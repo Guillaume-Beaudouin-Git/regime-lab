@@ -1,5 +1,7 @@
-# data lake — regenerable, never committed
-data/
+# data lake at the repo root — regenerable, never committed.
+# The leading slash matters: a bare `data/` also matches regime_lab/data/,
+# which silently kept the point-in-time core out of the first push.
+/data/
 *.parquet
 *.csv
 !docs/**/*.csv
