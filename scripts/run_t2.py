@@ -30,9 +30,8 @@ import pandas as pd
 
 from regime_lab.analysis.power import minimum_detectable_sharpe_difference
 from regime_lab.config import CACHE
-from regime_lab.data import build_panel, store
 from regime_lab.models.mapping import apply_overlay, state_to_position
-from regime_lab.strategies.base import sixty_forty
+from regime_lab.strategies.book import base_book
 
 warnings.filterwarnings("ignore")
 RULE = "=" * 78
@@ -82,9 +81,7 @@ def main() -> None:
     states = pd.read_parquet(CACHE / "states.parquet")
     diagnostics = pd.read_parquet(CACHE / "refit_diagnostics.parquet")
 
-    prices = store.read("prices", "cross_asset")
-    dates = pd.date_range("1990-01-01", prices["period"].max(), freq="B")
-    book = sixty_forty(build_panel(prices, dates)).dropna()
+    book = base_book()
 
     oos = states.dropna(how="all").index
     base = book.reindex(oos).dropna()

@@ -15,7 +15,6 @@ import pandas as pd
 
 from regime_lab.analysis import trials
 from regime_lab.config import CACHE
-from regime_lab.data import build_panel, store
 from regime_lab.models.base import run_expanding
 from regime_lab.models.calibrate import LAMBDA_GRID, choose_jump_penalty
 from regime_lab.models.hmm import FilteredHMM
@@ -23,7 +22,7 @@ from regime_lab.models.jump import JumpRegimes
 from regime_lab.models.mapping import apply_overlay, state_to_position, summary, turnover
 from regime_lab.models.protocol import walk_forward
 from regime_lab.models.supervised import ForwardVolModel, har_features
-from regime_lab.strategies.base import sixty_forty
+from regime_lab.strategies.book import base_book
 
 warnings.filterwarnings("ignore")
 RULE = "=" * 78
@@ -32,12 +31,6 @@ RULE = "=" * 78
 #: does not re-tune a structural parameter twice a year, and re-tuning at every
 #: refit multiplies the search by six for no realism.
 CALIBRATE_EVERY = 4
-
-
-def base_book() -> pd.Series:
-    prices = store.read("prices", "cross_asset")
-    dates = pd.date_range("1990-01-01", prices["period"].max(), freq="B")
-    return sixty_forty(build_panel(prices, dates)).dropna()
 
 
 def jump_factory(*, sparse: bool):

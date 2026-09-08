@@ -14,7 +14,8 @@ from regime_lab.analysis.power import minimum_detectable_sharpe_difference
 from regime_lab.data import build_panel, store
 from regime_lab.data.quality import flags, screen
 from regime_lab.data.universe import MACRO_LAGGED, MACRO_VINTAGED, PRICES
-from regime_lab.strategies.base import sixty_forty, vol_target
+from regime_lab.strategies.base import vol_target
+from regime_lab.strategies.book import base_book
 
 RULE = "=" * 78
 
@@ -55,9 +56,7 @@ def main() -> None:
     print("\n" + RULE)
     print("\n2. POWER — what effect could this sample detect?\n")
 
-    book = sixty_forty(panel).dropna()
-    cash = (panel["rate_cash_3m"].reindex(book.index).ffill() / 100.0) / 252.0
-    excess = (book - cash).dropna()
+    excess = base_book().dropna()
 
     train = excess.loc[:"2010-12-31"]
     target = float(train.std() * np.sqrt(252))
