@@ -82,10 +82,18 @@ tests/test_pit.py              temporal integrity regression tests
 docs/CHARTER.html              the frozen charter (v2)
 docs/PROTOCOL_FREEZE.md        content hash, amendment log, what the freeze binds
 docs/DATA_NOTES.md             data traps found and how they were resolved
+
+regime_lab/features/           44 features in seven families, expanding standardisation
+regime_lab/models/protocol.py  folds, refit schedule, what every family shares
+regime_lab/models/jump.py      family A, the statistical jump model
+regime_lab/models/hmm.py       family B, a Gaussian HMM with filtered probabilities only
+regime_lab/models/supervised.py family C, direct prediction with no latent state
+regime_lab/models/mapping.py   the one state-to-position rule, fixed before any fit
+regime_lab/analysis/trials.py  append-only log of every configuration evaluated
 ```
 
 ## Status
 
-Phase 0 (data contract and ingestion) delivered. Still open in phase 0: power
-calculation, per-series data quality screen, Ken French cross-sectional panels.
-Phases 1-5 in `docs/CHARTER.html`.
+Phase 0 (point-in-time contract, ingestion, quality screen, power) and phase 1
+(feature matrix and its admissibility test) delivered. Phase 2 (three model
+families under one protocol) in progress. Phases 3-5 in `docs/CHARTER.html`.
