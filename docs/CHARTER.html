@@ -1,0 +1,866 @@
+<title>Régimes de marché et alpha conditionnel</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,300..600;1,6..72,300..500&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap">
+
+<style>
+  :root {
+    --paper:      #f3f6f5;
+    --surface:    #ffffff;
+    --surface-2:  #eaefee;
+    --ink:        #16211f;
+    --ink-soft:   #3d4b48;
+    --ink-mute:   #67746f;
+    --rule:       #d6dedb;
+    --rule-soft:  #e5ebe9;
+    --calm:       #0e6b63;
+    --calm-wash:  #dcebe8;
+    --stress:     #a03626;
+    --stress-wash:#f6e2dd;
+    --amber:      #8d6a12;
+    --focus:      #0e6b63;
+
+    --f-display: "Newsreader", "Iowan Old Style", Georgia, serif;
+    --f-body:    "IBM Plex Sans", "Helvetica Neue", Arial, sans-serif;
+    --f-mono:    "IBM Plex Mono", "SF Mono", Menlo, monospace;
+
+    --measure: 65ch;
+    --gutter: 6.5rem;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --paper:      #0d1413;
+      --surface:    #141d1b;
+      --surface-2:  #1b2523;
+      --ink:        #e3eae7;
+      --ink-soft:   #c2cecb;
+      --ink-mute:   #8b9c97;
+      --rule:       #27332f;
+      --rule-soft:  #1e2826;
+      --calm:       #55c3b1;
+      --calm-wash:  #14302c;
+      --stress:     #e0765f;
+      --stress-wash:#331914;
+      --amber:      #d5a33f;
+      --focus:      #55c3b1;
+    }
+  }
+
+  :root[data-theme="dark"] {
+    --paper:      #0d1413;
+    --surface:    #141d1b;
+    --surface-2:  #1b2523;
+    --ink:        #e3eae7;
+    --ink-soft:   #c2cecb;
+    --ink-mute:   #8b9c97;
+    --rule:       #27332f;
+    --rule-soft:  #1e2826;
+    --calm:       #55c3b1;
+    --calm-wash:  #14302c;
+    --stress:     #e0765f;
+    --stress-wash:#331914;
+    --amber:      #d5a33f;
+    --focus:      #55c3b1;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--f-body);
+    font-size: 16px;
+    line-height: 1.62;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap {
+    max-width: 62rem;
+    margin: 0 auto;
+    padding: 3rem 1.5rem 5rem;
+  }
+
+  /* ---------- masthead ---------- */
+
+  .masthead { border-bottom: 1px solid var(--ink); padding-bottom: 1.6rem; }
+
+  .kicker {
+    font-family: var(--f-mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--calm);
+    margin: 0 0 1.1rem;
+  }
+
+  h1 {
+    font-family: var(--f-display);
+    font-weight: 400;
+    font-size: clamp(2.1rem, 5.4vw, 3.2rem);
+    line-height: 1.08;
+    letter-spacing: -0.015em;
+    text-wrap: balance;
+    margin: 0 0 0.9rem;
+    max-width: 20ch;
+  }
+
+  .standfirst {
+    font-family: var(--f-display);
+    font-size: clamp(1.05rem, 2.1vw, 1.24rem);
+    font-style: italic;
+    font-weight: 300;
+    color: var(--ink-soft);
+    max-width: 54ch;
+    margin: 0;
+    line-height: 1.5;
+  }
+
+  .meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 2.4rem;
+    margin-top: 1.9rem;
+    font-family: var(--f-mono);
+    font-size: 0.73rem;
+    color: var(--ink-mute);
+  }
+  .meta div { display: flex; gap: 0.5rem; padding: 0.18rem 0; }
+  .meta dt { color: var(--ink-mute); opacity: 0.75; }
+  .meta dd { margin: 0; color: var(--ink-soft); }
+  .meta .live { color: var(--amber); }
+
+  /* ---------- timeline ---------- */
+
+  figure.tl { margin: 2.6rem 0 0; }
+
+  .tl-track {
+    position: relative;
+    height: 74px;
+    background: var(--surface);
+    border: 1px solid var(--rule);
+    overflow: hidden;
+  }
+  .tl-band {
+    position: absolute;
+    top: 0; bottom: 0;
+    background: var(--stress-wash);
+    border-left: 1px solid var(--stress);
+  }
+  .tl-grid {
+    position: absolute;
+    top: 0; bottom: 0;
+    width: 1px;
+    background: var(--rule);
+  }
+  .tl-tick {
+    position: absolute;
+    bottom: 5px;
+    transform: translateX(-50%);
+    font-family: var(--f-mono);
+    font-size: 0.66rem;
+    color: var(--ink-mute);
+    font-variant-numeric: tabular-nums;
+  }
+  .tl-tag {
+    position: absolute;
+    top: 7px;
+    transform: translateX(-50%);
+    font-family: var(--f-mono);
+    font-size: 0.63rem;
+    color: var(--stress);
+    white-space: nowrap;
+  }
+  figcaption {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 0.6rem 1.5rem;
+    margin-top: 0.7rem;
+    font-size: 0.8rem;
+    color: var(--ink-mute);
+    max-width: none;
+  }
+  .legend { display: flex; gap: 1rem; font-family: var(--f-mono); font-size: 0.7rem; }
+  .legend span { display: inline-flex; align-items: center; gap: 0.4rem; }
+  .swatch { width: 12px; height: 12px; display: inline-block; border: 1px solid var(--rule); }
+  .swatch.s { background: var(--stress-wash); border-color: var(--stress); }
+  .swatch.c { background: var(--surface); }
+
+  /* ---------- sections ---------- */
+
+  section { margin-top: 3.4rem; }
+
+  .sec {
+    display: grid;
+    grid-template-columns: var(--gutter) minmax(0, 1fr);
+    gap: 0 1.5rem;
+    align-items: start;
+  }
+  .sec > .num {
+    font-family: var(--f-mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.1em;
+    color: var(--ink-mute);
+    padding-top: 0.55rem;
+    border-top: 2px solid var(--ink);
+    font-variant-numeric: tabular-nums;
+  }
+  .sec > .body { border-top: 1px solid var(--rule); padding-top: 0.5rem; min-width: 0; }
+
+  h2 {
+    font-family: var(--f-display);
+    font-weight: 400;
+    font-size: 1.62rem;
+    line-height: 1.2;
+    letter-spacing: -0.01em;
+    text-wrap: balance;
+    margin: 0 0 0.9rem;
+  }
+
+  h3 {
+    font-family: var(--f-body);
+    font-size: 0.98rem;
+    font-weight: 600;
+    margin: 2rem 0 0.5rem;
+    color: var(--ink);
+  }
+
+  p { margin: 0 0 1rem; max-width: var(--measure); }
+  .body > p:last-child { margin-bottom: 0; }
+
+  a { color: var(--calm); text-decoration-thickness: 1px; text-underline-offset: 2px; }
+  a:focus-visible, [tabindex]:focus-visible { outline: 2px solid var(--focus); outline-offset: 3px; }
+
+  strong { font-weight: 600; }
+  em.term { font-style: normal; font-family: var(--f-mono); font-size: 0.88em; color: var(--calm); }
+
+  .lede { font-size: 1.06rem; color: var(--ink-soft); }
+
+  /* ---------- failure list ---------- */
+
+  ol.reasons { list-style: none; margin: 0; padding: 0; display: grid; gap: 1.1rem; }
+  ol.reasons li {
+    display: grid;
+    grid-template-columns: 1.6rem minmax(0, 1fr);
+    gap: 0 0.8rem;
+    max-width: var(--measure);
+  }
+  ol.reasons li::before {
+    content: counter(r);
+    counter-increment: r;
+    font-family: var(--f-mono);
+    font-size: 0.74rem;
+    color: var(--stress);
+    padding-top: 0.28rem;
+  }
+  ol.reasons { counter-reset: r; }
+  ol.reasons b { display: block; font-weight: 600; }
+  ol.reasons p { margin: 0.15rem 0 0; font-size: 0.94rem; color: var(--ink-soft); }
+
+  /* ---------- tables ---------- */
+
+  .scroll { overflow-x: auto; margin: 0 0 0.4rem; }
+  table {
+    border-collapse: collapse;
+    width: 100%;
+    min-width: 34rem;
+    font-size: 0.9rem;
+  }
+  caption {
+    text-align: left;
+    font-family: var(--f-mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.13em;
+    text-transform: uppercase;
+    color: var(--ink-mute);
+    padding-bottom: 0.6rem;
+  }
+  th, td { text-align: left; padding: 0.62rem 0.9rem 0.62rem 0; vertical-align: top; border-bottom: 1px solid var(--rule-soft); }
+  th {
+    font-family: var(--f-mono);
+    font-weight: 500;
+    font-size: 0.68rem;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: var(--ink-mute);
+    border-bottom: 1px solid var(--rule);
+  }
+  td:first-child { font-weight: 500; padding-right: 1.4rem; }
+  tbody tr:last-child td { border-bottom: none; }
+  td .win { color: var(--calm); }
+  td .lose { color: var(--stress); }
+
+  /* ---------- phases ---------- */
+
+  .phases { display: grid; gap: 0; margin-top: 0.4rem; }
+  .phase {
+    display: grid;
+    grid-template-columns: 4.6rem minmax(0, 1fr);
+    gap: 0 1.2rem;
+    padding: 1.15rem 0;
+    border-bottom: 1px solid var(--rule-soft);
+  }
+  .phase:last-child { border-bottom: none; }
+  .phase .p-id {
+    font-family: var(--f-mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.08em;
+    color: var(--ink-mute);
+    padding-top: 0.18rem;
+  }
+  .phase h4 { margin: 0 0 0.28rem; font-size: 0.99rem; font-weight: 600; }
+  .phase p { margin: 0; font-size: 0.93rem; color: var(--ink-soft); max-width: 58ch; }
+
+  /* ---------- tests ---------- */
+
+  ol.tests { list-style: none; counter-reset: t; margin: 0.4rem 0 0; padding: 0; display: grid; gap: 0.9rem; }
+  ol.tests li {
+    display: grid;
+    grid-template-columns: 2.1rem minmax(0, 1fr);
+    gap: 0 0.7rem;
+    padding: 0.7rem 0.9rem 0.7rem 0;
+    max-width: var(--measure);
+  }
+  ol.tests li::before {
+    content: "T" counter(t, decimal-leading-zero);
+    counter-increment: t;
+    font-family: var(--f-mono);
+    font-size: 0.7rem;
+    color: var(--ink-mute);
+    padding-top: 0.24rem;
+  }
+  ol.tests b { font-weight: 600; }
+  ol.tests p { margin: 0.15rem 0 0; font-size: 0.93rem; color: var(--ink-soft); }
+  ol.tests li.decisive {
+    background: var(--stress-wash);
+    border-left: 3px solid var(--stress);
+    padding-left: 0.9rem;
+  }
+  ol.tests li.decisive::before { color: var(--stress); }
+  .chip {
+    display: inline-block;
+    font-family: var(--f-mono);
+    font-size: 0.6rem;
+    letter-spacing: 0.13em;
+    text-transform: uppercase;
+    color: var(--stress);
+    border: 1px solid var(--stress);
+    padding: 0.06rem 0.4rem;
+    margin-left: 0.5rem;
+    vertical-align: 0.12em;
+  }
+
+  /* ---------- pull ---------- */
+
+  blockquote.pull {
+    margin: 1.4rem 0;
+    padding: 0 0 0 1.4rem;
+    border-left: 2px solid var(--calm);
+    font-family: var(--f-display);
+    font-size: 1.2rem;
+    line-height: 1.45;
+    font-weight: 300;
+    color: var(--ink);
+    max-width: 52ch;
+  }
+
+  .note {
+    background: var(--surface);
+    border: 1px solid var(--rule);
+    padding: 1.1rem 1.2rem;
+    margin: 1.4rem 0 0;
+    max-width: var(--measure);
+  }
+  .note .label {
+    font-family: var(--f-mono);
+    font-size: 0.65rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--amber);
+    display: block;
+    margin-bottom: 0.5rem;
+  }
+  .note p { font-size: 0.93rem; color: var(--ink-soft); }
+  .note p:last-child { margin-bottom: 0; }
+
+  ul.plain { margin: 0 0 1rem; padding-left: 1.1rem; max-width: var(--measure); }
+  ul.plain li { margin-bottom: 0.4rem; font-size: 0.95rem; color: var(--ink-soft); }
+
+  /* ---------- open decisions ---------- */
+
+  .open { display: grid; gap: 0; margin-top: 0.3rem; }
+  .open-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 0.4rem 1.5rem;
+    align-items: baseline;
+    padding: 0.85rem 0;
+    border-bottom: 1px solid var(--rule-soft);
+  }
+  .open-row:last-child { border-bottom: none; }
+  .open-row span { font-size: 0.95rem; color: var(--ink-soft); }
+  .open-row .who {
+    font-family: var(--f-mono);
+    font-size: 0.66rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--calm);
+    white-space: nowrap;
+  }
+
+  footer {
+    margin-top: 4rem;
+    padding-top: 1.2rem;
+    border-top: 1px solid var(--ink);
+    font-family: var(--f-mono);
+    font-size: 0.7rem;
+    color: var(--ink-mute);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 2rem;
+    justify-content: space-between;
+  }
+
+  @media (max-width: 720px) {
+    :root { --gutter: 3.4rem; }
+    .wrap { padding: 2.2rem 1.1rem 3.5rem; }
+    .sec { grid-template-columns: 1fr; gap: 0; }
+    .sec > .num { border-top: 2px solid var(--ink); padding-bottom: 0.4rem; }
+    .sec > .body { border-top: none; padding-top: 0.7rem; }
+    .phase { grid-template-columns: 1fr; gap: 0.3rem; }
+    .tl-tag { display: none; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { animation: none !important; transition: none !important; }
+  }
+
+  /* ---------- v2 additions ---------- */
+  .spec {
+    font-family: var(--f-mono);
+    font-size: 0.82rem;
+    line-height: 1.6;
+    background: var(--surface-2);
+    border-left: 2px solid var(--calm);
+    padding: 0.9rem 1.1rem;
+    margin: 1rem 0;
+    max-width: var(--measure);
+    overflow-x: auto;
+  }
+  .spec b { color: var(--calm); font-weight: 500; }
+  .note.cut { border-color: var(--rule); }
+  .note.cut .label { color: var(--stress); }
+  .strike { text-decoration: line-through; color: var(--ink-mute); }
+  .outcome {
+    display: grid;
+    grid-template-columns: 2.4rem minmax(0, 1fr);
+    gap: 0 0.8rem;
+    padding: 0.7rem 0;
+    border-bottom: 1px solid var(--rule-soft);
+    max-width: var(--measure);
+  }
+  .outcome:last-child { border-bottom: none; }
+  .outcome .tagl {
+    font-family: var(--f-mono);
+    font-size: 0.72rem;
+    color: var(--calm);
+    padding-top: 0.16rem;
+  }
+  .outcome p { margin: 0.1rem 0 0; font-size: 0.93rem; color: var(--ink-soft); }
+  .outcome b { font-size: 0.96rem; }
+</style>
+
+<div class="wrap">
+
+  <header class="masthead">
+    <p class="kicker">Protocole gelé · v2 · révisé après review adversariale</p>
+    <h1>Régimes de marché et alpha conditionnel</h1>
+    <p class="standfirst">Décomposer l’alpha apparent d’une allocation conditionnée au régime : quelle part revient au timing de volatilité, à la réduction d’exposition, à la latence de détection, aux coûts de rotation ?</p>
+
+    <dl class="meta">
+      <div><dt>Cours</dt><dd>Big Data · M1 IEF</dd></div>
+      <div><dt>Univers</dt><dd>Multi-actifs quotidien, 1990–2026</dd></div>
+      <div><dt>Dépôt</dt><dd>regime-lab</dd></div>
+      <div><dt>Version</dt><dd>v2 — 8 sept. 2026</dd></div>
+      <div><dt>Phase 0</dt><dd class="live">livrée</dd></div>
+    </dl>
+
+    <figure class="tl">
+      <div class="tl-track" id="tl" role="img" aria-label="Frise 1990–2026 marquant les épisodes de stress de marché : récession de 1990, krach obligataire de 1994, crise asiatique de 1997, LTCM en 1998, dot-com 2000-2002, crise financière 2007-2009, crise de la zone euro 2011, choc chinois 2015-2016, Volmageddon 2018, Covid 2020, resserrement 2022 et SVB en 2023."></div>
+      <figcaption>
+        <span>Quatorze épisodes en trente-six ans. <strong>Illustration, pas critère d’évaluation</strong> — l’étiquetage est le nôtre ; la référence externe est le calendrier NBER plus une règle de perte pré-spécifiée.</span>
+        <span class="legend">
+          <span><i class="swatch c"></i>calme</span>
+          <span><i class="swatch s"></i>stress</span>
+        </span>
+      </figcaption>
+    </figure>
+  </header>
+
+  <section class="sec">
+    <div class="num">§ 01</div>
+    <div class="body">
+      <h2>La question qu’on défend</h2>
+      <blockquote class="pull">Sur un alpha de régime apparent, quelle part revient au market-timing de volatilité pur, quelle part à la simple réduction d’exposition, quelle part est détruite par la latence de détection, et quelle part par les coûts de rotation ?</blockquote>
+      <p class="lede">C’est une <strong>décomposition</strong>, pas une question binaire. Le choix est délibéré : la réponse binaire — « le conditionnement au régime bat-il un simple ciblage de volatilité ? » — est déjà publiée. Cederburg, O’Doherty, Wang et Yan (<em>JFE</em>, 2020) la tranchent par la négative sur 103 stratégies. La répliquer serait un exercice, pas une contribution.</p>
+      <p>Les <em>magnitudes</em> de la décomposition, elles, ne sont pas connues. Elles s’obtiennent avec exactement les mêmes tests, pour le même coût, et elles restent informatives quel que soit le signe du résultat final.</p>
+      <p>Le projet ne se juge donc pas sur une performance mais sur la solidité de la chaîne d’inférence : gouvernance des données en temps réel, comparaison à armes appariées, et une batterie de tests conçue pour tuer nos propres conclusions.</p>
+    </div>
+  </section>
+
+  <section class="sec">
+    <div class="num">§ 02</div>
+    <div class="body">
+      <h2>Pourquoi le HMM seul ne suffit pas</h2>
+      <p>Quatre défaillances mesurables — pas des objections de principe.</p>
+      <ol class="reasons">
+        <li>
+          <div>
+            <b>Fuite d’information dans la plupart des implémentations</b>
+            <p>Un ajustement Baum-Welch sur l’échantillon complet renvoie des probabilités <em class="term">lissées</em>, conditionnées sur le futur. Seules les probabilités <em class="term">filtrées</em> sont exploitables en temps réel, et elles sont nettement moins tranchées.</p>
+          </div>
+        </li>
+        <li>
+          <div>
+            <b>Le régime obtenu approxime un quantile de volatilité</b>
+            <p>Un HMM gaussien à deux états sur rendements quotidiens redécouvre « volatilité haute / volatilité basse ». L’apport marginal contre un classifieur trivial peut être nul. C’est le test T1 — et il vaut aussi bien contre notre propre modèle principal, voir § 03.</p>
+          </div>
+        </li>
+        <li>
+          <div>
+            <b>La latence de détection consomme le gain</b>
+            <p>Le filtre reconnaît un changement d’état avec un retard lié à la durée de séjour moyenne. Or le rendement d’un basculement se joue dans les jours qui suivent la rupture, là où le filtre est le moins confiant.</p>
+          </div>
+        </li>
+        <li>
+          <div>
+            <b>Instabilité entre réestimations</b>
+            <p>Non pas la permutation d’étiquettes — elle se règle en ordonnant les états par variance. Les vraies sources sont les <strong>optima locaux de l’algorithme EM selon l’initialisation</strong>, la dérive des paramètres en fenêtre expansive, et le choix du nombre d’états. C’est ce que mesure T5.</p>
+          </div>
+        </li>
+      </ol>
+    </div>
+  </section>
+
+  <section class="sec">
+    <div class="num">§ 03</div>
+    <div class="body">
+      <h2>Le modèle principal, et sa condition préalable</h2>
+      <p>Le <strong>Statistical Jump Model</strong> (Nystrup, Kolm &amp; Lindström, 2020–2021 ; extension continue Aydınhan, Kolm, Mulvey &amp; Shu, 2024) : un partitionnement de type k-moyennes sur variables standardisées, augmenté d’une <strong>pénalité de saut λ</strong> qui facture chaque changement d’état. λ contrôle la persistance, donc la rotation, donc les coûts.</p>
+
+      <div class="note">
+        <span class="label">Condition préalable — sinon le test T1 est joué d’avance contre nous</span>
+        <p>L’implémentation canonique de la littérature n’utilise que trois variables, toutes dérivées des rendements : déviation baissière et ratios de Sortino en moyenne mobile exponentielle. Ce sont des statistiques de volatilité. <strong>Nourri ainsi, le modèle ne peut structurellement produire qu’un quantile de volatilité</strong>, et T1 est perdu avant d’être lancé.</p>
+        <p>Nous imposons donc un bloc de variables <strong>orthogonales à la volatilité</strong> — dispersion transversale, corrélation moyenne par paires, concentration factorielle, spreads de crédit, pente de courbe — et nous rapportons le R² de chacune contre la volatilité réalisée à 20 jours. T1 n’a de contenu empirique qu’à cette condition.</p>
+      </div>
+
+      <div class="scroll">
+        <table>
+          <caption>Comparaison structurelle — révisée</caption>
+          <thead>
+            <tr><th scope="col">Critère</th><th scope="col">HMM gaussien</th><th scope="col">Jump Model</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Hypothèse de distribution</td><td>Gaussienne explicite, par vraisemblance</td><td>Pas de vraisemblance, mais la perte quadratique <strong>équivaut à une gaussienne sphérique à variance commune</strong> — hypothèse implicite, pas absence d’hypothèse</td></tr>
+            <tr><td>Persistance des états</td><td>Matrice de transition, ou hystérésis sur seuil de probabilité</td><td class="win">Paramètre λ explicite, directement relié à la rotation</td></tr>
+            <tr><td>Stabilité entre réestimations</td><td colspan="2">Avantage annoncé au Jump Model dans la littérature, mais <strong>mesuré à cadences de réestimation différentes</strong> (semestrielle contre quotidienne). T5 les appaire avant de conclure.</td></tr>
+            <tr><td>Nature des entrées</td><td colspan="2">Identique — les deux acceptent un vecteur de variables quelconque. Ce n’est pas une propriété du modèle mais un choix d’usage.</td></tr>
+            <tr><td>Sélection de variables</td><td>Par régularisation, moins standard</td><td class="win">Pénalisation L1 intégrée (Sparse JM)</td></tr>
+            <tr><td>Lisibilité</td><td>Moyenne</td><td class="win">Centroïdes directement interprétables</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>Réserve à déclarer : dans la source, <strong>λ est choisi en maximisant le Sharpe de validation</strong>. Il ne « gouverne pas la facture » ex ante — il est optimisé sur la performance, et s’inscrit donc au registre des essais.</p>
+    </div>
+  </section>
+
+  <section class="sec">
+    <div class="num">§ 04</div>
+    <div class="body">
+      <h2>Trois familles, à armes appariées</h2>
+      <div class="scroll">
+        <table>
+          <caption>Familles évaluées</caption>
+          <thead>
+            <tr><th scope="col">Famille</th><th scope="col">Modèle</th><th scope="col">Rôle</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>A</td><td>Jump Model discret, continu et parcimonieux</td><td>Modèle principal</td></tr>
+            <tr><td>B</td><td>Un HMM gaussien à deux états, filtré</td><td>Référence exigée par le sujet, traitée loyalement</td></tr>
+            <tr><td>C</td><td>Gradient boosting supervisé, référence HAR-RV</td><td>Prédiction directe, <strong>sans couche latente</strong></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p><strong>Le protocole « mêmes variables » n’est pas réalisable naïvement.</strong> Un HMM à covariance pleine sur 250 variables et deux états demanderait près de 63 000 paramètres de covariance pour 9 300 observations : non estimable. Toutes les familles reçoivent donc le <strong>même sous-ensemble de K variables</strong>, sélectionné par le Sparse JM sur les seuls plis d’entraînement, plus une variante où chaque famille sélectionne les siennes.</p>
+
+      <p>Les trois familles ne sont comparables que si leurs sorties sont converties en poids de position par <strong>une même règle fixée à l’avance</strong>. Cette règle et les stratégies de base sont gelées maintenant, pas plus tard — voir § 06.</p>
+
+      <div class="note">
+        <span class="label">Biais à déclarer, pas à dissimuler</span>
+        <p>La famille C voit des étiquettes, A et B n’en voient aucune. Sur la prédiction de volatilité, le gradient boosting et HAR-RV gagneront presque certainement. La conclusion « la couche de régime est un intermédiaire coûteux » est donc <strong>partiellement pré-chargée</strong>. Nous l’assumons comme hypothèse à haute probabilité, et nous comparons <strong>à décision finale identique</strong> plutôt qu’à qualité de prédiction.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec">
+    <div class="num">§ 05</div>
+    <div class="body">
+      <h2>Batterie de falsification</h2>
+      <p>Six contrôles, gelés avant tout résultat.</p>
+
+      <ol class="tests">
+        <li>
+          <div>
+            <b>Placebo par quantile de volatilité</b>
+            <p>Le modèle bat-il « volatilité réalisée à 20 jours au-dessus de son seuil médian » ? Valide seulement si le vecteur de variables contient le bloc non-vol du § 03.</p>
+          </div>
+        </li>
+        <li class="decisive">
+          <div>
+            <b>Comparaison au ciblage de volatilité dynamique<span class="chip">décisif</span></b>
+            <p><strong>Correction d’une erreur de la v1.</strong> La v1 comparait au dé-levier « à volatilité égale ». Or le Sharpe est <strong>invariant par changement d’échelle</strong> : un dé-levier par scalaire constant a exactement le même Sharpe que la stratégie brute. Le test annoncé comme décisif comparait une stratégie à elle-même.</p>
+            <div class="spec"><b>T2 re-spécifié.</b> Benchmark = même stratégie de base, position dimensionnée par σ_cible / σ̂(t−1), σ̂ en EWMA de demi-vie 20 j sur les rendements jusqu’à t−1. σ_cible est fixé <b>sur l’échantillon d’entraînement de chaque pli</b>, jamais sur l’échantillon d’évaluation — c’est le point sur lequel Moreira-Muir a été renversé.<br><br><b>Contrôle de validité :</b> volatilités réalisées hors échantillon des deux jambes à ±10 %, rapporté.<br><br><b>Métriques,</b> toutes non invariantes d’échelle : équivalent-certain sous utilité CRRA γ = 5 ; ratio rendement / perte maximale ; différence de Sharpe testée par <b>block bootstrap apparié</b> (Politis-Romano), jamais iid.<br><br><b>Effet minimum détectable rapporté.</b> ΔSR &gt; 0 dans le bruit = sous-puissant, pas concluant.</div>
+          </div>
+        </li>
+        <li>
+          <div>
+            <b>Placebo à taux d’exposition apparié</b>
+            <p>Signal aléatoire exposé le même pourcentage du temps. Largement subsumé par T2 en version dynamique : une exécution, une ligne de résultat.</p>
+          </div>
+        </li>
+        <li>
+          <div>
+            <b>Information marginale</b>
+            <p>R² incrémental de la probabilité de régime <em>après</em> contrôle du quantile de volatilité. Le test le moins cher et le plus informatif : c’est lui qui alimente la décomposition du § 01.</p>
+          </div>
+        </li>
+        <li>
+          <div>
+            <b>Stabilité entre réestimations</b>
+            <p>Indice de Rand ajusté entre partitions successives, <strong>à cadence de réestimation appariée</strong> entre familles — sans quoi on republie un artefact de protocole plutôt qu’une propriété de modèle.</p>
+          </div>
+        </li>
+        <li>
+          <div>
+            <b>Latence de détection</b>
+            <p>Délai entre rupture et détection en temps réel. <strong>Conditionnel à un oracle objectif</strong> : récessions NBER et règle de perte pré-spécifiée. Sans définition externe, ce test est supprimé plutôt que bricolé.</p>
+          </div>
+        </li>
+      </ol>
+
+      <p>Par-dessus : validation temporelle en <strong>fenêtre expansive, au moins cinq plis</strong>. Le purge et l’embargo de López de Prado sont conçus pour des étiquettes à horizons chevauchants ; à horizon quotidien ils sont quasi sans effet, et nous ne les invoquons que là où les horizons se recouvrent réellement.</p>
+
+      <p>Le <strong>Sharpe dégonflé</strong> demande le nombre d’essais <em>et</em> la variance de leurs Sharpe. Compter les essais à la main est indéfinissable ; nous journalisons automatiquement le Sharpe hors échantillon de chaque configuration évaluée, avec empreinte de configuration et horodatage. Le dégonflement est <strong>conditionnel à une découverte positive</strong> : on ne dégonfle pas un Sharpe qui n’existe pas.</p>
+    </div>
+  </section>
+
+  <section class="sec">
+    <div class="num">§ 06</div>
+    <div class="body">
+      <h2>Ce qui est gelé maintenant plutôt que plus tard</h2>
+      <p>La v1 différait le choix des stratégies « selon le signe empirique de la relation moyenne/variance dans chaque état ». <strong>C’était circulaire</strong> : ce signe est précisément la quantité que le projet teste. Choisir la stratégie en fonction de lui, c’est de la fouille de données, quelle que soit la règle annoncée.</p>
+      <p>Deux stratégies de base sont donc figées dès maintenant, et les deux sont rapportées quoi qu’il arrive :</p>
+      <ul class="plain">
+        <li><strong>60/40 actions-obligations</strong>, rebalancé mensuellement.</li>
+        <li><strong>Book multi-actifs équipondéré en risque</strong>, momentum 12-1, ciblage de volatilité quotidien.</li>
+      </ul>
+      <p>Coût de ce gel : nul. Bénéfice : le seul vrai trou de fouille de données disparaît, et T2 devient calculable dès la phase 2 au lieu de la phase 5.</p>
+      <p>Les <strong>coûts de transaction sont chiffrés maintenant</strong>, avant tout résultat, parce que le niveau de coût est sinon un degré de liberté : sur ce type de stratégie, le signe bascule entre 2 et 3 points de base.</p>
+    </div>
+  </section>
+
+  <section class="sec">
+    <div class="num">§ 07</div>
+    <div class="body">
+      <h2>Puissance : N effectif ≈ 14, pas 9 300</h2>
+      <p>Trente-six ans de données quotidiennes font environ 9 300 observations. Mais le nombre d’<strong>épisodes de stress indépendants</strong> est celui de la frise en tête de page : <strong>quatorze</strong>. C’est ce N-là qui gouverne toute inférence sur « le conditionnement au régime ajoute-t-il de la valeur ».</p>
+      <p>Conséquence de protocole : l’effet minimum détectable est calculé <strong>en phase 0, avant tout modèle</strong>, par block bootstrap sur des blocs de longueur voisine de la durée moyenne des épisodes. S’il dépasse tout effet plausible, ce n’est pas un échec — <strong>c’est le résultat</strong> : la question est sous-puissante sur trente-six ans de données quotidiennes, et on dit de combien.</p>
+    </div>
+  </section>
+
+  <section class="sec">
+    <div class="num">§ 08</div>
+    <div class="body">
+      <h2>Critères d’arrêt et issues admissibles</h2>
+      <p>La v1 disait que la phase de falsification « pouvait arrêter le projet » sans dire à quelle valeur. Trois seuils, écrits avant les résultats :</p>
+      <ul class="plain">
+        <li><strong>Arrêt 1</strong> — si aucune famille ne bat le placebo de volatilité (T1) avec un écart supérieur à l’effet minimum détectable sur au moins trois plis sur cinq : on ne va pas en phase 5, on rédige le résultat nul et sa décomposition.</li>
+        <li><strong>Arrêt 2</strong> — si T4 donne un R² incrémental inférieur à 0,2 point pour toutes les familles : la couche latente est déclarée non informative, les phases 4 et 5 sont réduites à une démonstration minimale.</li>
+        <li><strong>Arrêt 3</strong> — si l’effet minimum détectable calculé en phase 0 dépasse 0,3 de Sharpe : le mémoire devient une étude de puissance, décidé <em>avant</em> de modéliser.</li>
+      </ul>
+
+      <h3>Trois issues, toutes admissibles</h3>
+      <div class="outcome"><span class="tagl">A</span><div><b>Le conditionnement bat le ciblage de volatilité, de façon robuste.</b><p>Issue rare. À dégonfler par le Sharpe déflaté avant toute affirmation.</p></div></div>
+      <div class="outcome"><span class="tagl">B</span><div><b>Il ne le bat pas, et on quantifie pourquoi.</b><p>Issue attendue, et c’est celle qui porte la décomposition du § 01. Ce n’est pas un échec du projet, c’est son contenu.</p></div></div>
+      <div class="outcome"><span class="tagl">C</span><div><b>La question est sous-puissante.</b><p>À ne surtout pas confondre avec B. Un effet indétectable n’est pas un effet absent, et présenter l’un pour l’autre est la faute que ce protocole existe pour éviter.</p></div></div>
+    </div>
+  </section>
+
+  <section class="sec">
+    <div class="num">§ 09</div>
+    <div class="body">
+      <h2>Données et couverture réelle</h2>
+      <p>La v1 annonçait « 1990–2026 » sur tous les blocs. C’était faux sur plusieurs d’entre eux. Couverture vérifiée :</p>
+      <div class="scroll">
+        <table>
+          <caption>Six blocs — couverture mesurée, pas annoncée</caption>
+          <thead>
+            <tr><th scope="col">Bloc</th><th scope="col">Source</th><th scope="col">Couverture réelle</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Prix multi-actifs</td><td>Yahoo Finance, ajusté</td><td>1990– (or et pétrole ~2000, substituts identifiés)</td></tr>
+            <tr><td>Volatilité</td><td>VIX</td><td>1990– · <span class="lose">structure par terme impossible avant 2001</span></td></tr>
+            <tr><td>Crédit</td><td>FRED, Moody’s Baa et Aaa sur le 10 ans</td><td>1990– <span class="win">vérifié</span></td></tr>
+            <tr><td>Conditions financières</td><td>FRED, NFCI hebdomadaire</td><td>1990– (indice St-Louis à partir de 1993)</td></tr>
+            <tr><td>Coupe transversale</td><td>Ken French, 49 secteurs + 25 portefeuilles taille/valeur, quotidien</td><td>1926– <span class="win">vérifié, 52 592 jours</span></td></tr>
+            <tr><td>Macro en millésimes</td><td>ALFRED, 4 séries</td><td>couverture variable, à vérifier série par série</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="note">
+        <span class="label">Trouvé en phase 0 — aurait corrompu l’étude en silence</span>
+        <p><strong>FRED tronque les séries de spreads ICE BofA aux deux dernières années</strong>, sans erreur ni avertissement : restriction de licence. Un bloc crédit bâti dessus n’aurait existé qu’à partir de 2023, puis aurait été prolongé en arrière par report de valeur. Remplacé par les spreads Moody’s, quotidiens depuis 1986. Le collecteur signale désormais toute série qui démarre trop tard.</p>
+      </div>
+
+      <div class="note">
+        <span class="label">Millésimes — réduits à une démonstration ciblée</span>
+        <p>Construire un panel point-in-time complet coûterait une à deux semaines pour un apport faible : une série mensuelle publiée avec deux à six semaines de retard n’ajoute presque rien, à fréquence quotidienne, au VIX et aux spreads de crédit, qui sont quotidiens et non révisés.</p>
+        <p>On garde donc <strong>quatre séries</strong> (production industrielle, emploi, chômage, inscriptions) et on produit <strong>une figure et un paragraphe</strong> chiffrant l’ampleur de la fuite : détection de régime sur série révisée contre série millésimée, écart des dates de basculement en jours, écart de Sharpe. Dix pour cent du coût, l’essentiel de la valeur pédagogique.</p>
+      </div>
+
+      <p>Contrôle qualité systématique en phase 0, une ligne de code pour un risque majeur : <strong>part de barres à fourchette nulle</strong> et part de valeurs répétées, par série et par année. Sur les séries gratuites exotiques ces taux dépassent parfois la moitié, et fabriquent du signal fantôme.</p>
+    </div>
+  </section>
+
+  <section class="sec">
+    <div class="num">§ 10</div>
+    <div class="body">
+      <h2>Ce qui a été coupé, et pourquoi</h2>
+      <p>Le plan v1 représentait de l’ordre de trois à quatre mois-personne à plein temps. Ce qui suit est retiré parce que c’était décoratif, pas parce que le temps manque.</p>
+      <div class="open">
+        <div class="open-row"><span><span class="strike">Benchmark deep learning (LSTM, Temporal Fusion Transformer)</span> — sur 9 300 observations et quatorze épisodes indépendants, l’échec est acquis d’avance ; trois à quatre semaines pour un résultat que la littérature donne déjà</span><span class="who">coupé</span></div>
+        <div class="open-row"><span><span class="strike">Détection bayésienne de rupture en ligne</span> — un troisième détecteur non supervisé qui n’ajoute aucune dimension à la thèse</span><span class="who">coupé</span></div>
+        <div class="open-row"><span><span class="strike">Volatilité implicite obligataire, base de financement court terme, actions émergentes avant 2000</span> — aucune source gratuite ne couvre la période</span><span class="who">coupé</span></div>
+        <div class="open-row"><span><span class="strike">Markov-switching autorégressif</span> — n’ajoute rien que le HMM filtré n’apporte déjà</span><span class="who">coupé</span></div>
+        <div class="open-row"><span>Volet textuel — ramené à <strong>un score de ton prêt à l’emploi</strong> sur les communiqués de politique monétaire, injecté dans T4 : une ligne de résultat, aucun développement de variables</span><span class="who">réduit</span></div>
+        <div class="open-row"><span>Nombre de variables — ramené de ~250 à <strong>40-60</strong>, dont un bloc explicitement non corrélé à la volatilité. Deux cent cinquante variables contre quatorze épisodes est une machine à artefacts de sélection</span><span class="who">réduit</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec">
+    <div class="num">§ 11</div>
+    <div class="body">
+      <h2>Phases</h2>
+      <div class="phases">
+        <div class="phase">
+          <div class="p-id">P0 ✓</div>
+          <div>
+            <h4>Contrat point-in-time et ingestion — livrée</h4>
+            <p>Chaque observation porte la date qu’elle décrit et la date où elle devenait connaissable, révisions conservées. Sept tests d’intégrité temporelle, dont celui qui compte : un panneau construit pour une date passée ne doit pas bouger quand des données ultérieures arrivent. Reste à ajouter : calcul de puissance, contrôle qualité des séries, panels Ken French.</p>
+          </div>
+        </div>
+        <div class="phase">
+          <div class="p-id">P1</div>
+          <div>
+            <h4>Construction des variables</h4>
+            <p>Quarante à soixante variables en cinq familles, dont le bloc non-vol obligatoire. Standardisation en fenêtre expansive.</p>
+          </div>
+        </div>
+        <div class="phase">
+          <div class="p-id">P2</div>
+          <div>
+            <h4>Inférence des régimes</h4>
+            <p>Les trois familles du § 04, sous protocole apparié. T2 devient calculable dès cette phase.</p>
+          </div>
+        </div>
+        <div class="phase">
+          <div class="p-id">P3</div>
+          <div>
+            <h4>Falsification et décomposition</h4>
+            <p>Les six contrôles du § 05, puis la table d’ablation qui répond à la question du § 01. Seule phase pouvant déclencher un arrêt.</p>
+          </div>
+        </div>
+        <div class="phase">
+          <div class="p-id">P4</div>
+          <div>
+            <h4>Backtest et coûts</h4>
+            <p>Signal en fin de séance, exécution à la suivante. Coûts chiffrés d’avance, rotation induite par λ.</p>
+          </div>
+        </div>
+        <div class="phase">
+          <div class="p-id">P5</div>
+          <div>
+            <h4>Rapport, dépôt et soutenance</h4>
+            <p>Rapport en français, code et documentation en anglais, une note méthodologique par phase.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec">
+    <div class="num">§ 12</div>
+    <div class="body">
+      <h2>Gel du protocole</h2>
+      <p>Un pré-enregistrement qu’on peut réécrire n’en est pas un. Sur des données que tout le monde a déjà vues, il ne peut pas signifier « données non vues » — il signifie <strong>gel de protocole</strong>, et c’est ce que nous revendiquons.</p>
+      <p>Mécanisme : cette note est figée par une empreinte SHA-256 publiée dans le dépôt et par une étiquette git signée poussée publiquement, dont la date est vérifiable par un tiers. Le fichier n’est jamais amendé ; toute révision ultérieure va dans un journal d’amendements daté et justifié — ce document est lui-même la v2, et la v1 reste consultable dans l’historique.</p>
+    </div>
+  </section>
+
+  <footer>
+    <span>Note de cadrage v2 — 8 septembre 2026</span>
+    <span>Protocole gelé · critères d’arrêt fixés avant résultats</span>
+  </footer>
+</div>
+
+<script>
+  (function () {
+    var t0 = 1990, t1 = 2026.75, span = t1 - t0;
+    var pos = function (y) { return ((y - t0) / span) * 100; };
+
+    var episodes = [
+      { a: 1990.55, b: 1991.20, tag: "récession" },
+      { a: 1994.10, b: 1994.95, tag: "krach oblig." },
+      { a: 1997.75, b: 1998.05, tag: "" },
+      { a: 1998.60, b: 1998.85, tag: "LTCM" },
+      { a: 2000.20, b: 2002.80, tag: "dot-com" },
+      { a: 2007.60, b: 2009.20, tag: "crise financière" },
+      { a: 2010.35, b: 2010.60, tag: "" },
+      { a: 2011.50, b: 2011.85, tag: "zone euro" },
+      { a: 2015.60, b: 2016.15, tag: "" },
+      { a: 2018.10, b: 2018.25, tag: "" },
+      { a: 2018.75, b: 2019.00, tag: "" },
+      { a: 2020.13, b: 2020.35, tag: "Covid" },
+      { a: 2022.05, b: 2022.80, tag: "resserrement" },
+      { a: 2023.18, b: 2023.35, tag: "" }
+    ];
+
+    var track = document.getElementById("tl");
+    if (!track) return;
+    var html = "";
+
+    [1990, 2000, 2010, 2020].forEach(function (y) {
+      html += '<div class="tl-grid" style="left:' + pos(y).toFixed(3) + '%"></div>';
+    });
+
+    episodes.forEach(function (e) {
+      var l = pos(e.a), w = pos(e.b) - pos(e.a);
+      html += '<div class="tl-band" style="left:' + l.toFixed(3) + '%;width:' + Math.max(w, 0.35).toFixed(3) + '%"></div>';
+      if (e.tag) {
+        html += '<div class="tl-tag" style="left:' + (l + w / 2).toFixed(3) + '%">' + e.tag + "</div>";
+      }
+    });
+
+    [1990, 2000, 2010, 2020, 2026].forEach(function (y, i) {
+      var l = pos(y);
+      var shift = i === 0 ? "left:0.45rem;transform:none;" : (y === 2026 ? "right:0.45rem;left:auto;transform:none;" : "left:" + l.toFixed(3) + "%;");
+      html += '<div class="tl-tick" style="' + shift + '">' + y + "</div>";
+    });
+
+    track.innerHTML = html;
+  })();
+</script>
