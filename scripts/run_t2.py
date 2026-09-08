@@ -134,7 +134,7 @@ def main() -> None:
     print("\n" + RULE)
     print("\nIS ANY DIFFERENCE LARGER THAN THE NOISE?\n")
 
-    for family, delta, gap, valid in verdicts:
+    for family, _delta, _gap, valid in verdicts:
         position = state_to_position(states[family]).reindex(oos).fillna(0.0)
         overlay = apply_overlay(base, position).dropna()
         diag = diagnostics[diagnostics["family"] == family]
@@ -160,10 +160,12 @@ def main() -> None:
     print("\n" + RULE)
     print("\nCOSTS  the margin against the benchmark, once trading is paid for\n")
     print("   cost levels declared before any result was read, in round-trip basis points\n")
-    print(f"   {'family':<18} {'turnover':>9} {'gross':>8} " +
-          "".join(f"{k + ' ' + str(v) + 'bp':>16}" for k, v in COST_BPS.items()))
+    print(
+        f"   {'family':<18} {'turnover':>9} {'gross':>8} "
+        + "".join(f"{k + ' ' + str(v) + 'bp':>16}" for k, v in COST_BPS.items())
+    )
 
-    for family, _, _, _ in verdicts:
+    for family, _delta, _gap, _valid in verdicts:
         position = state_to_position(states[family]).reindex(oos).fillna(0.0)
         overlay = apply_overlay(base, position).dropna()
         diag = diagnostics[diagnostics["family"] == family]
@@ -171,7 +173,9 @@ def main() -> None:
         common = overlay.index.intersection(benchmark.index)
 
         row = f"   {family:<18} {position.diff().abs().mean():>9.4f}"
-        row += f" {annual_sharpe(overlay.loc[common]) - annual_sharpe(benchmark.loc[common]):>+8.2f}"
+        row += (
+            f" {annual_sharpe(overlay.loc[common]) - annual_sharpe(benchmark.loc[common]):>+8.2f}"
+        )
         for bps in COST_BPS.values():
             net = charge(overlay, position, bps=bps).loc[common]
             row += f" {annual_sharpe(net) - annual_sharpe(benchmark.loc[common]):>+15.2f}"
@@ -190,7 +194,7 @@ def main() -> None:
     print("   the charter stops the study if the minimum detectable effect exceeds 0.30")
     print("   phase 0 put it at 0.174 and flagged that figure as a lower bound\n")
 
-    for family, _, _, _ in verdicts:
+    for family, _delta, _gap, _valid in verdicts:
         position = state_to_position(states[family]).reindex(oos).fillna(0.0)
         overlay = apply_overlay(base, position).dropna()
         diag = diagnostics[diagnostics["family"] == family]
