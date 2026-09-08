@@ -10,8 +10,19 @@ whether the regimes it finds are worth conditioning a portfolio on.
 > survive transaction costs, point-in-time data constraints and a correction for
 > multiple testing?
 
-The question is falsifiable and the protocol is allowed to answer no. Rejection
-criteria are written before results are looked at; see `docs/CHARTER.md`.
+It is a decomposition, not a yes/no question: the binary version is already
+settled in the literature (Cederburg, O'Doherty, Wang & Yan, *JFE* 2020), while
+the magnitudes are not.
+
+The protocol is allowed to answer that the effect is absent, or that the data
+cannot tell. Stopping rules and admissible outcomes are fixed before results are
+looked at: see `docs/CHARTER.html`, frozen at
+
+```
+SHA-256  5791c1887c41d1f6b0449bafad2125013b82dc6b3506b4d72564e14ec1abc0db
+```
+
+and `docs/PROTOCOL_FREEZE.md` for what the freeze commits us to.
 
 ## Why point-in-time comes first
 
@@ -68,9 +79,13 @@ regime_lab/data/store.py       immutable parquet store with content-hashed manif
 regime_lab/data/sources/       one module per provider
 regime_lab/data/universe.py    the catalogue of series the study draws on
 tests/test_pit.py              temporal integrity regression tests
-docs/CHARTER.md                scope, protocol and pre-registered rejection criteria
+docs/CHARTER.html              the frozen charter (v2)
+docs/PROTOCOL_FREEZE.md        content hash, amendment log, what the freeze binds
+docs/DATA_NOTES.md             data traps found and how they were resolved
 ```
 
 ## Status
 
-Phase 0 (data contract and ingestion) complete. Phases 1–6 in `docs/CHARTER.md`.
+Phase 0 (data contract and ingestion) delivered. Still open in phase 0: power
+calculation, per-series data quality screen, Ken French cross-sectional panels.
+Phases 1-5 in `docs/CHARTER.html`.
