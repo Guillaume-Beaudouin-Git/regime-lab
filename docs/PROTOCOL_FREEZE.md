@@ -36,3 +36,11 @@ each dated and justified, so that a reader can see what changed and when.
 | date | version | change | reason |
 | --- | --- | --- | --- |
 | 2026-09-08 | v1 → v2 | T2 respecified; families D cut; strategies frozen; power section added; data coverage corrected | Adversarial review found T2 was scale-invariant, hence vacuous on Sharpe, and that deferring the strategy choice to phase 4 was circular. |
+
+## Deviations from the frozen text
+
+The charter is not edited to match reality; deviations are recorded here.
+
+| item | charter says | actual | why |
+| --- | --- | --- | --- |
+| tag signature | "signed git tag pushed publicly" | annotated tag, unsigned, pushed publicly | No signing key is configured on the author's machine. The property that matters for a third party is the **push date**, which GitHub records independently of the signature. To be upgraded if a key is set up; the tag will be re-cut and this row updated. |
