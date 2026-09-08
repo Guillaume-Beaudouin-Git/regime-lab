@@ -33,7 +33,7 @@ def screen(panel: pd.DataFrame) -> pd.DataFrame:
             if len(present) < 5:
                 continue
             change = present.diff()
-            repeated = (change == 0)
+            repeated = change == 0
             run, longest = 0, 0
             for flag in repeated.to_numpy():
                 run = run + 1 if flag else 0

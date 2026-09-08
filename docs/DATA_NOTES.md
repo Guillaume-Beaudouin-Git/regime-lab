@@ -58,3 +58,27 @@ the paired difference and its standard error sits near its floor — which is al
 why the block length barely changes it. A regime overlay tracks the benchmark
 less closely and will have a larger minimum detectable effect. The number that
 decides stop rule 3 is the one recomputed against the actual overlay in phase 3.
+
+## Two Yahoo commodity series cost ten years of sample
+
+Yahoo's continuous futures for gold (`GC=F`) and WTI (`CL=F`) begin in late
+2000. Because the feature matrix is used on its common sample, those two columns
+alone pushed the study's start from March 1992 to November 2001 — losing four of
+the fourteen stress episodes, to buy two features out of forty-four.
+
+**Oil** is substituted with `DCOILWTICO` from FRED: full daily history from
+1990, never revised, so the publication-lag path is exact rather than
+approximate.
+
+**Gold is dropped rather than proxied.** There is no free long series: the LBMA
+fixing was withdrawn from FRED, the bullion ETF starts in 2004, and `^XAU` is an
+index of gold *miners* — an equity sector that fell with the market in 2008.
+Using it would have injected equity beta into a feature labelled as a safe
+haven, which is worse than not having the feature.
+
+`STLFSI4` is dropped on the same logic: it measures the same construct as the
+Chicago Fed's NFCI but begins in 1994, and keeping both would have cost four
+years including the 1990 recession for no new information.
+
+The general rule this establishes: **a feature is worth its coverage cost only
+if no existing feature carries the same construct over a longer sample.**
