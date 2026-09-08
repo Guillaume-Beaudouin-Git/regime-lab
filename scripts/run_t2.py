@@ -155,6 +155,42 @@ def main() -> None:
         "\n   A difference inside the minimum detectable effect is UNDERPOWERED,\n"
         "   not evidence of no effect, and it is never reported as a pass."
     )
+
+    print("\n" + RULE)
+    print("\nSTOP RULE 3  how much data would settle this?\n")
+
+    years = len(oos) / 252
+    target = 0.20
+    print("   the charter stops the study if the minimum detectable effect exceeds 0.30")
+    print("   phase 0 put it at 0.174 and flagged that figure as a lower bound\n")
+
+    for family, _, _, _ in verdicts:
+        position = state_to_position(states[family]).reindex(oos).fillna(0.0)
+        overlay = apply_overlay(base, position).dropna()
+        diag = diagnostics[diagnostics["family"] == family]
+        benchmark = managed_benchmark(base, stepwise_target(diag, oos)).dropna()
+        common = overlay.index.intersection(benchmark.index)
+        a = overlay.loc[common].to_numpy()
+        b = benchmark.loc[common].to_numpy()
+
+        res = minimum_detectable_sharpe_difference(a, b, mean_block=63, draws=1_500)
+        correlation = float(np.corrcoef(a, b)[0, 1])
+        # The standard error falls with the square root of sample length, so the
+        # sample needed to reach a target effect scales with the square of the ratio.
+        needed = years * (res.mde / target) ** 2
+        fires = "FIRES" if res.mde > 0.30 else "clear"
+        print(
+            f"   {family:<18} MDE {res.mde:.3f}  corr {correlation:.2f}  "
+            f"stop rule {fires:<5}  {needed:>5.0f} years needed for {target:.2f}"
+        )
+
+    print(
+        f"\n   Measured over {years:.0f} years. The phase 0 figure was computed on two\n"
+        "   versions of one book correlated at 0.91; against a real overlay the\n"
+        "   correlation is lower, the paired standard error larger, and the\n"
+        "   detectable effect two to three times worse. The lower-bound warning\n"
+        "   attached to it was the right call and is now quantified."
+    )
     print("\n" + RULE)
 
 
