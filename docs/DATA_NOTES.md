@@ -36,3 +36,25 @@ The public `fredgraph.csv` endpoint has no vintage parameter that works; the
 documented URL forms all return an HTML error page. Real-time histories come
 from `api.stlouisfed.org/fred/series/observations` with
 `realtime_start=1776-07-04&realtime_end=9999-12-31`, which requires a free key.
+
+## Repeated levels on the yield series are granularity, not staleness
+
+The quality screen flags `bond_us_10y` and `bond_us_long` at 13-16% repeated
+levels in 1991-1993, above the 10% threshold. This is not a stale feed: Treasury
+yields are quoted to two decimal places, so an unchanged print is a genuine
+observation whenever the day's move is under a basis point, and the longest run
+of repeats is two or three sessions rather than the long flat stretches a dead
+feed produces.
+
+The threshold is calibrated for price series. Yields are read against the run
+length instead. The flag stays in the report rather than being silenced, because
+suppressing a warning is how the next real one gets missed.
+
+## The power calculation is a lower bound
+
+`scripts/phase0_report.py` compares a 60/40 book with a volatility-targeted
+version of itself. The two correlate at 0.91, so the common market move largely cancels in
+the paired difference and its standard error sits near its floor — which is also
+why the block length barely changes it. A regime overlay tracks the benchmark
+less closely and will have a larger minimum detectable effect. The number that
+decides stop rule 3 is the one recomputed against the actual overlay in phase 3.
