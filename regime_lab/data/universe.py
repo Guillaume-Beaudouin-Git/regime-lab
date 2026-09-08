@@ -61,4 +61,8 @@ MACRO_LAGGED = {
     "rate_curve_10y2y": ("T10Y2Y", "daily", False),
     "rate_curve_10y3m": ("T10Y3M", "daily", False),
     "rate_cash_3m": ("DTB3", "daily", False),
+    # Validation only, never a feature. NBER dates are announced six to eighteen
+    # months after the fact, so this is not point-in-time information and cannot
+    # enter a model; it is the external label the classifier is scored against.
+    "ref_nber": ("USREC", "monthly", False),
 }
