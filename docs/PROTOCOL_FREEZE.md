@@ -35,6 +35,7 @@ each dated and justified, so that a reader can see what changed and when.
 
 | date | version | change | reason |
 | --- | --- | --- | --- |
+| 2026-09-08 | grid | **DECLINED** — the jump-penalty grid was not widened despite the optimum landing on its floor | Extending a grid after seeing which end wins is an amendment made in the light of results. Recorded in docs/CALIBRATION_NOTES.md. |
 | 2026-09-08 | v1 → v2 | T2 respecified; families D cut; strategies frozen; power section added; data coverage corrected | Adversarial review found T2 was scale-invariant, hence vacuous on Sharpe, and that deferring the strategy choice to phase 4 was circular. |
 
 ## Deviations from the frozen text
