@@ -1,0 +1,24 @@
+# data lake — regenerable, never committed
+data/
+*.parquet
+*.csv
+!docs/**/*.csv
+
+# reference PDFs (copyrighted)
+docs/references/
+
+# python
+__pycache__/
+*.py[cod]
+.venv/
+.pytest_cache/
+.ruff_cache/
+.ipynb_checkpoints/
+
+# secrets
+.env
+.env.*
+!.env.example
+
+# os
+.DS_Store
