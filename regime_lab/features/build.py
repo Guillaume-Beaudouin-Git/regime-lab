@@ -7,13 +7,14 @@ import pandas as pd
 
 from regime_lab.data import build_panel, store
 from regime_lab.data.universe import MACRO_LAGGED, MACRO_VINTAGED
-from regime_lab.features import crosssection, macro, market
+from regime_lab.features import asymmetry, crosssection, macro, market
 from regime_lab.features.standardise import expanding_zscore, winsorise
 
 #: Which module produced a feature, read off its name prefix.
 FAMILIES = {
     "mom_": "momentum",
     "vol_": "volatility",
+    "asy_": "asymmetry",
     "xs_": "cross-section",
     "mac_": "macro",
     "cre_": "credit",
@@ -49,6 +50,7 @@ def raw_features(dates: pd.DatetimeIndex) -> pd.DataFrame:
     blocks = [
         market.momentum(price_panel),
         market.volatility(price_panel),
+        asymmetry.build(price_panel),
         crosssection.build(industries, size_bm, factors),
         macro.build(macro_panel),
     ]
