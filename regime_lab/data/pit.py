@@ -38,8 +38,10 @@ def validate(frame: pd.DataFrame) -> pd.DataFrame:
 
     out = frame.loc[:, PIT_COLUMNS].copy()
     out["series_id"] = out["series_id"].astype("string")
-    out["period"] = pd.to_datetime(out["period"])
-    out["available_at"] = pd.to_datetime(out["available_at"])
+    # Pin the resolution: a parquet round-trip returns milliseconds while
+    # date_range produces microseconds, and pandas refuses to join the two.
+    out["period"] = pd.to_datetime(out["period"]).astype("datetime64[ns]")
+    out["available_at"] = pd.to_datetime(out["available_at"]).astype("datetime64[ns]")
     out["value"] = pd.to_numeric(out["value"], errors="coerce")
 
     if out["period"].isna().any():
@@ -127,7 +129,7 @@ def build_panel(
         A DataFrame indexed by ``dates`` with one column per ``series_id``.
         Each cell holds the value that was published and current on that date.
     """
-    dates = pd.DatetimeIndex(dates).sort_values()
+    dates = pd.DatetimeIndex(dates).astype("datetime64[ns]").sort_values()
     trace = realtime_trace(frame)
     if trace.empty:
         return pd.DataFrame(index=dates)

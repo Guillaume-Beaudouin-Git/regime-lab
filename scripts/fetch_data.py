@@ -4,14 +4,18 @@ from __future__ import annotations
 
 import argparse
 
+import pandas as pd
+
 from regime_lab.config import FRED_API_KEY, SAMPLE_START
 from regime_lab.data import store
 from regime_lab.data.sources import fred, kenfrench, prices
-from regime_lab.data.universe import MACRO_LAGGED, MACRO_VINTAGED, PRICES
+from regime_lab.data.universe import MACRO_LAGGED, MACRO_VINTAGED, PRICES, PRICES_FRED
 
 
 def _report(kind: str, name: str, frame, note: str = "") -> None:
-    revisions = len(frame) - frame["period"].nunique()
+    # Count revisions per series: a multi-series frame has many rows per date
+    # without any of them being a restatement.
+    revisions = len(frame) - len(frame.drop_duplicates(["series_id", "period"]))
     print(
         f"{kind:<10} {name:<18} {len(frame):>8,} rows  {revisions:>6,} rev  "
         f"{frame['period'].min():%Y-%m-%d} to {frame['period'].max():%Y-%m-%d}  {note}"
@@ -30,6 +34,16 @@ def main() -> None:
         frame = prices.fetch(PRICES, start=args.start)
         store.write(frame, "prices", "cross_asset", origin="Yahoo Finance, adjusted close")
         _report("prices", "cross_asset", frame, f"{frame['series_id'].nunique()} series")
+
+        blocks = []
+        for name, series_id in PRICES_FRED.items():
+            block = fred.fetch_current(series_id, frequency="daily", start=args.start)
+            block["series_id"] = name
+            blocks.append(block)
+        if blocks:
+            frame = pd.concat(blocks, ignore_index=True)
+            store.write(frame, "prices", "fred_daily", origin="FRED daily prices, unrevised")
+            _report("prices", "fred_daily", frame, f"{frame['series_id'].nunique()} series")
 
     if want("macro"):
         if not FRED_API_KEY:
