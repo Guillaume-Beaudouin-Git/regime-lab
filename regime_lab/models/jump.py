@@ -68,6 +68,21 @@ class JumpRegimes:
         # state 0 is always the weaker one, so states are comparable across refits.
         self.model_.fit(frame, ret_ser=returns.reindex(frame.index), sort_by="cumret")
 
+    def predict_offline(self, features: pd.DataFrame) -> pd.Series:
+        """Assign states using the whole block, future included.
+
+        Not tradable, and not meant to be: the gap against ``predict_online`` is
+        the price of having to recognise a regime as it happens rather than
+        afterwards.
+        """
+        if self.model_ is None:
+            raise RuntimeError("fit before predicting")
+        frame = features.loc[:, self.features_].ffill().dropna()
+        predicted = self.model_.predict(frame)
+        return pd.Series(np.asarray(predicted, dtype=float), index=frame.index).reindex(
+            features.index
+        )
+
     def predict_online(self, features: pd.DataFrame) -> pd.Series:
         """Filter forward: each row is assigned using only rows up to it."""
         if self.model_ is None:

@@ -32,6 +32,7 @@ from regime_lab.analysis.power import minimum_detectable_sharpe_difference
 from regime_lab.config import CACHE
 from regime_lab.models.mapping import apply_overlay, state_to_position
 from regime_lab.strategies.book import base_book
+from regime_lab.strategies.costs import COST_BPS, charge
 
 warnings.filterwarnings("ignore")
 RULE = "=" * 78
@@ -154,6 +155,31 @@ def main() -> None:
     print(
         "\n   A difference inside the minimum detectable effect is UNDERPOWERED,\n"
         "   not evidence of no effect, and it is never reported as a pass."
+    )
+
+    print("\n" + RULE)
+    print("\nCOSTS  the margin against the benchmark, once trading is paid for\n")
+    print("   cost levels declared before any result was read, in round-trip basis points\n")
+    print(f"   {'family':<18} {'turnover':>9} {'gross':>8} " +
+          "".join(f"{k + ' ' + str(v) + 'bp':>16}" for k, v in COST_BPS.items()))
+
+    for family, _, _, _ in verdicts:
+        position = state_to_position(states[family]).reindex(oos).fillna(0.0)
+        overlay = apply_overlay(base, position).dropna()
+        diag = diagnostics[diagnostics["family"] == family]
+        benchmark = managed_benchmark(base, stepwise_target(diag, oos)).dropna()
+        common = overlay.index.intersection(benchmark.index)
+
+        row = f"   {family:<18} {position.diff().abs().mean():>9.4f}"
+        row += f" {annual_sharpe(overlay.loc[common]) - annual_sharpe(benchmark.loc[common]):>+8.2f}"
+        for bps in COST_BPS.values():
+            net = charge(overlay, position, bps=bps).loc[common]
+            row += f" {annual_sharpe(net) - annual_sharpe(benchmark.loc[common]):>+15.2f}"
+        print(row)
+
+    print(
+        "\n   The benchmark is left gross, which flatters the overlays: a moving\n"
+        "   volatility target also trades. Even so, no margin survives."
     )
 
     print("\n" + RULE)

@@ -81,6 +81,21 @@ class FilteredHMM:
         ranked = out[:, self.order_]
         return pd.DataFrame(ranked, index=frame.index).reindex(features.index)
 
+    def predict_offline(self, features: pd.DataFrame) -> pd.Series:
+        """Viterbi path over the whole block — the smoothed state, not tradable.
+
+        This is what the library returns by default, and what most published
+        regime backtests trade on. Keeping it here, clearly labelled and used
+        only to price latency, is the honest way to show what it is worth.
+        """
+        if self.model_ is None or self.order_ is None:
+            raise RuntimeError("fit before predicting")
+        frame = features.loc[:, self.features_].ffill().dropna()
+        path = self.model_.predict(frame.to_numpy())
+        rank = {int(s): int(r) for r, s in enumerate(self.order_)}
+        mapped = np.array([rank[int(v)] for v in path], dtype=float)
+        return pd.Series(mapped, index=frame.index).reindex(features.index)
+
     def predict_online(self, features: pd.DataFrame) -> pd.Series:
         """Most likely state under the filtered distribution."""
         return self.filtered_probabilities(features).idxmax(axis=1).astype(float)

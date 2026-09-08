@@ -85,12 +85,14 @@ def main() -> None:
     }
 
     results: dict[str, pd.Series] = {}
+    offline_states: dict[str, pd.Series] = {}
     diagnostics: list[pd.DataFrame] = []
     for name, (design, factory) in families.items():
-        states, fitted, diag = run_expanding(
+        states, fitted, diag, offline = run_expanding(
             factory, design.dropna(), book, first_refit=first_refit, months=6
         )
         results[name] = states
+        offline_states[name] = offline
         diagnostics.append(diag.assign(family=name))
         oos = states.dropna()
         switches = int((oos.diff().abs() > 0).sum())
@@ -128,6 +130,7 @@ def main() -> None:
         )
 
     pd.DataFrame(results).to_parquet(CACHE / "states.parquet")
+    pd.DataFrame(offline_states).to_parquet(CACHE / "states_offline.parquet")
     pd.concat(diagnostics).reset_index().to_parquet(CACHE / "refit_diagnostics.parquet")
     log = trials.summary()
     print(

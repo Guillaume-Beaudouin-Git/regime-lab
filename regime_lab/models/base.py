@@ -36,6 +36,7 @@ def run_expanding(
     """
     schedule = refit_dates(features.index, first=first_refit, months=months)
     states = pd.Series(index=features.index, dtype="float64")
+    offline = pd.Series(index=features.index, dtype="float64")
     fitted: dict[pd.Timestamp, object] = {}
     diagnostics: list[dict[str, object]] = []
 
@@ -76,7 +77,16 @@ def run_expanding(
         predicted = model.predict_online(context)
         states.loc[block.index] = np.asarray(predicted)[-len(block) :]
 
-    return states.rename("state"), fitted, pd.DataFrame(diagnostics).set_index("refit")
+        # The same block assigned with hindsight, used only to price latency.
+        seen_whole = model.predict_offline(context)
+        offline.loc[block.index] = np.asarray(seen_whole)[-len(block) :]
+
+    return (
+        states.rename("state"),
+        fitted,
+        pd.DataFrame(diagnostics).set_index("refit"),
+        offline.rename("state_offline"),
+    )
 
 
 def label_by_training_returns(

@@ -92,6 +92,15 @@ class ForwardVolModel:
         frame = features.loc[:, self.features_].ffill().dropna()
         return pd.Series(self.model_.predict(frame), index=frame.index)
 
+    def predict_offline(self, features: pd.DataFrame) -> pd.Series:
+        """Identical to the online state, by construction.
+
+        A pointwise regression has no sequential smoothing to exploit, so this
+        family pays no latency penalty at all. That is a real advantage over the
+        state-space families and it is worth showing rather than assuming.
+        """
+        return self.predict_online(features)
+
     def predict_online(self, features: pd.DataFrame) -> pd.Series:
         """State 1 when predicted volatility is below the training median.
 
