@@ -24,9 +24,11 @@ import pandas as pd
 def state_to_position(states: pd.Series, *, n_states: int = 2) -> pd.Series:
     """One when the model sits in its strongest state, zero otherwise.
 
-    States arrive ordered by the return earned in them on training data, so the
-    strongest is the last index. The signal is lagged one session: a state read
-    from today's close is traded tomorrow.
+    States arrive ordered by the volatility realised in them on training data,
+    ascending in calm, so the last index is the quietest state. An earlier
+    version documented an ordering by return and assumed it ran the other way,
+    which held the weakest state for the entire study. The signal is lagged one
+    session: a state read from today's close is traded tomorrow.
     """
     on = (states == float(n_states - 1)).astype(float)
     return on.shift(1).rename("position")

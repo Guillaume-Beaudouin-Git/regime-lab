@@ -21,8 +21,9 @@ import warnings
 import pandas as pd
 
 from regime_lab.config import CACHE
-from regime_lab.data import build_panel, store
+from regime_lab.data import store
 from regime_lab.evaluation import predictive, reliability
+from regime_lab.evaluation.predictive import volatility_quantile_placebo
 from regime_lab.strategies.book import base_book, panels
 
 warnings.filterwarnings("ignore")
@@ -43,8 +44,20 @@ def main() -> None:
     equity = price_panel["eq_us_large"].reindex(oos)
     realised = (equity.pct_change().rolling(21).std() * (252**0.5)).reindex(oos)
     drawdown_ref = reliability.drawdown_reference(equity).reindex(oos)
-    nber = store.read("macro", "ref_nber")
-    nber_ref = build_panel(nber, oos, max_staleness=pd.Timedelta(days=120))["ref_nber"]
+    # Scored against the month each observation describes. Routing this through
+    # the lagged macro path handed the classifier up to forty-five days of free
+    # hindsight at every boundary and overstated its accuracy.
+    nber = store.read("references", "ref_nber").set_index("period")["value"]
+    nber_ref = nber.reindex(oos.to_period("M").to_timestamp()).to_numpy()
+    nber_ref = pd.Series(nber_ref, index=oos, name="ref_nber")
+
+    # A one-line causal rule sits in every table beside the fitted models. A
+    # claim that a model separates variance means nothing until it is read next
+    # to what a volatility median does for free.
+    online = online.copy()
+    online["·  vol placebo"] = volatility_quantile_placebo(returns).reindex(oos)
+    offline = offline.copy()
+    offline["·  vol placebo"] = online["·  vol placebo"]
 
     print(RULE)
     print(f"CLASSIFIER EVALUATION  {len(oos):,} out-of-sample days, no portfolio")
@@ -116,14 +129,26 @@ def main() -> None:
     print("   from 'regimes do not work'.\n")
 
     print(RULE)
-    print("\n   marginal information over a plain volatility quantile, horizon 21\n")
-    print(f"   {'family':<18} {'R2 vol':>8} {'R2 both':>9} {'incremental':>12} {'t state':>8}")
-    for family in online.columns:
-        info = predictive.incremental_information(online[family], returns, realised, horizon=21)
+    for target, label in (("return", "forward RETURNS"), ("volatility", "forward VOLATILITY")):
+        print(f"\n   marginal information over a plain volatility quantile — {label}\n")
         print(
-            f"   {family:<18} {info['r2_vol']:>7.2%} {info['r2_both']:>8.2%} "
-            f"{info['incremental']:>11.3%} {info['t_state']:>8.2f}"
+            f"   {'family':<18} {'R2 vol':>8} {'R2 both':>9} "
+            f"{'incremental':>12} {'t state':>8}"
         )
+        for family in online.columns:
+            info = predictive.incremental_information(
+                online[family], returns, realised, horizon=21, target=target
+            )
+            print(
+                f"   {family:<18} {info['r2_vol']:>7.2%} {info['r2_both']:>8.2%} "
+                f"{info['incremental']:>11.3%} {info['t_state']:>8.2f}"
+            )
+
+    print(
+        "\n   The two tables are the finding. Over a volatility quantile the state adds\n"
+        "   essentially nothing about direction and several points of R2 about magnitude.\n"
+        "   Reporting only the first would have buried the study's strongest result."
+    )
     print("\n" + RULE)
 
 

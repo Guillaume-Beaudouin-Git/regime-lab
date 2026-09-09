@@ -126,8 +126,30 @@ def variance_versus_mean(
     }
 
 
+def volatility_quantile_placebo(
+    returns: pd.Series, *, window: int = 21, min_periods: int = 252
+) -> pd.Series:
+    """The trivial rule the charter's placebo test compares against.
+
+    One when realised volatility sits below its own expanding median, zero
+    otherwise, so the output carries the same meaning as a fitted state: the
+    higher label is the calm one. Causal by construction — the median is
+    expanding, never full-sample — and it costs a line of code.
+
+    Any claim that a model "separates variance" has to be read next to this.
+    """
+    realised = returns.rolling(window).std() * np.sqrt(252)
+    median = realised.expanding(min_periods=min_periods).median()
+    return (realised < median).astype(float).where(median.notna()).rename("placebo")
+
+
 def incremental_information(
-    states: pd.Series, returns: pd.Series, realised_vol: pd.Series, *, horizon: int = 21
+    states: pd.Series,
+    returns: pd.Series,
+    realised_vol: pd.Series,
+    *,
+    horizon: int = 21,
+    target: str = "return",
 ) -> dict[str, float]:
     """R-squared of the state over and above a volatility quantile.
 
@@ -135,12 +157,25 @@ def incremental_information(
     instead of the level of a portfolio. If the state adds nothing once a plain
     volatility measure is in the regression, then whatever it found was already
     in the volatility.
+
+    Args:
+        target: ``"return"`` or ``"volatility"``. The distinction is the whole
+            finding: the state adds almost nothing about forward *returns* and a
+            great deal about forward *volatility*, and reporting only the first
+            hides the study's strongest positive result.
     """
+    if target not in {"return", "volatility"}:
+        raise ValueError(f"unknown target {target!r}")
+    dependent = (
+        forward_return(returns, horizon)
+        if target == "return"
+        else forward_volatility(returns, horizon)
+    )
     frame = pd.concat(
         {
             "state": states,
             "vol_rank": realised_vol.rank(pct=True),
-            "fwd": forward_return(returns, horizon),
+            "fwd": dependent,
         },
         axis=1,
     ).dropna()
