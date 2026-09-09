@@ -58,6 +58,7 @@ class ForwardVolModel:
         self.model_: object | None = None
         self.features_: list[str] = []
         self.threshold_: float | None = None
+        self.state_vol_: dict[int, float] = {}
 
     def fit(self, features: pd.DataFrame, returns: pd.Series) -> None:
         target = forward_volatility(returns, horizon=self.horizon)
@@ -84,6 +85,17 @@ class ForwardVolModel:
             ).fit(x, y)
 
         self.threshold_ = float(np.median(self.model_.predict(x)))
+
+        # Realised volatility per state on the training window, so this family
+        # can feed the sizing rule like the state-space ones. Without it the
+        # supervised rows came out empty, which read as a missing result rather
+        # than as a missing attribute.
+        state = (self.model_.predict(x) < self.threshold_).astype(int)
+        aligned = returns.reindex(x.index)
+        self.state_vol_ = {
+            int(k): float(v)
+            for k, v in pd.Series(aligned.to_numpy()).groupby(state).std().items()
+        }
 
     def predict_volatility(self, features: pd.DataFrame) -> pd.Series:
         """Predicted forward volatility, for scoring against the realised value."""

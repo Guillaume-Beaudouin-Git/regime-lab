@@ -26,15 +26,18 @@ class FilteredHMM:
         n_states: int = 2,
         covariance_type: str = "diag",
         n_iter: int = 200,
+        ordering: str = "volatility",
         random_state: int = 0,
     ) -> None:
         self.n_states = n_states
         self.covariance_type = covariance_type
         self.n_iter = n_iter
+        self.ordering = ordering
         self.random_state = random_state
         self.model_: GaussianHMM | None = None
         self.features_: list[str] = []
         self.order_: np.ndarray | None = None
+        self.state_vol_: dict[int, float] = {}
 
     def fit(self, features: pd.DataFrame, returns: pd.Series) -> None:
         frame = features.dropna()
@@ -48,14 +51,22 @@ class FilteredHMM:
         )
         self.model_.fit(frame.to_numpy())
 
-        # Order states by the mean return earned in them on the training window,
-        # so that state 0 means the same thing after every refit. Ordering is the
-        # actual fix for label switching; the deeper instabilities of the EM
-        # algorithm — local optima, drifting parameters — are what the stability
-        # test measures.
+        # Order states so that 0 is the turbulent one after every refit. Ranking
+        # by volatility rather than by return is the same convention used for the
+        # jump model, and for the same reason: a return-based ranking inverted
+        # that model's labels against every external reference.
         smoothed = self.model_.predict(frame.to_numpy())
-        means = pd.Series(returns.reindex(frame.index).to_numpy()).groupby(smoothed).mean()
-        self.order_ = np.argsort(means.reindex(range(self.n_states)).fillna(0.0).to_numpy())
+        aligned = pd.Series(returns.reindex(frame.index).to_numpy())
+        if self.ordering == "cumret":
+            score = aligned.groupby(smoothed).mean().reindex(range(self.n_states)).fillna(0.0)
+            self.order_ = np.argsort(score.to_numpy())
+        else:
+            vols = aligned.groupby(smoothed).std().reindex(range(self.n_states))
+            self.order_ = np.argsort(-vols.fillna(vols.max()).to_numpy())
+        rank = {int(s): int(r) for r, s in enumerate(self.order_)}
+        self.state_vol_ = {
+            rank[int(k)]: float(v) for k, v in aligned.groupby(smoothed).std().items()
+        }
 
     def filtered_probabilities(self, features: pd.DataFrame) -> pd.DataFrame:
         """Forward recursion: ``P(state_t | observations up to t)``."""
