@@ -10,6 +10,15 @@ dependencies = [
     "requests>=2.31",
     "yfinance>=0.2.40",
     "python-dotenv>=1.0",
+    # Modelling. Absent from the first version of this list, which meant the
+    # documented setup command installed none of the three model families, nor
+    # the libraries behind every t-statistic and every detectable-effect figure.
+    "scipy>=1.13",
+    "scikit-learn>=1.5",
+    "statsmodels>=0.14",
+    "hmmlearn>=0.3",
+    "lightgbm>=4.0",
+    "jumpmodels>=0.1",
 ]
 
 [project.optional-dependencies]

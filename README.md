@@ -83,17 +83,20 @@ docs/CHARTER.html              the frozen charter (v2)
 docs/PROTOCOL_FREEZE.md        content hash, amendment log, what the freeze binds
 docs/DATA_NOTES.md             data traps found and how they were resolved
 
-regime_lab/features/           44 features in seven families, expanding standardisation
+regime_lab/features/           50 features in eight families, expanding standardisation
 regime_lab/models/protocol.py  folds, refit schedule, what every family shares
 regime_lab/models/jump.py      family A, the statistical jump model
 regime_lab/models/hmm.py       family B, a Gaussian HMM with filtered probabilities only
 regime_lab/models/supervised.py family C, direct prediction with no latent state
 regime_lab/models/mapping.py   the one state-to-position rule, fixed before any fit
 regime_lab/analysis/trials.py  append-only log of every configuration evaluated
+regime_lab/evaluation/         the classifier judged as a classifier, no portfolio
+regime_lab/data/coverage.py    refuses a source that returns less than it was asked for
 ```
 
 ## Status
 
-Phase 0 (point-in-time contract, ingestion, quality screen, power) and phase 1
-(feature matrix and its admissibility test) delivered. Phase 2 (three model
-families under one protocol) in progress. Phases 3-5 in `docs/CHARTER.html`.
+Study closed. Results in `docs/RESULTS_FINAL.md` (the three evaluation layers),
+`docs/RESULTS_CLASSIFIER.md` (label quality) and `docs/RESULTS_T2.md` (the
+portfolio comparison). Deviations from the frozen charter, including two the
+audit forced, are in `docs/PROTOCOL_FREEZE.md`.

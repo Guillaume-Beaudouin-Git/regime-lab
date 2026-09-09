@@ -59,8 +59,9 @@ def test_the_row_cap_failure_is_caught():
 def test_a_declared_short_series_is_accepted():
     """Accepting a young series has to be somebody's written decision."""
     short = series("2022-11-11", "2026-08-28", "W")
-    check(short, name="STLFSI4", start="1990-01-01", frequency="weekly",
-          allow_short_from="2022-11-11")
+    check(
+        short, name="STLFSI4", start="1990-01-01", frequency="weekly", allow_short_from="2022-11-11"
+    )
 
 
 def test_an_undeclared_short_series_is_not():

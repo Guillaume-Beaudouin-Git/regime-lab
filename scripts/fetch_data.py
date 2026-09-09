@@ -16,6 +16,7 @@ from regime_lab.data.universe import (
     MACRO_VINTAGED,
     PRICES,
     PRICES_FRED,
+    REFERENCES,
 )
 
 
@@ -92,6 +93,16 @@ def main() -> None:
             note = f"lag {frequency}" + ("" if revised else ", unrevised so exact")
             store.write(frame, "macro", name, origin=f"FRED {series_id}, {note}")
             _report("macro", name, frame, note)
+
+        for name, series_id in REFERENCES.items():
+            frame = fred.fetch_current(series_id, frequency="monthly", start=args.start)
+            # No publication lag: an external label is scored against the period
+            # it describes. It is never a feature, so no point-in-time claim is
+            # made or needed.
+            frame["available_at"] = frame["period"]
+            frame["series_id"] = name
+            store.write(frame, "references", name, origin=f"FRED {series_id}, scoring label")
+            _report("reference", name, frame, "validation only, not a feature")
 
     if want("panels"):
         for panel in kenfrench.PANELS:
