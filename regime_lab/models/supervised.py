@@ -93,8 +93,7 @@ class ForwardVolModel:
         state = (self.model_.predict(x) < self.threshold_).astype(int)
         aligned = returns.reindex(x.index)
         self.state_vol_ = {
-            int(k): float(v)
-            for k, v in pd.Series(aligned.to_numpy()).groupby(state).std().items()
+            int(k): float(v) for k, v in pd.Series(aligned.to_numpy()).groupby(state).std().items()
         }
 
     def predict_volatility(self, features: pd.DataFrame) -> pd.Series:

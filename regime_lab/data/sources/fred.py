@@ -36,6 +36,7 @@ import pandas as pd
 import requests
 
 from regime_lab.config import FRED_API_KEY, SAMPLE_START
+from regime_lab.data.coverage import check
 from regime_lab.data.pit import validate
 
 FRED_CSV = "https://fred.stlouisfed.org/graph/fredgraph.csv"
@@ -59,11 +60,20 @@ def fetch_current(
     frequency: str = "daily",
     start: str = SAMPLE_START,
     timeout: int = 60,
+    allow_short_from: str | None = None,
 ) -> pd.DataFrame:
     """Download the current vintage and stamp it with a publication lag.
 
     Exact for series that are never revised; a documented approximation
     otherwise, since the values are the revised ones.
+
+    The result is checked for coverage before it is returned. This endpoint is
+    the one that served the ICE BofA credit spreads for two years instead of
+    thirty, with no error, so it is the last place to trust a row count.
+
+    Raises:
+        CoverageError: if the response is short or sparse and the shortfall was
+            not declared through ``allow_short_from``.
     """
     if frequency not in PUBLICATION_LAG:
         raise ValueError(f"unknown frequency {frequency!r}; expected {list(PUBLICATION_LAG)}")
@@ -79,7 +89,13 @@ def fetch_current(
     table["period"] = pd.to_datetime(table["period"])
     table["value"] = pd.to_numeric(table["value"], errors="coerce")
     table["available_at"] = table["period"] + PUBLICATION_LAG[frequency]
-    return validate(table)
+    return check(
+        validate(table),
+        name=series_id,
+        start=start,
+        frequency=frequency,
+        allow_short_from=allow_short_from,
+    )
 
 
 def fetch_first_release(
