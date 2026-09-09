@@ -159,3 +159,44 @@ def incremental_information(
         "t_state": float(both.tvalues[2]),
         "n": int(len(frame)),
     }
+
+
+def volatility_difference_test(
+    states: pd.Series, returns: pd.Series, *, horizon: int = 21, draws: int = 2_000
+) -> dict[str, float]:
+    """Test the state's separation of forward *variance*, with its own power.
+
+    The mean test is underpowered here and the variance test need not be: a
+    volatility spread is estimated far more precisely than a mean spread on the
+    same data, which is the statistical reason a regime signal can be usable for
+    sizing while being useless for timing. Reporting only the mean test would
+    have hidden that.
+    """
+    frame = pd.concat(
+        {"state": states, "fwd_vol": forward_volatility(returns, horizon)}, axis=1
+    ).dropna()
+    if frame["state"].nunique() < 2:
+        return {"difference": np.nan, "t_hac": np.nan, "mde": np.nan, "n": len(frame)}
+
+    calm = (frame["state"] == frame["state"].max()).astype(float)
+    design = sm.add_constant(calm.to_numpy())
+    model = sm.OLS(frame["fwd_vol"].to_numpy(), design).fit(
+        cov_type="HAC", cov_kwds={"maxlags": horizon}
+    )
+
+    values = frame["fwd_vol"].to_numpy()
+    flags = calm.to_numpy().astype(bool)
+    rng = np.random.default_rng(0)
+    differences = np.empty(draws)
+    for d in range(draws):
+        idx = stationary_indices(len(values), horizon * 3, rng)
+        v, f = values[idx], flags[idx]
+        differences[d] = v[f].mean() - v[~f].mean() if f.any() and (~f).any() else np.nan
+
+    return {
+        "difference": float(model.params[1]),
+        "t_hac": float(model.tvalues[1]),
+        "mde": float(2.802 * np.nanstd(differences, ddof=1)),
+        "detected": bool(abs(model.params[1]) > 2.802 * np.nanstd(differences, ddof=1)),
+        "n": int(len(frame)),
+    }

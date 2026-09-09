@@ -57,14 +57,17 @@ def run_expanding(
         in_sample = model.predict_online(train)
         held = (in_sample == in_sample.max()).astype(float).shift(1).fillna(0.0)
         gated = (returns.reindex(train.index) * held).dropna()
-        diagnostics.append(
-            {
-                "refit": refit,
-                "train_days": len(train),
-                "train_exposure": float(held.mean()),
-                "train_overlay_vol": float(gated.std(ddof=1) * np.sqrt(252)),
-            }
-        )
+        entry = {
+            "refit": refit,
+            "train_days": len(train),
+            "train_exposure": float(held.mean()),
+            "train_overlay_vol": float(gated.std(ddof=1) * np.sqrt(252)),
+        }
+        # The volatility realised in each state on the training window is what a
+        # sizing rule needs, and it must come from training data only.
+        for state, vol in getattr(model, "state_vol_", {}).items():
+            entry[f"state_vol_{int(state)}"] = float(vol) * np.sqrt(252)
+        diagnostics.append(entry)
 
         stop = schedule[i + 1] if i + 1 < len(schedule) else features.index.max()
         block = features.loc[(features.index >= refit) & (features.index <= stop)]

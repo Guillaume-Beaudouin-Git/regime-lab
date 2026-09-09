@@ -35,6 +35,8 @@ each dated and justified, so that a reader can see what changed and when.
 
 | date | version | change | reason |
 | --- | --- | --- | --- |
+| 2026-09-08 | state ordering | **APPLIED** — states are ranked by the volatility realised in each on the training window, replacing the reference implementation's ranking by cumulative return | A diagnosis, not a search. Scored against NBER dates the old convention gave the jump model 6.0% balanced accuracy — anti-correlated with every external reference, with all 434 recession days in the state it called strong. The new rule never touches returns and cannot invert. Both orderings are reported. See docs/RESULTS_CLASSIFIER.md. |
+| 2026-09-08 | sizing rule | **ADDED** — a graded inverse-volatility sizing rule alongside the frozen on/off rule; the on/off rule is still reported | The frozen rule is a timing rule and the measured signal separates variance, not mean. Adding the rule the evidence supports is disclosed here rather than substituted quietly, and the original stays in every table. |
 | 2026-09-08 | grid | **DECLINED** — the jump-penalty grid was not widened despite the optimum landing on its floor | Extending a grid after seeing which end wins is an amendment made in the light of results. Recorded in docs/CALIBRATION_NOTES.md. |
 | 2026-09-08 | v1 → v2 | T2 respecified; families D cut; strategies frozen; power section added; data coverage corrected | Adversarial review found T2 was scale-invariant, hence vacuous on Sharpe, and that deferring the strategy choice to phase 4 was circular. |
 

@@ -32,6 +32,35 @@ def state_to_position(states: pd.Series, *, n_states: int = 2) -> pd.Series:
     return on.shift(1).rename("position")
 
 
+def state_to_size(
+    states: pd.Series,
+    state_vol: pd.DataFrame,
+    *,
+    target: float,
+    cap: float = 2.0,
+) -> pd.Series:
+    """Size the book inversely to the volatility the state carries.
+
+    The evidence says the state separates forward variance and not forward mean,
+    so this is the rule the signal supports: hold more where the state is calm,
+    less where it is turbulent, and never go flat on the strength of a signal
+    that says nothing about direction.
+
+    ``state_vol`` holds, per refit, the volatility realised in each state on that
+    refit's training window — training data only, forward filled between refits.
+    The signal is lagged one session, as everywhere else.
+    """
+    aligned = state_vol.reindex(states.index, method="ffill")
+    chosen = pd.Series(np.nan, index=states.index, dtype="float64")
+    for state in states.dropna().unique():
+        column = f"state_vol_{int(state)}"
+        if column in aligned:
+            chosen = chosen.mask(states == state, aligned[column])
+
+    leverage = (target / chosen).clip(upper=cap)
+    return leverage.shift(1).fillna(0.0).rename("size")
+
+
 def apply_overlay(returns: pd.Series, position: pd.Series) -> pd.Series:
     """Return the base strategy gated by ``position``."""
     aligned = position.reindex(returns.index).fillna(0.0)
