@@ -5,11 +5,18 @@ from __future__ import annotations
 import argparse
 
 import pandas as pd
+import requests
 
 from regime_lab.config import FRED_API_KEY, SAMPLE_START
 from regime_lab.data import store
 from regime_lab.data.sources import fred, kenfrench, prices
-from regime_lab.data.universe import MACRO_LAGGED, MACRO_VINTAGED, PRICES, PRICES_FRED
+from regime_lab.data.universe import (
+    KNOWN_SHORT,
+    MACRO_LAGGED,
+    MACRO_VINTAGED,
+    PRICES,
+    PRICES_FRED,
+)
 
 
 def _report(kind: str, name: str, frame, note: str = "") -> None:
@@ -37,7 +44,12 @@ def main() -> None:
 
         blocks = []
         for name, series_id in PRICES_FRED.items():
-            block = fred.fetch_current(series_id, frequency="daily", start=args.start)
+            block = fred.fetch_current(
+                series_id,
+                frequency="daily",
+                start=args.start,
+                allow_short_from=KNOWN_SHORT.get(series_id),
+            )
             block["series_id"] = name
             blocks.append(block)
         if blocks:
@@ -53,16 +65,29 @@ def main() -> None:
             try:
                 frame = fred.fetch_first_release(series_id, start=args.start)
                 note = "first release"
-            except Exception as exc:
+            except (RuntimeError, requests.RequestException) as exc:
+                # Only a missing vintage history or a transport failure falls
+                # back. Anything else is a bug and must not be papered over by
+                # quietly producing a lesser dataset.
                 print(f"macro      {name:<18} vintage path failed ({exc}); using lag path")
-                frame = fred.fetch_current(series_id, frequency="monthly", start=args.start)
+                frame = fred.fetch_current(
+                    series_id,
+                    frequency="monthly",
+                    start=args.start,
+                    allow_short_from=KNOWN_SHORT.get(series_id),
+                )
                 note = "LAG FALLBACK"
             frame["series_id"] = name
             store.write(frame, "macro", name, origin=f"FRED {series_id}, {note}")
             _report("macro", name, frame, note)
 
         for name, (series_id, frequency, revised) in MACRO_LAGGED.items():
-            frame = fred.fetch_current(series_id, frequency=frequency, start=args.start)
+            frame = fred.fetch_current(
+                series_id,
+                frequency=frequency,
+                start=args.start,
+                allow_short_from=KNOWN_SHORT.get(series_id),
+            )
             frame["series_id"] = name
             note = f"lag {frequency}" + ("" if revised else ", unrevised so exact")
             store.write(frame, "macro", name, origin=f"FRED {series_id}, {note}")

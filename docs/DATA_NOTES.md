@@ -82,3 +82,32 @@ years including the 1990 recession for no new information.
 
 The general rule this establishes: **a feature is worth its coverage cost only
 if no existing feature carries the same construct over a longer sample.**
+
+## The detector for one failure was deleted by the fix for another
+
+The `SHORT HISTORY` warning added after the ICE BofA discovery was lost when
+`fetch_data.py` was rewritten for the two-path vintage design. Nothing broke and
+nothing reported it: a warning that stops being printed looks exactly like a
+warning that never fires.
+
+Worse, the truncation guard written after the row-cap discovery was placed on
+the API path only — while the path that had actually failed, the public CSV
+endpoint, was left unguarded. The fix was applied to the wrong door.
+
+`regime_lab/data/coverage.py` now guards both paths with two independent checks,
+because the two failures had different shapes:
+
+* **start** — a series that begins after the requested window is refused, which
+  catches the ICE BofA case (796 rows starting 2023 against a 1990 request);
+* **density** — a series that covers the right span with far too few
+  observations is refused, which catches the row-cap case, where the response
+  begins exactly where it should and stops early.
+
+A genuinely short series is accepted only by declaring its real first date in
+`KNOWN_SHORT`. That asymmetry is the point: a truncated download and a young
+series are indistinguishable in a dataframe, so accepting one has to be a
+written decision rather than something nobody noticed.
+
+`tests/test_coverage.py` rebuilds both historical failures from their real
+shapes and asserts the guard raises. Verified live against FRED: the request for
+`BAMLH0A0HYM2` from 1990 is now refused, and `BAA10Y` returns 9,171 rows.

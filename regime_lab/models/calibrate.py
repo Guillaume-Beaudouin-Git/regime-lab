@@ -54,7 +54,12 @@ def choose_jump_penalty(
         try:
             model.fit(features, returns)
             states = model.predict_online(features)
-        except Exception:
+        except (ValueError, np.linalg.LinAlgError) as exc:
+            # A penalty that collapses the partition is a legitimate rejection;
+            # anything else is a bug, and swallowing it would show up later as
+            # an unexplained gap in the grid rather than as a failure.
+            scored.append((penalty, np.nan, np.nan))
+            print(f"      lambda {penalty}: rejected ({type(exc).__name__}: {exc})")
             continue
 
         clean = states.dropna()

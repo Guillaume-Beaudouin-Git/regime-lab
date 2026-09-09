@@ -66,3 +66,13 @@ MACRO_LAGGED = {
     # enter a model; it is the external label the classifier is scored against.
     "ref_nber": ("USREC", "monthly", False),
 }
+
+
+#: Series whose history genuinely begins after the sample start,
+#: ``{series_id: first available date}``.
+#:
+#: Declaring one is the only way to accept a short series: without an entry here
+#: the collector refuses it. That is deliberate. A truncated download and a
+#: genuinely young series look identical in a dataframe, and the difference has
+#: to be someone's written decision rather than something nobody noticed.
+KNOWN_SHORT: dict[str, str] = {}
