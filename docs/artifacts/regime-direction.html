@@ -1,0 +1,595 @@
+<title>Doser, pas deviner</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,300..600;1,6..72,300..400&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap">
+
+<style>
+  :root {
+    --paper:      #f3f6f5;
+    --surface:    #ffffff;
+    --surface-2:  #e9efed;
+    --ink:        #16211f;
+    --ink-soft:   #3d4b48;
+    --ink-mute:   #6a7773;
+    --rule:       #d6dedb;
+    --rule-soft:  #e5ebe9;
+    --calm:       #0e6b63;
+    --calm-wash:  #ddece9;
+    --stress:     #a03626;
+    --stress-wash:#f7e4e0;
+    --amber:      #8d6a12;
+
+    --f-display: "Newsreader", "Iowan Old Style", Georgia, serif;
+    --f-body:    "IBM Plex Sans", "Helvetica Neue", Arial, sans-serif;
+    --f-mono:    "IBM Plex Mono", "SF Mono", Menlo, monospace;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --paper:      #0d1413;  --surface:    #151e1c;  --surface-2:  #1c2624;
+      --ink:        #e4ebe8;  --ink-soft:   #c2cecb;  --ink-mute:   #8d9e99;
+      --rule:       #28342f;  --rule-soft:  #1f2927;
+      --calm:       #58c6b4;  --calm-wash:  #143330;
+      --stress:     #e37a63;  --stress-wash:#361a15;
+      --amber:      #d9a744;
+    }
+  }
+  :root[data-theme="dark"] {
+    --paper:      #0d1413;  --surface:    #151e1c;  --surface-2:  #1c2624;
+    --ink:        #e4ebe8;  --ink-soft:   #c2cecb;  --ink-mute:   #8d9e99;
+    --rule:       #28342f;  --rule-soft:  #1f2927;
+    --calm:       #58c6b4;  --calm-wash:  #143330;
+    --stress:     #e37a63;  --stress-wash:#361a15;
+    --amber:      #d9a744;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--f-body);
+    font-size: 17px;
+    line-height: 1.72;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .page {
+    max-width: 44rem;
+    margin: 0 auto;
+    padding-block: 3.5rem 6rem;
+    padding-left: 1.25rem;
+    padding-right: 1.25rem;
+  }
+
+  /* ---------- masthead ---------- */
+
+  header.top { border-bottom: 2px solid var(--ink); padding-bottom: 2rem; }
+
+  .eyebrow {
+    font-family: var(--f-mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--calm);
+    margin: 0 0 1.2rem;
+  }
+
+  h1 {
+    font-family: var(--f-display);
+    font-weight: 400;
+    font-size: clamp(2.3rem, 7vw, 3.6rem);
+    line-height: 1.04;
+    letter-spacing: -0.02em;
+    text-wrap: balance;
+    margin: 0 0 1.1rem;
+  }
+
+  .deck {
+    font-family: var(--f-display);
+    font-size: clamp(1.1rem, 2.4vw, 1.3rem);
+    font-weight: 300;
+    font-style: italic;
+    line-height: 1.5;
+    color: var(--ink-soft);
+    margin: 0;
+    max-width: 32ch;
+  }
+
+  .byline {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.3rem 1.8rem;
+    margin-top: 2rem;
+    font-family: var(--f-mono);
+    font-size: 0.72rem;
+    color: var(--ink-mute);
+  }
+
+  /* ---------- sections ---------- */
+
+  section { margin-top: 3.6rem; }
+
+  .label {
+    font-family: var(--f-mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--calm);
+    margin: 0 0 0.7rem;
+  }
+
+  h2 {
+    font-family: var(--f-display);
+    font-weight: 400;
+    font-size: clamp(1.55rem, 3.6vw, 1.95rem);
+    line-height: 1.18;
+    letter-spacing: -0.012em;
+    text-wrap: balance;
+    margin: 0 0 1.1rem;
+  }
+
+  h3 {
+    font-family: var(--f-body);
+    font-size: 1.02rem;
+    font-weight: 600;
+    margin: 2.2rem 0 0.6rem;
+  }
+
+  p { margin: 0 0 1.15rem; }
+  section > p:last-child, .plain > p:last-child { margin-bottom: 0; }
+
+  strong { font-weight: 600; }
+  .lead { font-size: 1.1rem; color: var(--ink-soft); }
+
+  ul { margin: 0 0 1.15rem; padding-left: 1.2rem; }
+  li { margin-bottom: 0.55rem; }
+
+  .num {
+    font-family: var(--f-mono);
+    font-variant-numeric: tabular-nums;
+    font-size: 0.94em;
+  }
+
+  /* ---------- plain-language aside ---------- */
+
+  .plain {
+    background: var(--calm-wash);
+    border-left: 3px solid var(--calm);
+    padding: 1.15rem 1.3rem;
+    margin: 1.6rem 0;
+  }
+  .plain .tag {
+    display: block;
+    font-family: var(--f-mono);
+    font-size: 0.63rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--calm);
+    margin-bottom: 0.5rem;
+  }
+  .plain p { font-size: 0.98rem; color: var(--ink-soft); }
+
+  /* ---------- figure ---------- */
+
+  figure { margin: 2rem 0 0; }
+  .panels {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+    gap: 1px;
+    background: var(--rule);
+    border: 1px solid var(--rule);
+  }
+  .panel { background: var(--surface); padding: 1.1rem 1.15rem 0.9rem; }
+  .panel h4 {
+    margin: 0 0 0.15rem;
+    font-size: 0.97rem;
+    font-weight: 600;
+  }
+  .panel .sub {
+    margin: 0 0 0.85rem;
+    font-size: 0.83rem;
+    color: var(--ink-mute);
+    line-height: 1.5;
+  }
+  .panel svg { display: block; width: 100%; height: auto; }
+  .panel svg text {
+    font-family: var(--f-mono);
+    font-size: 9px;
+    letter-spacing: 0.08em;
+  }
+  .verdict {
+    font-family: var(--f-mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-top: 0.7rem;
+  }
+  .verdict.yes { color: var(--calm); }
+  .verdict.no { color: var(--stress); }
+  figcaption {
+    margin-top: 0.8rem;
+    font-size: 0.87rem;
+    color: var(--ink-mute);
+    line-height: 1.55;
+  }
+
+  /* ---------- numbers strip ---------- */
+
+  .facts {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(8.5rem, 1fr));
+    gap: 1px;
+    background: var(--rule);
+    border: 1px solid var(--rule);
+    margin: 1.8rem 0 0;
+  }
+  .facts div { background: var(--surface); padding: 0.95rem 1rem; }
+  .facts b {
+    display: block;
+    font-family: var(--f-display);
+    font-size: 1.7rem;
+    font-weight: 400;
+    line-height: 1;
+    margin-bottom: 0.35rem;
+    font-variant-numeric: tabular-nums;
+  }
+  .facts span {
+    font-family: var(--f-mono);
+    font-size: 0.63rem;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: var(--ink-mute);
+    line-height: 1.4;
+    display: block;
+  }
+
+  /* ---------- mistakes ---------- */
+
+  .mistake {
+    padding: 1.15rem 0;
+    border-bottom: 1px solid var(--rule-soft);
+  }
+  .mistake:last-of-type { border-bottom: none; }
+  .mistake b { display: block; margin-bottom: 0.3rem; }
+  .mistake p { margin: 0; font-size: 0.97rem; color: var(--ink-soft); }
+
+  /* ---------- pull quote ---------- */
+
+  blockquote {
+    margin: 2rem 0;
+    padding: 0 0 0 1.5rem;
+    border-left: 2px solid var(--stress);
+    font-family: var(--f-display);
+    font-size: clamp(1.2rem, 2.8vw, 1.45rem);
+    line-height: 1.4;
+    font-weight: 300;
+    color: var(--ink);
+  }
+  blockquote p { margin: 0; }
+
+  /* ---------- table ---------- */
+
+  .scroll { overflow-x: auto; margin: 1.4rem 0; }
+  table { border-collapse: collapse; width: 100%; min-width: 26rem; font-size: 0.92rem; }
+  th, td { text-align: left; padding: 0.6rem 1rem 0.6rem 0; border-bottom: 1px solid var(--rule-soft); }
+  th {
+    font-family: var(--f-mono);
+    font-weight: 500;
+    font-size: 0.66rem;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: var(--ink-mute);
+    border-bottom: 1px solid var(--rule);
+  }
+  td.n { font-family: var(--f-mono); font-variant-numeric: tabular-nums; }
+  tbody tr:last-child td { border-bottom: none; }
+
+  a { color: var(--calm); text-underline-offset: 2px; }
+  a:focus-visible { outline: 2px solid var(--calm); outline-offset: 3px; }
+
+  footer {
+    margin-top: 4.5rem;
+    padding-top: 1.3rem;
+    border-top: 2px solid var(--ink);
+    font-family: var(--f-mono);
+    font-size: 0.7rem;
+    color: var(--ink-mute);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem 2rem;
+    justify-content: space-between;
+  }
+
+  @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+
+  /* ---------- orientation cards ---------- */
+  .dirs { display: grid; gap: 0; margin-top: 1.6rem; border-top: 1px solid var(--rule); }
+  .dir {
+    display: grid;
+    grid-template-columns: 2.6rem minmax(0, 1fr);
+    gap: 0 1rem;
+    padding: 1.5rem 0;
+    border-bottom: 1px solid var(--rule);
+  }
+  .dir .rank {
+    font-family: var(--f-display);
+    font-size: 1.9rem;
+    line-height: 1;
+    color: var(--calm);
+    font-variant-numeric: tabular-nums;
+  }
+  .dir h3 { margin: 0 0 0.5rem; font-size: 1.08rem; }
+  .dir p { font-size: 0.99rem; margin-bottom: 0.7rem; }
+  .dir p:last-child { margin-bottom: 0; }
+  .dir .why {
+    font-size: 0.93rem;
+    color: var(--ink-soft);
+    border-left: 2px solid var(--rule);
+    padding-left: 0.9rem;
+  }
+  .effort {
+    display: inline-block;
+    font-family: var(--f-mono);
+    font-size: 0.62rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--calm);
+    border: 1px solid var(--calm);
+    padding: 0.08rem 0.45rem;
+    margin-bottom: 0.6rem;
+  }
+  .effort.side { color: var(--amber); border-color: var(--amber); }
+
+  /* ---------- avoid list ---------- */
+  .avoid { display: grid; gap: 0; }
+  .avoid div {
+    display: grid;
+    grid-template-columns: 1.4rem minmax(0, 1fr);
+    gap: 0 0.7rem;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid var(--rule-soft);
+    font-size: 0.97rem;
+  }
+  .avoid div:last-child { border-bottom: none; }
+  .avoid .x { color: var(--stress); font-family: var(--f-mono); font-size: 0.85rem; }
+
+  /* ---------- state vs change figure ---------- */
+  .chart-box {
+    background: var(--surface);
+    border: 1px solid var(--rule);
+    padding: 1.2rem 1.2rem 1rem;
+  }
+  .chart-box svg { display: block; width: 100%; height: auto; }
+  .chart-box svg text { font-family: var(--f-mono); font-size: 9px; letter-spacing: 0.05em; }
+  .keys { display: flex; flex-wrap: wrap; gap: 0.5rem 1.6rem; margin-top: 0.9rem; font-size: 0.85rem; }
+  .keys span { display: inline-flex; align-items: center; gap: 0.45rem; color: var(--ink-soft); }
+  .dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+</style>
+
+<div class="page">
+
+  <header class="top">
+    <p class="eyebrow">Suite du projet · ce que font vraiment les professionnels</p>
+    <h1>Doser, pas deviner</h1>
+    <p class="deck">On a un détecteur qui marche. Reste à savoir à quoi le brancher. Réponse, après avoir été voir ce qui tourne réellement dans les fonds : au volume, jamais à la direction.</p>
+    <div class="byline">
+      <span>Note d’orientation</span>
+      <span>Septembre 2026</span>
+      <span>Fait suite à « Combien, pas dans quel sens »</span>
+    </div>
+  </header>
+
+  <section>
+    <p class="label">Rappel en trois phrases</p>
+    <h2>Où on en est</h2>
+    <p class="lead">Un programme a appris à reconnaître si les marchés sont calmes ou agités. Il y arrive bien : <strong>93 % d’accord avec les dates officielles de récession américaine</strong>, et il les reconnaît au moment où elles se produisent.</p>
+    <p>Mais il ne dit qu’une moitié de la chose. Il sait <strong>à quel point ça va bouger</strong>. Il ne sait pas <strong>dans quel sens</strong>. Une règle d’une seule ligne, volontairement stupide, fait aussi bien que lui sur la direction — c’est-à-dire rien.</p>
+    <p>La question devient donc : <strong>à quoi sert un instrument qui mesure l’ampleur mais pas le sens ?</strong> Pour y répondre, on est allés voir ce que font les gens dont c’est le métier.</p>
+  </section>
+
+  <section>
+    <p class="label">La méthode d’enquête</p>
+    <h2>Ce qui tourne, pas ce qui se publie</h2>
+    <p>On a délibérément <strong>ignoré les travaux universitaires</strong>. Un chercheur publie ce qui est publiable ; un fonds déploie ce qui rapporte, et ce n’est pas le même ensemble.</p>
+    <p>On a donc cherché ailleurs : lettres de fonds à leurs investisseurs, blogs d’anciens gérants, documentation de produits vendus à des institutions, offres d’emploi — celles-ci trahissent les outils qui tournent réellement — et podcasts de praticiens.</p>
+    <div class="plain">
+      <span class="tag">En clair</span>
+      <p>La différence est concrète. Un fonds qui écrit à ses clients engage sa réputation sur ce qu’il fait vraiment. Un article de recherche décrit ce qui a marché sur des données passées, souvent sans les frais, souvent sans dire combien d’essais ont précédé.</p>
+    </div>
+  </section>
+
+  <section>
+    <p class="label">La confirmation</p>
+    <h2>Un effet énorme qui rapporte très peu</h2>
+    <p>Le chiffre le plus parlant vient d’un ancien gérant d’un grand fonds systématique, qui publie son code et l’utilise avec son propre argent. Sur <strong>37 marchés et 36 ans</strong>, il mesure la performance d’une stratégie de suivi de tendance selon que la période est calme ou agitée.</p>
+
+    <div class="scroll">
+      <table>
+        <thead><tr><th>Période</th><th>Performance de la stratégie</th></tr></thead>
+        <tbody>
+          <tr><td>Calme</td><td class="n">0,49</td></tr>
+          <tr><td>Moyenne</td><td class="n">0,40</td></tr>
+          <tr><td><strong>Agitée</strong></td><td class="n"><strong>0,003</strong></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p>L’écart est spectaculaire : en période agitée, la stratégie ne rapporte <em>rien</em>. On s’attend donc à ce qu’il suffise de la couper quand ça s’agite pour gagner beaucoup.</p>
+    <p><strong>Ce n’est pas ce qu’il fait.</strong> Il n’utilise aucun interrupteur. Il applique un réglage <em>progressif</em> — investir un peu moins quand c’est agité, un peu plus quand c’est calme — et il le <strong>lisse sur dix jours</strong>, parce que sinon, dit-il, « ça ferait exploser les frais de transaction ».</p>
+    <p>Le gain final ? <strong>Quelques centièmes.</strong> Un effet gigantesque en apparence se transforme en amélioration modeste une fois traduit en décisions réelles et payé.</p>
+
+    <blockquote><p>C’est exactement notre résultat, trouvé indépendamment, sur d’autres marchés, par quelqu’un qui joue son argent.</p></blockquote>
+
+    <p>Les autres vont dans le même sens. Un grand fonds quantitatif américain écrit noir sur blanc à propos de son propre modèle de régimes : <strong>« ce modèle n’est pas prédictif »</strong>. Dans le produit qu’il vend, le régime ne s’active que pour les chocs les plus extrêmes. Un autre a abandonné les catégories tranchées au profit d’une mesure continue. Un troisième, célèbre, refuse explicitement de classer et met simplement le même risque sur chaque scénario possible.</p>
+  </section>
+
+  <section>
+    <p class="label">L’objection</p>
+    <h2>Un fonds affirme le contraire</h2>
+    <p>Honnêteté oblige : une maison réputée publie en 2025 une méthode qui, elle, <strong>prédit bien la direction</strong>, avec des résultats solides sur quarante ans.</p>
+    <p>Trois choses l’affaiblissent, dont deux qu’ils reconnaissent eux-mêmes. Leur méthode ne fonctionne que sur un compartiment particulier du marché des actions, pas sur les marchés qui nous intéressent. Ils admettent que <strong>le choix des ingrédients de leur modèle introduit lui-même un biais</strong> — ils ont regardé les données avant de choisir quoi mesurer. Et une méthode très proche, testée par un praticien indépendant, s’est révélée <strong>meilleure que 98 % de 160 000 combinaisons tirées au hasard</strong> — ce qui, contre-intuitivement, est un mauvais signe : cela veut dire que la combinaison gagnante a probablement été trouvée à force d’essais, pas par compréhension.</p>
+  </section>
+
+  <section>
+    <p class="label">La découverte</p>
+    <h2>L’état ne prédit rien. La variation, si.</h2>
+    <p class="lead">C’est le point le plus important de toute l’enquête, et il ne contredit pas notre résultat : il le contourne.</p>
+    <p>Notre programme répond à la question <strong>« dans quel état est l’économie ? »</strong> — calme ou agitée, expansion ou récession. La pratique dit que cette question ne prédit pas grand-chose.</p>
+    <p>Mais une autre question, très proche en apparence, prédit remarquablement bien : <strong>« l’économie est-elle en train de s’améliorer ou de se dégrader ? »</strong></p>
+
+    <figure>
+      <div class="chart-box">
+        <svg viewBox="0 0 320 150" role="img" aria-label="Courbe du chômage en forme de cloche. Deux points sont marqués à la même hauteur, l'un pendant la montée et l'autre pendant la descente : l'état est identique aux deux moments, la variation est opposée.">
+          <line x1="34" y1="120" x2="310" y2="120" stroke="var(--rule)" stroke-width="1"></line>
+          <line x1="34" y1="18" x2="34" y2="120" stroke="var(--rule)" stroke-width="1"></line>
+          <line x1="34" y1="45" x2="310" y2="45" stroke="var(--ink-mute)" stroke-width="1" stroke-dasharray="3 4"></line>
+          <polyline id="curve" fill="none" stroke="var(--ink)" stroke-width="2" stroke-linejoin="round" points=""></polyline>
+          <circle id="ptA" r="5" fill="var(--stress)"></circle>
+          <circle id="ptB" r="5" fill="var(--calm)"></circle>
+          <text x="4" y="48" fill="var(--ink-mute)">HAUT</text>
+          <text x="4" y="123" fill="var(--ink-mute)">BAS</text>
+          <text id="labA" fill="var(--stress)">ça se dégrade</text>
+          <text id="labB" fill="var(--calm)">ça s’améliore</text>
+          <text x="150" y="140" fill="var(--ink-mute)" text-anchor="middle">CHÔMAGE, AU FIL DU TEMPS</text>
+        </svg>
+        <div class="keys">
+          <span><i class="dot" style="background:var(--stress)"></i>même niveau, en hausse</span>
+          <span><i class="dot" style="background:var(--calm)"></i>même niveau, en baisse</span>
+        </div>
+      </div>
+      <figcaption>Aux deux points marqués, le chômage est <strong>exactement au même niveau</strong>. Un programme qui classe l’état dit donc la même chose. Historiquement, ce sont pourtant deux moments opposés : le premier précède les mauvaises années de marché, le second les bonnes.</figcaption>
+    </figure>
+
+    <div class="plain">
+      <span class="tag">En clair</span>
+      <p>Savoir qu’il fait froid ne dit pas s’il faut sortir. Savoir qu’<em>il se réchauffe</em>, si. Notre programme mesure la température. Il ne regarde pas si elle monte ou descend.</p>
+    </div>
+
+    <p>Un grand gérant américain publie une stratégie bâtie exactement là-dessus — les <em>variations</em> sur un an des prévisions de croissance et d’inflation, sans jamais classer d’état. Résultat sur <strong>un demi-siècle, de 1970 à 2016</strong> : de loin le meilleur rapport rendement/risque de tout ce qu’on a trouvé, et surtout <strong>une performance qui va à l’inverse de celle des actions</strong> — donc utile précisément quand le reste souffre.</p>
+    <p>C’est un objet différent du nôtre. <strong>On a construit le premier ; on n’a jamais testé le second.</strong></p>
+  </section>
+
+  <section>
+    <p class="label">Trois surprises</p>
+    <h2>Ce que l’intuition dit, et que les chiffres démentent</h2>
+
+    <h3>« Il faut sortir quand ça devient dangereux »</h3>
+    <p>Un fonds suisse mesure sur vingt-trois ans que le suivi de tendance gagne dans <strong>tous</strong> les régimes de volatilité — et qu’il rapporte <strong>davantage en période calme</strong> qu’en période agitée. Couper quand ça secoue revient donc à couper du mauvais côté.</p>
+    <p>La nuance qui réconcilie tout : ce qui compte n’est pas l’agitation du marché en général, mais celle de <strong>chaque marché rapportée à sa propre histoire</strong>. Ce n’est pas la même mesure, et elle ne donne pas la même réponse.</p>
+
+    <h3>« Une grosse chute, c’est une grosse chute »</h3>
+    <p>Non. Ce qui compte est la <strong>durée</strong>, pas la profondeur.</p>
+    <div class="scroll">
+      <table>
+        <thead><tr><th>Épisode</th><th>Durée</th><th>Chute</th><th>Suivi de tendance</th></tr></thead>
+        <tbody>
+          <tr><td>Bulle internet</td><td class="n">545 j</td><td class="n">−47 %</td><td class="n" style="color:var(--calm)"><strong>+62 %</strong></td></tr>
+          <tr><td>Crise de 2008</td><td class="n">367 j</td><td class="n">−55 %</td><td class="n" style="color:var(--calm)"><strong>+32 %</strong></td></tr>
+          <tr><td>Covid</td><td class="n">23 j</td><td class="n">−34 %</td><td class="n" style="color:var(--stress)">−2,4 %</td></tr>
+          <tr><td>Fin 2018</td><td class="n">67 j</td><td class="n">−19 %</td><td class="n" style="color:var(--stress)">−3,3 %</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>Le Covid a été une chute plus violente que 2008, et le suivi de tendance y a perdu de l’argent. La bulle internet a été plus lente, et il a gagné 62 %. <strong>Aucun programme qui ne regarde que le niveau d’agitation ne peut distinguer les deux.</strong></p>
+    <p>Conséquence directe et inconfortable : les comptes d’évaluation de sociétés de trading se jouent sur <strong>trente à quatre-vingt-dix jours</strong>. C’est exactement la fenêtre où ces stratégies perdent. Ce n’est pas une fatalité, mais c’est un paramètre à traiter explicitement.</p>
+
+    <h3>« Le risque, c’est que le détecteur se trompe »</h3>
+    <p>Le vrai piège est ailleurs. Un praticien a reproduit une méthode vendue par un grand fournisseur d’indices, puis l’a comparée à <strong>160 000 combinaisons tirées au hasard</strong>. La méthode officielle arrive au 98ᵉ percentile — un score qu’on obtient en essayant beaucoup, pas en comprenant.</p>
+    <p>Autrement dit : <strong>le danger n’est pas dans le détecteur, il est dans ce qu’on décide d’en faire.</strong> On a soigneusement validé le détecteur. On n’a jamais validé la décision qui suit.</p>
+  </section>
+
+  <section>
+    <p class="label">Ce qu’on construit ensuite</p>
+    <h2>Trois directions, dans l’ordre</h2>
+
+    <div class="dirs">
+      <div class="dir">
+        <span class="rank">1</span>
+        <div>
+          <span class="effort">le plus rentable, le moins coûteux</span>
+          <h3>Un réglage progressif du volume</h3>
+          <p>Remplacer toute idée d’interrupteur par une molette : investir progressivement moins quand un marché est agité par rapport à son propre passé, progressivement plus quand il est calme. Lissée, pour ne pas payer chaque hésitation en frais.</p>
+          <p class="why">C’est le seul dispositif pour lequel un praticien publie la chaîne complète — mesures, tests statistiques, code public, argent réel. Et c’est le seul cas où la condition qu’on s’était fixée est remplie : le régime agité prédit à la fois plus de risque <em>et</em> moins de rendement. Sur nos autres essais, ce n’était pas le cas.</p>
+        </div>
+      </div>
+
+      <div class="dir">
+        <span class="rank">2</span>
+        <div>
+          <span class="effort">test gratuit qui tranche</span>
+          <h3>Compter les forces qui mènent le marché</h3>
+          <p>Mesurer combien de causes indépendantes font bouger les marchés à un instant donné. Quand tout bouge ensemble, la diversification cesse de protéger — et ça se voit <em>avant</em> que l’agitation n’augmente.</p>
+          <p class="why">Un fonds publie une relation frappante : l’année où il n’y avait que huit forces indépendantes fut sa meilleure ; celle où il y en avait plus de trente, sa pire. On a déjà cet indicateur dans nos données. <strong>Mais leur mesure décrit le présent, elle ne prédit pas.</strong> Le test décisif tient en une ligne : la décaler d’un à trois mois et regarder si elle annonce quelque chose. Si oui, c’est un signal. Si non, ça reste un excellent tableau de bord.</p>
+        </div>
+      </div>
+
+      <div class="dir">
+        <span class="rank">3</span>
+        <div>
+          <span class="effort">le mieux aligné sur l’objectif</span>
+          <h3>Brancher le détecteur sur le risque de ruine, pas sur le signal</h3>
+          <p>Ne pas s’en servir pour décider quoi acheter, mais pour estimer la probabilité de franchir une limite de perte — et donc combien miser pour ne pas la franchir.</p>
+          <p class="why">C’est l’usage exact que fait le seul grand fonds quantitatif à documenter un déploiement : chez lui, le régime ne sert qu’aux chocs extrêmes. C’est aussi là que la valeur se trouve dans notre cas, puisqu’on a mesuré que la majeure partie du résultat dépend de la géométrie des limites plutôt que de la qualité du signal.</p>
+        </div>
+      </div>
+    </div>
+
+    <h3 style="margin-top:2.4rem">Et un chantier séparé</h3>
+    <p>Construire un modèle qui suit <strong>les variations</strong> des indicateurs économiques plutôt que leur niveau. C’est le seul objet qui, chez des professionnels, prédit la direction sur un demi-siècle. On a déjà les données historiques correctement datées et toute l’infrastructure de vérification.</p>
+    <p>Ce n’est pas une extension du travail actuel : c’est un autre projet, qui répond à une autre question. Le mélanger au premier serait la meilleure façon de perdre les deux.</p>
+  </section>
+
+  <section>
+    <p class="label">Les garde-fous</p>
+    <h2>Ce que la pratique dit d’éviter</h2>
+    <div class="avoid">
+      <div><span class="x">✕</span><span><strong>L’interrupteur tout ou rien.</strong> Coût mesuré : 2 à 4 % par an. Et celui qui observe l’écart le plus violent entre périodes calmes et agitées refuse explicitement de l’utiliser.</span></div>
+      <div><span class="x">✕</span><span><strong>La table « tel régime, tel placement ».</strong> C’est le maillon où se cache le trucage statistique, pas dans le détecteur.</span></div>
+      <div><span class="x">✕</span><span><strong>Multiplier les catégories.</strong> Personne de sérieux ne dépasse quatre états. Deux états bien mesurés valent mieux que six approximatifs.</span></div>
+      <div><span class="x">✕</span><span><strong>Rebalancer à date fixe.</strong> Deux portefeuilles identiques réajustés à des jours différents peuvent diverger de plus de 40 % sur une année. Correctif connu et gratuit : étaler sur plusieurs dates.</span></div>
+      <div><span class="x">✕</span><span><strong>Croire le détecteur sur un événement inédit.</strong> Un grand fonds attribuait une probabilité <em>nulle</em> au régime inflationniste en octobre 2021 — six mois avant le plus fort épisode d’inflation depuis 1981.</span></div>
+    </div>
+  </section>
+
+  <section>
+    <p class="label">Pour finir</p>
+    <h2>Ce que cette enquête vaut</h2>
+    <p>Le premier document expliquait un résultat : le détecteur mesure l’ampleur, pas le sens. Celui-ci explique ce qu’on en fait — et la réponse des professionnels est <strong>exactement la même que la nôtre</strong>, trouvée séparément, sur d’autres marchés, par des gens qui engagent leur argent.</p>
+    <p>Cette convergence est le vrai résultat. Un travail d’étudiant qui arrive indépendamment à la conclusion d’un praticien de trente ans d’expérience n’a pas découvert quelque chose de nouveau — <strong>il a démontré que sa méthode fonctionne.</strong> C’est ce qui rend la suite crédible.</p>
+    <p>Et l’enquête laisse deux trous, signalés plutôt que comblés. Aucun fonds ne publie ses échecs, donc on n’a aucun retour d’expérience de première main sur un dispositif de ce type qui aurait été abandonné. Et la famille de modèles qui s’est révélée la meilleure chez nous n’apparaît nulle part comme déployée en production — ce qui peut vouloir dire qu’on a de l’avance, ou que quelqu’un a déjà essayé sans le dire.</p>
+  </section>
+
+  <footer>
+    <span>Note d’orientation · septembre 2026</span>
+    <span>Sources praticiennes uniquement · aucun travail universitaire</span>
+  </footer>
+</div>
+
+<script>
+  (function () {
+    // Unemployment-shaped curve: same level twice, opposite direction.
+    var pts = [], n = 120;
+    for (var i = 0; i < n; i++) {
+      var t = i / (n - 1);
+      var y = Math.exp(-Math.pow((t - 0.42) * 3.1, 2)) * 0.86 + 0.06 + t * 0.04;
+      pts.push([34 + t * 276, 120 - y * 88]);
+    }
+    var curve = document.getElementById("curve");
+    if (curve) curve.setAttribute("points", pts.map(function (p) { return p[0].toFixed(1) + "," + p[1].toFixed(1); }).join(" "));
+
+    // The two points sit on the same horizontal line, one rising, one falling.
+    var target = 45, up = null, down = null;
+    for (var j = 1; j < pts.length; j++) {
+      if (up === null && pts[j][1] <= target && pts[j - 1][1] > target) up = pts[j];
+      if (up !== null && down === null && pts[j][1] >= target && pts[j - 1][1] < target) down = pts[j];
+    }
+    function place(id, p) { var e = document.getElementById(id); if (e && p) { e.setAttribute("cx", p[0].toFixed(1)); e.setAttribute("cy", p[1].toFixed(1)); } }
+    place("ptA", up); place("ptB", down);
+    function label(id, p, dx, anchor) {
+      var e = document.getElementById(id);
+      if (e && p) { e.setAttribute("x", (p[0] + dx).toFixed(1)); e.setAttribute("y", (p[1] - 11).toFixed(1)); e.setAttribute("text-anchor", anchor); }
+    }
+    label("labA", up, -8, "end"); label("labB", down, 8, "start");
+  })();
+</script>
