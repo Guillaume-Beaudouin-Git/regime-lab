@@ -284,19 +284,42 @@ décalage T-1 appliqué exactement une fois ; bootstrap réellement apparié ;
 
 ### Extensions post-étude — résultats
 
-Univers de 46 instruments, 2000-2026, livre TSMOM de référence Sharpe 0,55.
+Univers de 46 instruments, 2000-2026, livre TSMOM de référence Sharpe **0,51**
+sur tout l'échantillon, **0,44** sur l'échantillon commun (à partir de 09/2003,
+après l'amorçage de 756 jours du percentile expanding).
 ⚠ **Sharpe BRUTS dans les extensions**, pas en excess — non comparables aux
 0,47/0,55 de l'étude principale.
+⚠ **Toute comparaison se fait sur l'échantillon commun** : contre le livre plein
+échantillon les mêmes écarts se lisent +0,07 au lieu de +0,14, et la différence
+est la période d'amorçage, pas le conditionnement.
 
 Le régime de volatilité se réplique et plus fort qu'à la source :
-tercile bas 0,88 · médian 0,89 · **haut −0,45** (Carver : 0,49 / 0,40 / 0,003).
+tercile bas 0,82 · médian 0,67 · **haut −0,32** (Carver : 0,49 / 0,40 / 0,003).
 
-Mais rien ne le monétise :
-- atténuateur par instrument : +0,004, t 1,38
-- atténuateur au niveau du livre sur vol de marché : **+0,053, t 2,59** — dans la
-  fourchette publiée — mais **placebo apparié au 94ᵉ percentile** et effet
-  minimum détectable 0,190 contre 0,077 observé. **Deux refus indépendants.**
+Le dispositif passe son placebo, et perd contre une règle sans paramètre :
+- atténuateur par instrument, gross libre : 0,55, écart +0,037, t **+0,18**
+  (gross renormalisé à 1 = **la mauvaise construction**, il réalloue au lieu de
+  dé-risquer : −0,003, t −0,35 ; conservé comme témoin)
+- atténuateur au niveau du livre, L = 2 − 1,5Q : 0,58, écart **+0,144, t 2,60**,
+  **placebo apparié au 99ᵉ percentile** (moyenne +0,428 sur un livre
+  inconditionnel à 0,44 ⇒ placebo non biaisé, contrôle L58)
+- **mais la cible de vol dynamique SANS PARAMÈTRE fait 0,68, écart +0,244,
+  t 2,89** — elle bat le dispositif de régime de 0,10 de Sharpe. Et l'écart
+  +0,144 est sous le MDE de 0,205 ⇒ **UNDERPOWERED, pas un PASS**.
+- variante binaire : plus gros gain de Sharpe (+0,199) avec un t **négatif**
+  (−0,47) ⇒ le gain arrive au **dénominateur**, pas au numérateur
 - compteur de facteurs effectifs : tous les |t| sous 1,6, ne prédit ni ne décrit
+
+⚠ **Ces chiffres remplacent ceux de la version du 10/09** (0,88/0,89/−0,45 ;
++0,053 t 2,59 ; placebo 94ᵉ percentile ; MDE 0,190). Le code qui les produisait
+n'avait jamais été commité — `run_extensions.py` ne calculait que l'atténuateur
+par instrument. Analyse réécrite dans le script et relancée : la section 1 se
+reproduit au chiffre près (données inchangées), les t se reproduisent (2,60 vs
+2,59), les niveaux de Sharpe non, parce que l'ancienne version comparait des
+constructions mesurées sur des **échantillons différents**. Le verdict tient, sa
+raison change : le dispositif ne rate pas son placebo, il perd contre un témoin
+que l'ancienne version n'avait jamais lancé. Détail → `docs/EXTENSIONS.md`
+§Amendment.
 
 ⚠ **Piège reproduit deux fois** : une version antérieure donnait t = 2,18 sur le
 compteur de facteurs. Elle exigeait que les 46 instruments aient tous des
