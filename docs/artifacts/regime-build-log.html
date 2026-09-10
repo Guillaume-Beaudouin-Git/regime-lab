@@ -1,0 +1,1015 @@
+<title>Construire regime-lab</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,300..600;1,6..72,300..500&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap">
+
+<style>
+  :root {
+    --paper:      #f3f6f5;
+    --surface:    #ffffff;
+    --surface-2:  #eaefee;
+    --ink:        #16211f;
+    --ink-soft:   #3d4b48;
+    --ink-mute:   #67746f;
+    --rule:       #d6dedb;
+    --rule-soft:  #e5ebe9;
+    --calm:       #0e6b63;
+    --calm-wash:  #dcebe8;
+    --stress:     #a03626;
+    --stress-wash:#f6e2dd;
+    --amber:      #8d6a12;
+    --focus:      #0e6b63;
+
+    --f-display: "Newsreader", "Iowan Old Style", Georgia, serif;
+    --f-body:    "IBM Plex Sans", "Helvetica Neue", Arial, sans-serif;
+    --f-mono:    "IBM Plex Mono", "SF Mono", Menlo, monospace;
+
+    --measure: 65ch;
+    --gutter: 6.5rem;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --paper:      #0d1413;
+      --surface:    #141d1b;
+      --surface-2:  #1b2523;
+      --ink:        #e3eae7;
+      --ink-soft:   #c2cecb;
+      --ink-mute:   #8b9c97;
+      --rule:       #27332f;
+      --rule-soft:  #1e2826;
+      --calm:       #55c3b1;
+      --calm-wash:  #14302c;
+      --stress:     #e0765f;
+      --stress-wash:#331914;
+      --amber:      #d5a33f;
+      --focus:      #55c3b1;
+    }
+  }
+
+  :root[data-theme="dark"] {
+    --paper:      #0d1413;
+    --surface:    #141d1b;
+    --surface-2:  #1b2523;
+    --ink:        #e3eae7;
+    --ink-soft:   #c2cecb;
+    --ink-mute:   #8b9c97;
+    --rule:       #27332f;
+    --rule-soft:  #1e2826;
+    --calm:       #55c3b1;
+    --calm-wash:  #14302c;
+    --stress:     #e0765f;
+    --stress-wash:#331914;
+    --amber:      #d5a33f;
+    --focus:      #55c3b1;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--f-body);
+    font-size: 16px;
+    line-height: 1.62;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap {
+    max-width: 62rem;
+    margin: 0 auto;
+    padding: 3rem 1.5rem 5rem;
+  }
+
+  /* ---------- masthead ---------- */
+
+  .masthead { border-bottom: 1px solid var(--ink); padding-bottom: 1.6rem; }
+
+  .kicker {
+    font-family: var(--f-mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--calm);
+    margin: 0 0 1.1rem;
+  }
+
+  h1 {
+    font-family: var(--f-display);
+    font-weight: 400;
+    font-size: clamp(2.1rem, 5.4vw, 3.2rem);
+    line-height: 1.08;
+    letter-spacing: -0.015em;
+    text-wrap: balance;
+    margin: 0 0 0.9rem;
+    max-width: 20ch;
+  }
+
+  .standfirst {
+    font-family: var(--f-display);
+    font-size: clamp(1.05rem, 2.1vw, 1.24rem);
+    font-style: italic;
+    font-weight: 300;
+    color: var(--ink-soft);
+    max-width: 54ch;
+    margin: 0;
+    line-height: 1.5;
+  }
+
+  .meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 2.4rem;
+    margin-top: 1.9rem;
+    font-family: var(--f-mono);
+    font-size: 0.73rem;
+    color: var(--ink-mute);
+  }
+  .meta div { display: flex; gap: 0.5rem; padding: 0.18rem 0; }
+  .meta dt { color: var(--ink-mute); opacity: 0.75; }
+  .meta dd { margin: 0; color: var(--ink-soft); }
+  .meta .live { color: var(--amber); }
+
+  /* ---------- timeline ---------- */
+
+  figure.tl { margin: 2.6rem 0 0; }
+
+  .tl-track {
+    position: relative;
+    height: 74px;
+    background: var(--surface);
+    border: 1px solid var(--rule);
+    overflow: hidden;
+  }
+  .tl-band {
+    position: absolute;
+    top: 0; bottom: 0;
+    background: var(--stress-wash);
+    border-left: 1px solid var(--stress);
+  }
+  .tl-grid {
+    position: absolute;
+    top: 0; bottom: 0;
+    width: 1px;
+    background: var(--rule);
+  }
+  .tl-tick {
+    position: absolute;
+    bottom: 5px;
+    transform: translateX(-50%);
+    font-family: var(--f-mono);
+    font-size: 0.66rem;
+    color: var(--ink-mute);
+    font-variant-numeric: tabular-nums;
+  }
+  .tl-tag {
+    position: absolute;
+    top: 7px;
+    transform: translateX(-50%);
+    font-family: var(--f-mono);
+    font-size: 0.63rem;
+    color: var(--stress);
+    white-space: nowrap;
+  }
+  figcaption {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 0.6rem 1.5rem;
+    margin-top: 0.7rem;
+    font-size: 0.8rem;
+    color: var(--ink-mute);
+    max-width: none;
+  }
+  .legend { display: flex; gap: 1rem; font-family: var(--f-mono); font-size: 0.7rem; }
+  .legend span { display: inline-flex; align-items: center; gap: 0.4rem; }
+  .swatch { width: 12px; height: 12px; display: inline-block; border: 1px solid var(--rule); }
+  .swatch.s { background: var(--stress-wash); border-color: var(--stress); }
+  .swatch.c { background: var(--surface); }
+
+  /* ---------- sections ---------- */
+
+  section { margin-top: 3.4rem; }
+
+  .sec {
+    display: grid;
+    grid-template-columns: var(--gutter) minmax(0, 1fr);
+    gap: 0 1.5rem;
+    align-items: start;
+  }
+  .sec > .num {
+    font-family: var(--f-mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.1em;
+    color: var(--ink-mute);
+    padding-top: 0.55rem;
+    border-top: 2px solid var(--ink);
+    font-variant-numeric: tabular-nums;
+  }
+  .sec > .body { border-top: 1px solid var(--rule); padding-top: 0.5rem; min-width: 0; }
+
+  h2 {
+    font-family: var(--f-display);
+    font-weight: 400;
+    font-size: 1.62rem;
+    line-height: 1.2;
+    letter-spacing: -0.01em;
+    text-wrap: balance;
+    margin: 0 0 0.9rem;
+  }
+
+  h3 {
+    font-family: var(--f-body);
+    font-size: 0.98rem;
+    font-weight: 600;
+    margin: 2rem 0 0.5rem;
+    color: var(--ink);
+  }
+
+  p { margin: 0 0 1rem; max-width: var(--measure); }
+  .body > p:last-child { margin-bottom: 0; }
+
+  a { color: var(--calm); text-decoration-thickness: 1px; text-underline-offset: 2px; }
+  a:focus-visible, [tabindex]:focus-visible { outline: 2px solid var(--focus); outline-offset: 3px; }
+
+  strong { font-weight: 600; }
+  em.term { font-style: normal; font-family: var(--f-mono); font-size: 0.88em; color: var(--calm); }
+
+  .lede { font-size: 1.06rem; color: var(--ink-soft); }
+
+  /* ---------- failure list ---------- */
+
+  ol.reasons { list-style: none; margin: 0; padding: 0; display: grid; gap: 1.1rem; }
+  ol.reasons li {
+    display: grid;
+    grid-template-columns: 1.6rem minmax(0, 1fr);
+    gap: 0 0.8rem;
+    max-width: var(--measure);
+  }
+  ol.reasons li::before {
+    content: counter(r);
+    counter-increment: r;
+    font-family: var(--f-mono);
+    font-size: 0.74rem;
+    color: var(--stress);
+    padding-top: 0.28rem;
+  }
+  ol.reasons { counter-reset: r; }
+  ol.reasons b { display: block; font-weight: 600; }
+  ol.reasons p { margin: 0.15rem 0 0; font-size: 0.94rem; color: var(--ink-soft); }
+
+  /* ---------- tables ---------- */
+
+  .scroll { overflow-x: auto; margin: 0 0 0.4rem; }
+  table {
+    border-collapse: collapse;
+    width: 100%;
+    min-width: 34rem;
+    font-size: 0.9rem;
+  }
+  caption {
+    text-align: left;
+    font-family: var(--f-mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.13em;
+    text-transform: uppercase;
+    color: var(--ink-mute);
+    padding-bottom: 0.6rem;
+  }
+  th, td { text-align: left; padding: 0.62rem 0.9rem 0.62rem 0; vertical-align: top; border-bottom: 1px solid var(--rule-soft); }
+  th {
+    font-family: var(--f-mono);
+    font-weight: 500;
+    font-size: 0.68rem;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: var(--ink-mute);
+    border-bottom: 1px solid var(--rule);
+  }
+  td:first-child { font-weight: 500; padding-right: 1.4rem; }
+  tbody tr:last-child td { border-bottom: none; }
+  td .win { color: var(--calm); }
+  td .lose { color: var(--stress); }
+
+  /* ---------- phases ---------- */
+
+  .phases { display: grid; gap: 0; margin-top: 0.4rem; }
+  .phase {
+    display: grid;
+    grid-template-columns: 4.6rem minmax(0, 1fr);
+    gap: 0 1.2rem;
+    padding: 1.15rem 0;
+    border-bottom: 1px solid var(--rule-soft);
+  }
+  .phase:last-child { border-bottom: none; }
+  .phase .p-id {
+    font-family: var(--f-mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.08em;
+    color: var(--ink-mute);
+    padding-top: 0.18rem;
+  }
+  .phase h4 { margin: 0 0 0.28rem; font-size: 0.99rem; font-weight: 600; }
+  .phase p { margin: 0; font-size: 0.93rem; color: var(--ink-soft); max-width: 58ch; }
+
+  /* ---------- tests ---------- */
+
+  ol.tests { list-style: none; counter-reset: t; margin: 0.4rem 0 0; padding: 0; display: grid; gap: 0.9rem; }
+  ol.tests li {
+    display: grid;
+    grid-template-columns: 2.1rem minmax(0, 1fr);
+    gap: 0 0.7rem;
+    padding: 0.7rem 0.9rem 0.7rem 0;
+    max-width: var(--measure);
+  }
+  ol.tests li::before {
+    content: "T" counter(t, decimal-leading-zero);
+    counter-increment: t;
+    font-family: var(--f-mono);
+    font-size: 0.7rem;
+    color: var(--ink-mute);
+    padding-top: 0.24rem;
+  }
+  ol.tests b { font-weight: 600; }
+  ol.tests p { margin: 0.15rem 0 0; font-size: 0.93rem; color: var(--ink-soft); }
+  ol.tests li.decisive {
+    background: var(--stress-wash);
+    border-left: 3px solid var(--stress);
+    padding-left: 0.9rem;
+  }
+  ol.tests li.decisive::before { color: var(--stress); }
+  .chip {
+    display: inline-block;
+    font-family: var(--f-mono);
+    font-size: 0.6rem;
+    letter-spacing: 0.13em;
+    text-transform: uppercase;
+    color: var(--stress);
+    border: 1px solid var(--stress);
+    padding: 0.06rem 0.4rem;
+    margin-left: 0.5rem;
+    vertical-align: 0.12em;
+  }
+
+  /* ---------- pull ---------- */
+
+  blockquote.pull {
+    margin: 1.4rem 0;
+    padding: 0 0 0 1.4rem;
+    border-left: 2px solid var(--calm);
+    font-family: var(--f-display);
+    font-size: 1.2rem;
+    line-height: 1.45;
+    font-weight: 300;
+    color: var(--ink);
+    max-width: 52ch;
+  }
+
+  .note {
+    background: var(--surface);
+    border: 1px solid var(--rule);
+    padding: 1.1rem 1.2rem;
+    margin: 1.4rem 0 0;
+    max-width: var(--measure);
+  }
+  .note .label {
+    font-family: var(--f-mono);
+    font-size: 0.65rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--amber);
+    display: block;
+    margin-bottom: 0.5rem;
+  }
+  .note p { font-size: 0.93rem; color: var(--ink-soft); }
+  .note p:last-child { margin-bottom: 0; }
+
+  ul.plain { margin: 0 0 1rem; padding-left: 1.1rem; max-width: var(--measure); }
+  ul.plain li { margin-bottom: 0.4rem; font-size: 0.95rem; color: var(--ink-soft); }
+
+  /* ---------- open decisions ---------- */
+
+  .open { display: grid; gap: 0; margin-top: 0.3rem; }
+  .open-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 0.4rem 1.5rem;
+    align-items: baseline;
+    padding: 0.85rem 0;
+    border-bottom: 1px solid var(--rule-soft);
+  }
+  .open-row:last-child { border-bottom: none; }
+  .open-row span { font-size: 0.95rem; color: var(--ink-soft); }
+  .open-row .who {
+    font-family: var(--f-mono);
+    font-size: 0.66rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--calm);
+    white-space: nowrap;
+  }
+
+  footer {
+    margin-top: 4rem;
+    padding-top: 1.2rem;
+    border-top: 1px solid var(--ink);
+    font-family: var(--f-mono);
+    font-size: 0.7rem;
+    color: var(--ink-mute);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 2rem;
+    justify-content: space-between;
+  }
+
+  @media (max-width: 720px) {
+    :root { --gutter: 3.4rem; }
+    .wrap { padding: 2.2rem 1.1rem 3.5rem; }
+    .sec { grid-template-columns: 1fr; gap: 0; }
+    .sec > .num { border-top: 2px solid var(--ink); padding-bottom: 0.4rem; }
+    .sec > .body { border-top: none; padding-top: 0.7rem; }
+    .phase { grid-template-columns: 1fr; gap: 0.3rem; }
+    .tl-tag { display: none; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { animation: none !important; transition: none !important; }
+  }
+
+  /* ---------- v2 additions ---------- */
+  .spec {
+    font-family: var(--f-mono);
+    font-size: 0.82rem;
+    line-height: 1.6;
+    background: var(--surface-2);
+    border-left: 2px solid var(--calm);
+    padding: 0.9rem 1.1rem;
+    margin: 1rem 0;
+    max-width: var(--measure);
+    overflow-x: auto;
+  }
+  .spec b { color: var(--calm); font-weight: 500; }
+  .note.cut { border-color: var(--rule); }
+  .note.cut .label { color: var(--stress); }
+  .strike { text-decoration: line-through; color: var(--ink-mute); }
+  .outcome {
+    display: grid;
+    grid-template-columns: 2.4rem minmax(0, 1fr);
+    gap: 0 0.8rem;
+    padding: 0.7rem 0;
+    border-bottom: 1px solid var(--rule-soft);
+    max-width: var(--measure);
+  }
+  .outcome:last-child { border-bottom: none; }
+  .outcome .tagl {
+    font-family: var(--f-mono);
+    font-size: 0.72rem;
+    color: var(--calm);
+    padding-top: 0.16rem;
+  }
+  .outcome p { margin: 0.1rem 0 0; font-size: 0.93rem; color: var(--ink-soft); }
+  .outcome b { font-size: 0.96rem; }
+
+  /* ---------- build-log additions ---------- */
+  .strip {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr));
+    gap: 1px;
+    background: var(--rule);
+    border: 1px solid var(--rule);
+    margin-top: 2.4rem;
+  }
+  .strip div { background: var(--surface); padding: 0.95rem 1rem; }
+  .strip .n {
+    font-family: var(--f-display);
+    font-size: 1.85rem;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+    display: block;
+    margin-bottom: 0.35rem;
+  }
+  .strip .k {
+    font-family: var(--f-mono);
+    font-size: 0.64rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink-mute);
+  }
+  .strip .alarm .n { color: var(--stress); }
+
+  figure.chart { margin: 1.4rem 0 0; max-width: var(--measure); }
+  .chart-title {
+    font-family: var(--f-mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--ink-mute);
+    margin-bottom: 0.9rem;
+  }
+  .bars { display: grid; gap: 0.42rem; }
+  .bar-row {
+    display: grid;
+    grid-template-columns: 8.2rem 1fr 3rem;
+    align-items: center;
+    gap: 0.7rem;
+  }
+  .bar-row .lab { font-size: 0.83rem; color: var(--ink-soft); }
+  .bar-track { position: relative; height: 15px; background: var(--surface-2); }
+  .bar-fill { position: absolute; inset: 0 auto 0 0; background: var(--calm); border-radius: 0 3px 3px 0; }
+  .bar-fill.over { background: var(--stress); }
+  .bar-row .val {
+    font-family: var(--f-mono);
+    font-size: 0.76rem;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+    color: var(--ink-soft);
+  }
+  .threshold {
+    position: absolute;
+    top: -3px; bottom: -3px;
+    width: 1px;
+    background: var(--ink-mute);
+  }
+  .chart-note {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-top: 0.7rem;
+    font-size: 0.78rem;
+    color: var(--ink-mute);
+  }
+
+  .fail {
+    display: grid;
+    grid-template-columns: 1.9rem minmax(0, 1fr);
+    gap: 0 0.8rem;
+    padding: 1rem 0;
+    border-bottom: 1px solid var(--rule-soft);
+    max-width: var(--measure);
+  }
+  .fail:last-child { border-bottom: none; }
+  .fail .mark {
+    font-family: var(--f-mono);
+    font-size: 0.72rem;
+    color: var(--stress);
+    padding-top: 0.22rem;
+  }
+  .fail b { display: block; font-weight: 600; margin-bottom: 0.2rem; }
+  .fail p { margin: 0 0 0.4rem; font-size: 0.93rem; color: var(--ink-soft); }
+  .fail .fix {
+    font-family: var(--f-mono);
+    font-size: 0.76rem;
+    color: var(--calm);
+  }
+  .provisional {
+    font-family: var(--f-mono);
+    font-size: 0.6rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--amber);
+    border: 1px solid var(--amber);
+    padding: 0.06rem 0.4rem;
+    margin-left: 0.5rem;
+    vertical-align: 0.14em;
+  }
+</style>
+
+<div class="wrap">
+
+  <header class="masthead">
+    <p class="kicker">Journal de construction · révisé après audit indépendant</p>
+    <h1>Construire regime-lab</h1>
+    <p class="standfirst">Ce qui a été bâti, ce que les données ont caché, et comment le meilleur détecteur de l’étude a été noté comme le pire pendant trois jours.</p>
+
+    <dl class="meta">
+      <div><dt>Dépôt</dt><dd>github.com/Guillaume-Beaudouin-Git/regime-lab</dd></div>
+      <div><dt>Échantillon</dt><dd>mars 1992 – septembre 2026</dd></div>
+      <div><dt>Protocole</dt><dd>gelé, empreinte 5791c188…</dd></div>
+    </dl>
+
+    <div class="strip">
+      <div><span class="n">50</span><span class="k">variables, 8 familles</span></div>
+      <div><span class="n">69</span><span class="k">tests d’intégrité</span></div>
+      <div><span class="n">83</span><span class="k">configurations testées</span></div>
+      <div class="alarm"><span class="n">9</span><span class="k">défaillances silencieuses</span></div>
+      <div><span class="n">93<span style="font-size:.55em">%</span></span><span class="k">exactitude vs NBER</span></div>
+    </div>
+  </header>
+
+  <section class="sec">
+    <div class="num">P0 · 1</div>
+    <div class="body">
+      <h2>Le contrat point-in-time</h2>
+      <p class="lede">Chaque observation porte deux dates : celle qu’elle <em>décrit</em>, et celle où un observateur en temps réel pouvait la <em>connaître</em>. Les révisions périmées sont conservées, si bien que n’importe quel panneau passé se reconstruit tel qu’il se présentait ce jour-là.</p>
+      <p>Le test qui compte n’est pas que le code tourne, c’est qu’il refuse de réécrire l’histoire : <strong>un panneau construit pour une date passée ne doit pas bouger quand des données ultérieures arrivent.</strong> Il tourne en intégration continue, avec six autres.</p>
+      <p>Contrôle de cohérence sur données réelles : au 14 mars 2008 — le week-end de la chute de Bear Stearns — le panneau rend un VIX à 31,16, un spread Baa à 3,39 et la dernière production industrielle alors publiée. C’est l’information de ce jour-là, pas celle révisée depuis.</p>
+    </div>
+  </section>
+
+  <section class="sec">
+    <div class="num">P0 · 2</div>
+    <div class="body">
+      <h2>Ce que les millésimes ont vraiment dit</h2>
+      <p>La production industrielle de janvier 2008 a été publiée à <strong>114,23</strong> et vaut aujourd’hui <strong>102,24</strong>, après vingt-trois révisions. Un modèle entraîné sur la série actuelle « voit » en 2008 une économie que personne ne voyait en 2008.</p>
+      <div class="note">
+        <span class="label">Correction — l’écart spectaculaire était le mauvais chiffre</span>
+        <p>Presque tout ce gouffre est du <strong>rebasage d’indice</strong>, pas de la révision. Mesurée sur le glissement annuel, invariant au rebasage, la révision réelle de ce mois-là vaut <strong>+0,13 point</strong>. Faible.</p>
+        <p>La fuite de <em>calendrier</em>, elle, reste massive : au millésime de février 2008 on ne connaissait que janvier à +2,28 %, quand la série actuelle laisse « voir » mai à −0,06 %. <strong>Deux fuites distinctes, d’ampleurs très différentes</strong> — et c’est la mesure, pas l’intuition, qui les sépare.</p>
+      </div>
+      <p>Conséquence de conception, appliquée partout : <strong>toute variable macro est un taux de croissance, jamais un niveau.</strong> Un niveau n’est pas comparable d’un millésime à l’autre ; un taux de croissance l’est.</p>
+    </div>
+  </section>
+
+  <section class="sec">
+    <div class="num">P0 · 3</div>
+    <div class="body">
+      <h2>Puissance : ce que l’échantillon peut trancher</h2>
+      <p>Trente-quatre ans de données quotidiennes ressemblent à neuf mille observations, mais le nombre d’<strong>épisodes de stress indépendants</strong> est de quatorze. C’est ce N-là qui gouverne toute conclusion.</p>
+      <p>Effet minimum détectable sur la différence de Sharpe, par bootstrap par blocs : <strong>0,174</strong>. En dessous du seuil de 0,30 qui déclencherait l’arrêt du projet — donc on continue.</p>
+      <div class="note">
+        <span class="label">À lire comme une borne inférieure, pas comme un résultat</span>
+        <p>La comparaison porte sur deux versions du <em>même</em> livre, corrélées à 0,91 : le mouvement de marché commun s’annule dans la différence appariée et l’erreur type est proche de son plancher — ce qui explique aussi pourquoi la longueur des blocs ne la déplace quasiment pas. Un overlay de régime suivra moins bien son benchmark et se résoudra <strong>moins bien</strong>.</p>
+      </div>
+      <p>Lecture préliminaire déjà instructive : le ciblage de volatilité déplace le livre 60/40 de <strong>+0,043</strong> de Sharpe, bien à l’intérieur des 0,17 que l’échantillon sait résoudre.</p>
+    </div>
+  </section>
+
+  <section class="sec">
+    <div class="num">P1 · 1</div>
+    <div class="body">
+      <h2>Cinquante variables, et le test qui les admet</h2>
+      <p>Le cadrage posait une condition préalable : un modèle nourri uniquement de statistiques de volatilité ne peut, par construction, produire qu’un quantile de volatilité — auquel cas le tester contre un quantile de volatilité est décidé d’avance. Ce n’est plus une hypothèse. C’est mesuré, variable par variable.</p>
+
+      <figure class="chart">
+        <p class="chart-title">Part de chaque famille expliquée par la volatilité réalisée · R² moyen</p>
+        <div class="bars" id="bars"></div>
+        <div class="chart-note">
+          <span>Seuil d’orthogonalité déclaré à 25 %</span>
+          <span><strong>34 des 50</strong> variables sont en dessous</span>
+        </div>
+      </figure>
+
+      <p>Deux détails valident la mesure elle-même. La volatilité réalisée à 21 jours sort à <strong>99,4 %</strong> — c’est la variable témoin qui se mesure contre elle-même. À l’inverse, la <em>part de saut</em> dans la variance est à <strong>0,1 %</strong> : classée « volatilité » par son nom, elle ne partage rien avec le niveau de volatilité. Exactement la raison de mesurer plutôt que de supposer.</p>
+      <p><strong>Verdict : le test placebo a un contenu empirique.</strong></p>
+    </div>
+  </section>
+
+  <section class="sec">
+    <div class="num">P1 · 2</div>
+    <div class="body">
+      <h2>La décision qui a rendu dix ans d’échantillon</h2>
+      <p>Toutes les variables n’étaient présentes qu’à partir de <strong>novembre 2001</strong>. Diagnostic : les futures or et pétrole de Yahoo démarrent fin 2000, et ces deux colonnes seules amputaient l’échantillon de <strong>quatre des quatorze épisodes de stress</strong> — pour deux variables sur quarante-quatre.</p>
+      <ul class="plain">
+        <li><strong>Pétrole</strong> substitué par la série FRED : historique complet depuis 1990, jamais révisé, donc le chemin de décalage de publication est <em>exact</em> et non approximatif.</li>
+        <li><strong>Or supprimé plutôt que mal approximé.</strong> Le fixing LBMA a été retiré de FRED, l’ETF physique démarre en 2004, et l’indice long disponible est un indice de <em>mines d’or</em> — un secteur actions qui s’est effondré avec le marché en 2008. L’utiliser aurait mis du bêta actions dans une variable étiquetée « valeur refuge ».</li>
+        <li><strong>Indice de stress de Saint-Louis supprimé</strong> : même construction que le NFCI de Chicago, mais démarre en 1994.</li>
+      </ul>
+      <p>Début de l’échantillon : novembre 2001 → <strong>mars 1992</strong>. La règle que ça établit : <em>une variable ne vaut son coût de couverture que si aucune variable existante ne porte la même construction sur un échantillon plus long.</em></p>
+    </div>
+  </section>
+
+  <section class="sec">
+    <div class="num">P2 · 1</div>
+    <div class="body">
+      <h2>Trois familles, un seul protocole</h2>
+      <p>Ce que les familles <em>partagent</em> est le sujet. Mêmes variables, mêmes dates de réestimation, même règle de conversion d’un état en position, même journal d’essais. Seule la méthode diffère — c’est la seule façon dont la comparaison veut dire quelque chose.</p>
+
+      <div class="scroll">
+        <table>
+          <caption>Les trois familles</caption>
+          <thead>
+            <tr><th scope="col">Famille</th><th scope="col">Méthode</th><th scope="col">Ce qu’elle teste</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>A</td><td>Jump model, discret et parcimonieux</td><td>Le modèle principal : partition pénalisée en changements d’état</td></tr>
+            <tr><td>B</td><td>HMM gaussien, probabilités <strong>filtrées</strong></td><td>La référence exigée par le sujet, traitée loyalement</td></tr>
+            <tr><td>C</td><td>Gradient boosting, référence HAR-RV</td><td>Prédiction directe, <strong>sans aucun état latent</strong></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="note">
+        <span class="label">Pourquoi la cadence de réestimation est appariée</span>
+        <p>La supériorité de stabilité publiée du jump model sur le HMM a été mesurée avec l’un réestimé <em>deux fois par an</em> et l’autre <em>quotidiennement</em>. Une partie de cet avantage est donc un artefact de protocole, pas une propriété de méthode. Ici les deux se réestiment aux mêmes dates.</p>
+      </div>
+
+      <p>La famille B ne prend pas sa probabilité d’état dans la bibliothèque. Celle-ci renvoie la probabilité <strong>lissée</strong>, conditionnée sur toute la séquence — observations postérieures comprises. Trader dessus est un lookahead, et c’est le défaut le plus répandu des backtests de régime publiés. Une récursion forward, écrite à la main, ne conditionne que sur le passé.</p>
+    </div>
+  </section>
+
+  <section class="sec">
+    <div class="num">P2 · 2</div>
+    <div class="body">
+      <h2>Hurst ne porte rien — mais son idée, si</h2>
+      <p>La famille « asymétrie et longue mémoire » était promise par le cadrage gelé et <strong>manquait</strong> du premier jeu de variables. Manquement au protocole, pas décision. L’ajouter fait passer de 44 à 50 variables et amène l’exposant de Hurst, très présent dans la littérature praticienne sur les régimes.</p>
+
+      <div class="scroll">
+        <table>
+          <caption>Mesuré plutôt que supposé — fenêtre glissante 252 jours, analyse de fluctuation détendancée</caption>
+          <thead>
+            <tr><th scope="col"></th><th scope="col">R² vs volatilité</th><th scope="col">IC sur 21 j</th><th scope="col">t</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>exposant de Hurst</td><td>18,7 %</td><td class="lose">−0,006</td><td class="lose">−0,13</td></tr>
+            <tr><td><strong>ratio de variance 20 j</strong></td><td>0,8 %</td><td class="win">+0,124</td><td class="win">+2,61</td></tr>
+            <tr><td>ratio de variance 5 j</td><td>10,3 %</td><td>+0,040</td><td>+0,84</td></tr>
+            <tr><td>skew 63 j</td><td>0,0 %</td><td>+0,002</td><td>+0,04</td></tr>
+            <tr><td>volatilité réalisée 21 j <em>(témoin)</em></td><td>99,4 %</td><td>+0,082</td><td>+1,74</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="note">
+        <span class="label">L’estimateur sort de son propre domaine de définition</span>
+        <p>Moyenne 0,473, écart-type 0,092 — mais <strong>minimum −0,205</strong>. Un exposant de Hurst négatif n’est pas une valeur que la quantité peut prendre. Sur bruit pur, un test montre que son écart-type à 252 jours est <strong>plus du double</strong> de celui à 1000 jours : le comportement observé sur données réelles est une propriété de la fenêtre, pas une erreur de code.</p>
+      </div>
+
+      <p>L’idée survit à son estimateur. Le <strong>ratio de variance</strong> pose la même question — cette série tend-elle ou revient-elle — avec une distribution d’échantillonnage connue, et il devance la volatilité réalisée tout en ne partageant presque rien avec elle.</p>
+      <p>L’exposant reste malgré tout dans le jeu. Il a été déclaré avant la mesure, et retirer une variable parce qu’on vient de la voir échouer est l’image en miroir d’en ajouter une parce qu’on vient de la voir marcher.</p>
+    </div>
+  </section>
+
+  <section class="sec">
+    <div class="num">P2 · 3</div>
+    <div class="body">
+      <h2>Le meilleur détecteur de l’étude, noté comme le pire</h2>
+      <p class="lede">Scoré contre les récessions NBER, le jump model rendait <strong>6,0 %</strong> d’exactitude équilibrée. Ce n’est pas un mauvais classifieur : c’est un classifieur <em>inversé</em>.</p>
+
+      <div class="scroll">
+        <table>
+          <caption>Matrice de confusion, états tels que produits par la convention d’origine</caption>
+          <thead>
+            <tr><th scope="col"></th><th scope="col">état « faible »</th><th scope="col">état « fort »</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>expansion</td><td>5 228</td><td>715</td></tr>
+            <tr><td>récession NBER</td><td class="lose">16</td><td class="win">419</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p><strong>419 des 435 jours de récession sont dans l’état que le modèle appelait « fort ».</strong> Étiquettes retournées, il rend <strong>93,3 %</strong> d’exactitude équilibrée. Un premier chiffrage annonçait un rappel parfait ; il venait d’une référence NBER décalée de 45 jours, corrigée depuis.</p>
+
+      <div class="note">
+        <span class="label">La cause, et pourquoi elle était invisible</span>
+        <p><strong>Correction apportée par l’audit :</strong> ce n’était pas une propriété de l’implémentation de référence. Mesuré, l’état volatil avait gagné <em>moins</em> (+0,167 contre +0,363). La cause réelle est que la bibliothèque trie en <strong>décroissant</strong> — index 0 = rendement le plus élevé — alors que mon wrapper documentait l’inverse et détenait le dernier index. <strong>Il était long du plus mauvais état par construction.</strong> Une erreur de signe chez moi, pas une subtilité du modèle.</p>
+        <p>Au niveau portefeuille, ça ressemblait à une stratégie à Sharpe 0,16 : <em>faible</em>, pas <em>à l’envers</em>. Seul le scoring des étiquettes contre une référence définie <strong>hors du projet</strong> pouvait le révéler.</p>
+      </div>
+
+      <p>Correctif : ordonner les états par la volatilité réalisée dans chacun sur l’entraînement. Cette règle ne regarde jamais les rendements, donc elle ne peut pas s’inverser. Inscrite au journal d’amendements, les deux ordonnancements rapportés.</p>
+    </div>
+  </section>
+
+  <section class="sec">
+    <div class="num">C1</div>
+    <div class="body">
+      <h2>Couche 1 — la classification est fiable</h2>
+      <p>Mesures sur la séquence d’étiquettes, aucun portefeuille. Chaque métrique est corrigée du hasard, parce que les métriques habituelles de cette littérature ont leurs façons de bien paraître gratuitement : les récessions font 8,2 % des mois, donc « toujours expansion » score 91,8 % d’exactitude brute.</p>
+
+      <div class="scroll">
+        <table>
+          <caption>Persistance, latence, et validation externe</caption>
+          <thead>
+            <tr><th scope="col"></th><th scope="col">durée moy.</th><th scope="col">vs hasard</th><th scope="col">changé avec recul</th><th scope="col">NBER</th><th scope="col">kappa</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>A jump model</td><td>456 j</td><td>97×</td><td>0,9 %</td><td>93,3 %</td><td>0,49</td></tr>
+            <tr><td><strong>A′ sparse jump</strong></td><td>456 j</td><td>83×</td><td>0,6 %</td><td class="win">93,2 %</td><td class="win">0,53</td></tr>
+            <tr><td>B HMM filtré</td><td>128 j</td><td>54×</td><td>0,7 %</td><td>84,7 %</td><td>0,24</td></tr>
+            <tr><td>C gradient boosting</td><td>18 j</td><td>9×</td><td>0,0 %</td><td>75,0 %</td><td>0,12</td></tr>
+            <tr><td>C′ HAR-RV</td><td>14 j</td><td>7×</td><td>0,0 %</td><td>78,2 %</td><td>0,17</td></tr>
+            <tr><td>· placebo une ligne</td><td>34 j</td><td>16×</td><td>0,0 %</td><td>—</td><td>—</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p><strong>La latence de détection est nulle.</strong> Voir la suite du bloc changerait moins d’un pour cent des étiquettes. Je m’attendais à ce que ce soit un coût majeur — les régimes ne sont pas reconnus tard, ils sont reconnus au moment où ils arrivent.</p>
+      <p>Et l’accord entre les cinq méthodes, corrigé du hasard, va de <strong>0,28 à 0,83 — tout positif</strong>. Avant la correction, les deux camps étaient à −0,39. Ce désaccord violent n’était rien d’autre que l’inversion.</p>
+    </div>
+  </section>
+
+  <section class="sec">
+    <div class="num">C2</div>
+    <div class="body">
+      <h2>Couche 2 — elle sépare la variance, et rien d’autre</h2>
+
+      <div class="scroll">
+        <table>
+          <caption>Horizon 21 séances — écart entre états, contre son propre seuil de détection</caption>
+          <thead>
+            <tr><th scope="col"></th><th scope="col">écart de moyenne</th><th scope="col">seuil</th><th scope="col"></th><th scope="col">écart de volatilité</th><th scope="col">seuil</th><th scope="col"></th></tr>
+          </thead>
+          <tbody>
+            <tr><td>A jump model</td><td>−1,02 %</td><td>19,5 %</td><td class="lose">non</td><td>−6,51 %</td><td>4,5 %</td><td class="win">DÉTECTÉ</td></tr>
+            <tr><td>A′ sparse jump</td><td>−0,46 %</td><td>21,9 %</td><td class="lose">non</td><td>−6,59 %</td><td>5,0 %</td><td class="win">DÉTECTÉ</td></tr>
+            <tr><td>B HMM filtré</td><td>−2,58 %</td><td>11,3 %</td><td class="lose">non</td><td>−5,42 %</td><td>2,9 %</td><td class="win">DÉTECTÉ</td></tr>
+            <tr><td>C gradient boosting</td><td>−0,84 %</td><td>8,0 %</td><td class="lose">non</td><td>−4,54 %</td><td>2,2 %</td><td class="win">DÉTECTÉ</td></tr>
+            <tr><td>C′ HAR-RV</td><td>−3,12 %</td><td>9,2 %</td><td class="lose">non</td><td>−4,99 %</td><td>2,4 %</td><td class="win">DÉTECTÉ</td></tr>
+            <tr><td><strong>· placebo une ligne</strong></td><td>−2,22 %</td><td>10,1 %</td><td class="lose">non</td><td>−3,52 %</td><td>2,4 %</td><td class="win">DÉTECTÉ</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <blockquote class="pull">Cinq familles sur cinq détectent la séparation de variance. Zéro sur cinq détecte celle de la moyenne.</blockquote>
+
+      <p>Mêmes données, mêmes états, même méthode. La différence tient au seuil de détection : <strong>2 à 5 % pour un écart de volatilité, 8 à 22 % pour un écart de moyenne</strong>. Mais <strong>le placebo détecte aussi</strong> — et les états sont ordonnés par volatilité d’entraînement, donc « ils séparent la variance » frôle la tautologie. L’écart seul n’établit rien.</p>
+
+      <h3>Ce qui survit au placebo</h3>
+      <div class="scroll">
+        <table>
+          <caption>Information marginale au-delà d’un quantile de volatilité — horizon 21 séances</caption>
+          <thead>
+            <tr><th scope="col"></th><th scope="col">sur les rendements futurs</th><th scope="col">t</th><th scope="col">sur la volatilité future</th><th scope="col">t</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>A′ sparse jump</td><td>+0,030 pt</td><td>0,27</td><td class="win">+3,93 pt</td><td class="win">−3,40</td></tr>
+            <tr><td>A jump model</td><td>+0,022 pt</td><td>0,24</td><td class="win">+3,47 pt</td><td class="win">−3,46</td></tr>
+            <tr><td>B HMM filtré</td><td>+0,007 pt</td><td>−0,22</td><td>+2,26 pt</td><td>−4,59</td></tr>
+            <tr><td>C gradient boosting</td><td>+0,023 pt</td><td>0,52</td><td>+2,13 pt</td><td>−6,34</td></tr>
+            <tr><td><strong>· placebo une ligne</strong></td><td>+0,000 pt</td><td>−0,03</td><td class="lose">+0,004 pt</td><td class="lose">0,21</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <blockquote class="pull">Deux à quatre points de R² sur la volatilité future au-delà d’un quantile de volatilité — là où le placebo n’ajoute rien. Sur la direction, personne n’ajoute rien.</blockquote>
+      <p><strong>C’est le résultat positif le plus solide de l’étude, et il était absent du premier compte rendu.</strong> L’audit l’a fait remarquer : sans le second tableau, le premier ne prouvait rien.</p>
+    </div>
+  </section>
+
+  <section class="sec">
+    <div class="num">C3</div>
+    <div class="body">
+      <h2>Couche 3 — règle de timing contre règle de dimensionnement</h2>
+      <p>Rendements en excess du cash, coûts à 2 points de base aller-retour.</p>
+
+      <div class="scroll">
+        <table>
+          <caption>Les onze lignes produites — un premier compte rendu n’en montrait que sept, la meilleure règle par famille</caption>
+          <thead>
+            <tr><th scope="col"></th><th scope="col">règle</th><th scope="col">Sharpe</th><th scope="col">net</th><th scope="col">vol</th><th scope="col">perte max</th><th scope="col">éq.-certain</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>base 60/40</td><td>—</td><td>0,47</td><td>0,47</td><td>10,5 %</td><td>−35,6 %</td><td>2,16 %</td></tr>
+            <tr><td>A jump</td><td>ON/OFF</td><td>0,54</td><td>0,54</td><td>7,5 %</td><td>−22,3 %</td><td>2,66 %</td></tr>
+            <tr><td>A′ sparse</td><td>ON/OFF</td><td>0,55</td><td>0,55</td><td>7,9 %</td><td>−22,3 %</td><td>2,80 %</td></tr>
+            <tr><td>A jump</td><td>dimensionné</td><td>0,50</td><td>0,50</td><td>10,6 %</td><td>−29,3 %</td><td>2,45 %</td></tr>
+            <tr><td>A′ sparse</td><td>dimensionné</td><td>0,49</td><td>0,49</td><td>10,5 %</td><td>−31,2 %</td><td>2,40 %</td></tr>
+            <tr><td>B HMM</td><td>ON/OFF</td><td>0,47</td><td>0,46</td><td>5,7 %</td><td>−13,7 %</td><td>1,83 %</td></tr>
+            <tr><td>B HMM</td><td>dimensionné</td><td>0,50</td><td>0,49</td><td>10,6 %</td><td>−30,4 %</td><td>2,42 %</td></tr>
+            <tr><td>C gradient boosting</td><td>ON/OFF</td><td>0,48</td><td>0,42</td><td>4,5 %</td><td>−10,2 %</td><td>1,39 %</td></tr>
+            <tr><td>C gradient boosting</td><td>dimensionné</td><td>0,52</td><td>0,50</td><td>10,0 %</td><td>−32,5 %</td><td>2,49 %</td></tr>
+            <tr><td>C′ HAR-RV</td><td>ON/OFF</td><td>0,57</td><td>0,50</td><td>5,1 %</td><td>−13,4 %</td><td>1,87 %</td></tr>
+            <tr><td>C′ HAR-RV</td><td>dimensionné</td><td>0,56</td><td>0,53</td><td>11,4 %</td><td>−33,5 %</td><td>2,76 %</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="note">
+        <span class="label">Deux réserves qui appartiennent à ce tableau</span>
+        <p>Le passage du jump model de 0,16 à 0,54 vient d’une correction faite <strong>après</strong> avoir constaté l’inversion. La correction est de principe — ordonner par volatilité ne regarde jamais les rendements — mais le chiffre est post-amendement et le journal le dit.</p>
+        <p>Et toute amélioration sur le livre de base reste <strong>à l’intérieur</strong> du seuil de détection de <strong>0,271-0,399</strong> mesuré au test décisif. Au niveau portefeuille, rien n’est tranchable.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec">
+    <div class="num">§</div>
+    <div class="body">
+      <h2>Les neuf défaillances silencieuses</h2>
+      <p class="lede">Aucune n’a levé d’erreur. Chacune aurait produit des résultats d’apparence normale.</p>
+
+      <div class="fail">
+        <span class="mark">01</span>
+        <div>
+          <b>FRED tronque à 100 000 lignes et annonce le vrai total ailleurs</b>
+          <p>L’indice de conditions financières est revenu à 100 000 lignes sur <strong>579 084</strong> — couvrant 1990 à 1995 — et a été écrit sur disque avec l’air d’être complet. Le champ <code>count</code> disait la vérité ; le collecteur ne le lisait pas.</p>
+          <p class="fix">→ échec bruyant si la réponse est tronquée, et deux chemins de collecte déclarés au lieu d’un chemin deviné</p>
+        </div>
+      </div>
+
+      <div class="fail">
+        <span class="mark">02</span>
+        <div>
+          <b>FRED sert les spreads de crédit ICE BofA sur deux ans seulement</b>
+          <p>Restriction de licence, sans erreur ni avertissement. Un bloc crédit bâti dessus n’aurait existé qu’à partir de 2023, puis aurait été prolongé en arrière par report de valeur.</p>
+          <p class="fix">→ spreads Moody’s Baa/Aaa, quotidiens depuis 1986, et un drapeau sur toute série qui démarre trop tard</p>
+        </div>
+      </div>
+
+      <div class="fail">
+        <span class="mark">03</span>
+        <div>
+          <b>Le motif <code>data/</code> excluait le cœur du projet du dépôt</b>
+          <p>Un motif sans barre oblique initiale matche n’importe quel dossier de ce nom, à n’importe quelle profondeur. Le premier push public contenait les tests mais pas le code qu’ils testent : un clone frais ne pouvait pas importer le paquet.</p>
+          <p class="fix">→ motif ancré à la racine</p>
+        </div>
+      </div>
+
+      <div class="fail">
+        <span class="mark">04</span>
+        <div>
+          <b>Le test « décisif » du cadrage v1 était arithmétiquement vide</b>
+          <p>Il comparait la stratégie à une version d’elle-même dé-levierée par un scalaire constant. Or <strong>le Sharpe est invariant par changement d’échelle</strong> : le benchmark avait, à la décimale, le Sharpe de la stratégie qu’il devait contester. Trouvé par une review adversariale, pas par le code.</p>
+          <p class="fix">→ benchmark à ciblage de volatilité dynamique, cible fixée sur les seules données d’entraînement, et des métriques qui réagissent au levier</p>
+        </div>
+      </div>
+
+      <div class="fail">
+        <span class="mark">05</span>
+        <div>
+          <b>Deux phases mesuraient des rendements différents</b>
+          <p>La Phase 0 calculait la puissance sur des rendements <em>en excess</em> du taux 3 mois ; la Phase 2 rapportait des Sharpe <em>bruts</em>. Deux chiffres censés être comparables ne l’étaient pas. Pire, filtrer un rendement brut par 0/1 suppose qu’être flat rapporte 0 % nominal — qu’on ne détient même pas de bons du Trésor.</p>
+          <p class="fix">→ une seule définition du livre de base, en excess, importée par tous les scripts</p>
+        </div>
+      </div>
+
+      <div class="fail">
+        <span class="mark">06</span>
+        <div>
+          <b>Une famille entière de variables promise par le cadrage n’avait pas été construite</b>
+          <p>« Asymétrie et pertes maximales » figurait au protocole gelé. Elle était absente : ni Hurst, ni skew, ni kurtosis, ni perte maximale glissante. Aucun test ne pouvait l’attraper — le code faisait exactement ce qu’il disait faire, il en faisait juste moins que promis.</p>
+          <p class="fix">→ famille ajoutée, 44 → 50 variables, écart consigné au journal d’amendements</p>
+        </div>
+      </div>
+
+      <div class="fail">
+        <span class="mark">07</span>
+        <div>
+          <b>La convention d’étiquetage retournait le meilleur classifieur de l’étude</b>
+          <p>Ordonner les états par rendement cumulé d’entraînement a mis les étiquettes du jump model exactement à l’envers, pendant trois jours de travail. Rien ne levait d’erreur : le modèle tournait, produisait des états persistants, et rendait un Sharpe de portefeuille faible mais plausible.</p>
+          <p class="fix">→ ordonnancement par volatilité, qui ne regarde jamais les rendements ; les deux conventions rapportées</p>
+        </div>
+      </div>
+
+      <div class="fail">
+        <span class="mark">08</span>
+        <div>
+          <b>Le dépôt public ne démarrait pas, et les tests passaient quand même</b>
+          <p>Un fichier de configuration indispensable était exclu par une règle de gitignore <em>globale</em>, invisible à <code>git status</code>. Sur un clone frais, aucun des huit scripts ne s’importait — et les vingt-trois tests passaient, parce qu’aucun ne touchait la partie cassée. Une suite verte ne disait rien sur la santé du checkout.</p>
+          <p class="fix">→ fichier suivi de force, six dépendances non déclarées ajoutées, et un test qui importe chaque module et chaque script</p>
+        </div>
+      </div>
+
+      <div class="fail">
+        <span class="mark">09</span>
+        <div>
+          <b>Le document décisif n’a jamais été régénéré après la correction</b>
+          <p>Il citait encore les chiffres du wrapper inversé, et ces chiffres ont été présentés comme courants pendant deux jours. Aucun test ne peut détecter un document périmé : le code était juste, la prose ne l’était plus.</p>
+          <p class="fix">→ régénéré ; cinq chiffres publiés corrigés à la baisse, dont l’exactitude NBER (95,1 % → 93,2 %) faussée par une référence décalée de 45 jours</p>
+        </div>
+      </div>
+
+      <p style="margin-top:1.4rem">Huit de ces neuf étaient dans <em>mon</em> code ou <em>mon</em> protocole, pas dans les données. Et cinq d’entre elles ont été trouvées par des <em>questions</em> ou par un <em>auditeur extérieur</em>, jamais par un test — aucune suite ne détecte une famille de variables qu’on a oublié d’écrire, un classifieur qui marche parfaitement à l’envers, ni un document que le code a cessé de soutenir. C’est l’argument le plus solide en faveur de la revue externe et de la relecture critique : <strong>un résultat qui a l’air normal ne prouve rien.</strong></p>
+    </div>
+  </section>
+
+  <section class="sec">
+    <div class="num">→</div>
+    <div class="body">
+      <h2>Ce que le projet établit</h2>
+      <p class="lede">La classification de régimes fonctionne. Ce qu’elle porte est de la variance. Ce n’est donc pas un signal de timing — et c’est la question qu’on lui posait.</p>
+      <div class="outcome"><span class="tagl">1</span><div><b>La classification est réelle et mesurable.</b><p>93 % d’exactitude équilibrée contre NBER, kappa 0,53, persistance 83-97× le hasard, cinq méthodes indépendantes qui s’accordent, latence réelle de 0 à 13 jours.</p></div></div>
+      <div class="outcome"><span class="tagl">2</span><div><b>Elle porte de la variance, pas de la moyenne.</b><p>Deux à quatre points de R² incrémental sur la volatilité future au-delà d’un quantile de volatilité, là où un placebo d’une ligne n’ajoute rien. Sur la direction, personne n’ajoute rien.</p></div></div>
+      <div class="outcome"><span class="tagl">3</span><div><b>Donc : signal de dimensionnement, pas de timing.</b><p>Et une règle ON/OFF est une règle de timing.</p></div></div>
+      <div class="outcome"><span class="tagl">4</span><div><b>Au niveau portefeuille, la question reste sous-puissante.</b><p>D’un facteur deux à quatre en longueur d’échantillon — sauf sur la meilleure famille, où le résultat est une mesure et non une absence de mesure.</p></div></div>
+      <p style="margin-top:1.4rem">La leçon de méthode tient en une phrase : <strong>on avait construit un classifieur et mesuré un portefeuille.</strong> Un écart de Sharpe entre deux livres s’estime sur une poignée d’épisodes indépendants ; un écart de volatilité conditionnelle s’estime sur des milliers de séances. Poser la question au mauvais étage a transformé un classifieur à 95 % en une stratégie à Sharpe 0,16, et une réponse nette en un verdict d’indécidabilité.</p>
+      <p>Le dépôt public contient le protocole gelé et son empreinte, le journal d’amendements — un refusé, trois appliqués — les 83 configurations testées, et soixante-neuf tests d’intégrité, dont un qui vérifie qu’une simplification vers la version commode et fausse casserait la suite, et un autre qui refuse un checkout qu’un tiers ne pourrait pas lancer.</p>
+    </div>
+  </section>
+
+  <footer>
+    <span>Journal de construction · révisé après audit indépendant</span>
+    <span>Protocole gelé avant résultats · empreinte publiée dans le dépôt</span>
+  </footer>
+</div>
+
+<script>
+  (function () {
+    var families = [
+      { name: "volatilité", r2: 45.3 },
+      { name: "crédit", r2: 28.7 },
+      { name: "conditions", r2: 28.6 },
+      { name: "coupe transv.", r2: 22.6 },
+      { name: "momentum", r2: 15.1 },
+      { name: "asymétrie", r2: 13.6 },
+      { name: "macro", r2: 2.6 },
+      { name: "taux", r2: 2.2 }
+    ];
+    var THRESHOLD = 25, MAX = 50;
+    var host = document.getElementById("bars");
+    if (!host) return;
+
+    host.innerHTML = families.map(function (f) {
+      var pct = (f.r2 / MAX) * 100;
+      var over = f.r2 > THRESHOLD;
+      return '<div class="bar-row">' +
+        '<span class="lab">' + f.name + "</span>" +
+        '<span class="bar-track">' +
+          '<span class="bar-fill' + (over ? " over" : "") + '" style="width:' + pct.toFixed(2) + '%"></span>' +
+          '<span class="threshold" style="left:' + ((THRESHOLD / MAX) * 100).toFixed(2) + '%"></span>' +
+        "</span>" +
+        '<span class="val">' + f.r2.toFixed(1) + "%</span>" +
+      "</div>";
+    }).join("");
+  })();
+</script>

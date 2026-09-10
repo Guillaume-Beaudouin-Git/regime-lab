@@ -1,0 +1,574 @@
+<title>Combien, pas dans quel sens</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,300..600;1,6..72,300..400&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap">
+
+<style>
+  :root {
+    --paper:      #f3f6f5;
+    --surface:    #ffffff;
+    --surface-2:  #e9efed;
+    --ink:        #16211f;
+    --ink-soft:   #3d4b48;
+    --ink-mute:   #6a7773;
+    --rule:       #d6dedb;
+    --rule-soft:  #e5ebe9;
+    --calm:       #0e6b63;
+    --calm-wash:  #ddece9;
+    --stress:     #a03626;
+    --stress-wash:#f7e4e0;
+    --amber:      #8d6a12;
+
+    --f-display: "Newsreader", "Iowan Old Style", Georgia, serif;
+    --f-body:    "IBM Plex Sans", "Helvetica Neue", Arial, sans-serif;
+    --f-mono:    "IBM Plex Mono", "SF Mono", Menlo, monospace;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --paper:      #0d1413;  --surface:    #151e1c;  --surface-2:  #1c2624;
+      --ink:        #e4ebe8;  --ink-soft:   #c2cecb;  --ink-mute:   #8d9e99;
+      --rule:       #28342f;  --rule-soft:  #1f2927;
+      --calm:       #58c6b4;  --calm-wash:  #143330;
+      --stress:     #e37a63;  --stress-wash:#361a15;
+      --amber:      #d9a744;
+    }
+  }
+  :root[data-theme="dark"] {
+    --paper:      #0d1413;  --surface:    #151e1c;  --surface-2:  #1c2624;
+    --ink:        #e4ebe8;  --ink-soft:   #c2cecb;  --ink-mute:   #8d9e99;
+    --rule:       #28342f;  --rule-soft:  #1f2927;
+    --calm:       #58c6b4;  --calm-wash:  #143330;
+    --stress:     #e37a63;  --stress-wash:#361a15;
+    --amber:      #d9a744;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--f-body);
+    font-size: 17px;
+    line-height: 1.72;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .page {
+    max-width: 44rem;
+    margin: 0 auto;
+    padding-block: 3.5rem 6rem;
+    padding-left: 1.25rem;
+    padding-right: 1.25rem;
+  }
+
+  /* ---------- masthead ---------- */
+
+  header.top { border-bottom: 2px solid var(--ink); padding-bottom: 2rem; }
+
+  .eyebrow {
+    font-family: var(--f-mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--calm);
+    margin: 0 0 1.2rem;
+  }
+
+  h1 {
+    font-family: var(--f-display);
+    font-weight: 400;
+    font-size: clamp(2.3rem, 7vw, 3.6rem);
+    line-height: 1.04;
+    letter-spacing: -0.02em;
+    text-wrap: balance;
+    margin: 0 0 1.1rem;
+  }
+
+  .deck {
+    font-family: var(--f-display);
+    font-size: clamp(1.1rem, 2.4vw, 1.3rem);
+    font-weight: 300;
+    font-style: italic;
+    line-height: 1.5;
+    color: var(--ink-soft);
+    margin: 0;
+    max-width: 32ch;
+  }
+
+  .byline {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.3rem 1.8rem;
+    margin-top: 2rem;
+    font-family: var(--f-mono);
+    font-size: 0.72rem;
+    color: var(--ink-mute);
+  }
+
+  /* ---------- sections ---------- */
+
+  section { margin-top: 3.6rem; }
+
+  .label {
+    font-family: var(--f-mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--calm);
+    margin: 0 0 0.7rem;
+  }
+
+  h2 {
+    font-family: var(--f-display);
+    font-weight: 400;
+    font-size: clamp(1.55rem, 3.6vw, 1.95rem);
+    line-height: 1.18;
+    letter-spacing: -0.012em;
+    text-wrap: balance;
+    margin: 0 0 1.1rem;
+  }
+
+  h3 {
+    font-family: var(--f-body);
+    font-size: 1.02rem;
+    font-weight: 600;
+    margin: 2.2rem 0 0.6rem;
+  }
+
+  p { margin: 0 0 1.15rem; }
+  section > p:last-child, .plain > p:last-child { margin-bottom: 0; }
+
+  strong { font-weight: 600; }
+  .lead { font-size: 1.1rem; color: var(--ink-soft); }
+
+  ul { margin: 0 0 1.15rem; padding-left: 1.2rem; }
+  li { margin-bottom: 0.55rem; }
+
+  .num {
+    font-family: var(--f-mono);
+    font-variant-numeric: tabular-nums;
+    font-size: 0.94em;
+  }
+
+  /* ---------- plain-language aside ---------- */
+
+  .plain {
+    background: var(--calm-wash);
+    border-left: 3px solid var(--calm);
+    padding: 1.15rem 1.3rem;
+    margin: 1.6rem 0;
+  }
+  .plain .tag {
+    display: block;
+    font-family: var(--f-mono);
+    font-size: 0.63rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--calm);
+    margin-bottom: 0.5rem;
+  }
+  .plain p { font-size: 0.98rem; color: var(--ink-soft); }
+
+  /* ---------- figure ---------- */
+
+  figure { margin: 2rem 0 0; }
+  .panels {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+    gap: 1px;
+    background: var(--rule);
+    border: 1px solid var(--rule);
+  }
+  .panel { background: var(--surface); padding: 1.1rem 1.15rem 0.9rem; }
+  .panel h4 {
+    margin: 0 0 0.15rem;
+    font-size: 0.97rem;
+    font-weight: 600;
+  }
+  .panel .sub {
+    margin: 0 0 0.85rem;
+    font-size: 0.83rem;
+    color: var(--ink-mute);
+    line-height: 1.5;
+  }
+  .panel svg { display: block; width: 100%; height: auto; }
+  .panel svg text {
+    font-family: var(--f-mono);
+    font-size: 9px;
+    letter-spacing: 0.08em;
+  }
+  .verdict {
+    font-family: var(--f-mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-top: 0.7rem;
+  }
+  .verdict.yes { color: var(--calm); }
+  .verdict.no { color: var(--stress); }
+  figcaption {
+    margin-top: 0.8rem;
+    font-size: 0.87rem;
+    color: var(--ink-mute);
+    line-height: 1.55;
+  }
+
+  /* ---------- numbers strip ---------- */
+
+  .facts {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(8.5rem, 1fr));
+    gap: 1px;
+    background: var(--rule);
+    border: 1px solid var(--rule);
+    margin: 1.8rem 0 0;
+  }
+  .facts div { background: var(--surface); padding: 0.95rem 1rem; }
+  .facts b {
+    display: block;
+    font-family: var(--f-display);
+    font-size: 1.7rem;
+    font-weight: 400;
+    line-height: 1;
+    margin-bottom: 0.35rem;
+    font-variant-numeric: tabular-nums;
+  }
+  .facts span {
+    font-family: var(--f-mono);
+    font-size: 0.63rem;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: var(--ink-mute);
+    line-height: 1.4;
+    display: block;
+  }
+
+  /* ---------- mistakes ---------- */
+
+  .mistake {
+    padding: 1.15rem 0;
+    border-bottom: 1px solid var(--rule-soft);
+  }
+  .mistake:last-of-type { border-bottom: none; }
+  .mistake b { display: block; margin-bottom: 0.3rem; }
+  .mistake p { margin: 0; font-size: 0.97rem; color: var(--ink-soft); }
+
+  /* ---------- pull quote ---------- */
+
+  blockquote {
+    margin: 2rem 0;
+    padding: 0 0 0 1.5rem;
+    border-left: 2px solid var(--stress);
+    font-family: var(--f-display);
+    font-size: clamp(1.2rem, 2.8vw, 1.45rem);
+    line-height: 1.4;
+    font-weight: 300;
+    color: var(--ink);
+  }
+  blockquote p { margin: 0; }
+
+  /* ---------- table ---------- */
+
+  .scroll { overflow-x: auto; margin: 1.4rem 0; }
+  table { border-collapse: collapse; width: 100%; min-width: 26rem; font-size: 0.92rem; }
+  th, td { text-align: left; padding: 0.6rem 1rem 0.6rem 0; border-bottom: 1px solid var(--rule-soft); }
+  th {
+    font-family: var(--f-mono);
+    font-weight: 500;
+    font-size: 0.66rem;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: var(--ink-mute);
+    border-bottom: 1px solid var(--rule);
+  }
+  td.n { font-family: var(--f-mono); font-variant-numeric: tabular-nums; }
+  tbody tr:last-child td { border-bottom: none; }
+
+  a { color: var(--calm); text-underline-offset: 2px; }
+  a:focus-visible { outline: 2px solid var(--calm); outline-offset: 3px; }
+
+  footer {
+    margin-top: 4.5rem;
+    padding-top: 1.3rem;
+    border-top: 2px solid var(--ink);
+    font-family: var(--f-mono);
+    font-size: 0.7rem;
+    color: var(--ink-mute);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem 2rem;
+    justify-content: space-between;
+  }
+
+  @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+</style>
+
+<div class="page">
+
+  <header class="top">
+    <p class="eyebrow">Projet de recherche · expliqué sans jargon</p>
+    <h1>Combien, pas dans quel sens</h1>
+    <p class="deck">Un programme peut apprendre à reconnaître si les marchés sont calmes ou agités. Il ne peut pas apprendre s’ils vont monter ou descendre. Voici comment on l’a mesuré.</p>
+    <div class="byline">
+      <span>Guillaume Beaudouin</span>
+      <span>M1 Ingénierie Économique et Financière</span>
+      <span>Septembre 2026</span>
+    </div>
+  </header>
+
+  <section>
+    <p class="label">Le point de départ</p>
+    <h2>Les marchés ont des humeurs</h2>
+    <p class="lead">Certaines années, la bourse monte tranquillement, sans à-coups. D’autres — 2008, mars 2020 — tout bouge violemment tous les jours. Ces périodes ont un nom en finance : des <strong>régimes</strong>.</p>
+    <p>L’idée qui motive ce projet est simple. Si un programme pouvait reconnaître, <em>au moment où on y est</em>, dans quel régime on se trouve, on pourrait s’en servir : prendre moins de risque quand ça secoue, davantage quand c’est calme.</p>
+    <p>Tout le travail consiste à répondre à deux questions, dans cet ordre. <strong>Est-ce qu’un programme y arrive vraiment ?</strong> Et si oui, <strong>qu’est-ce que ça permet de faire, exactement ?</strong></p>
+  </section>
+
+  <section>
+    <p class="label">La matière première</p>
+    <h2>Trente-six ans de marchés, gratuits</h2>
+    <p>Le programme n’apprend rien sans données. Celles utilisées ici couvrent <strong>janvier 1990 à septembre 2026</strong> et viennent toutes de sources publiques et gratuites — condition posée dès le départ pour que n’importe qui puisse refaire le travail.</p>
+    <ul>
+      <li><strong>Les prix</strong> — indices boursiers américains, européens, japonais ; taux d’intérêt ; dollar ; pétrole. Un chiffre par jour ouvré, par marché.</li>
+      <li><strong>L’économie réelle</strong> — production industrielle, emploi, chômage, inflation, inscriptions au chômage, publiés par la banque centrale américaine.</li>
+      <li><strong>Le stress financier</strong> — le coût auquel les entreprises empruntent, la forme de la courbe des taux, un indice de tension bancaire.</li>
+      <li><strong>La dispersion des secteurs</strong> — 49 secteurs de la bourse américaine suivis séparément depuis 1926, pour mesurer si le marché bouge d’un bloc ou en ordre dispersé.</li>
+    </ul>
+    <p>À partir de ces sources brutes, on calcule <strong>50 indicateurs</strong>. Chacun résume un aspect du marché à une date donnée : à quel point ça a bougé le mois dernier, à quel point les secteurs divergent, si le chômage remonte, si le crédit se tend.</p>
+
+    <div class="facts">
+      <div><b>36</b><span>années couvertes</span></div>
+      <div><b>50</b><span>indicateurs calculés</span></div>
+      <div><b>6&nbsp;377</b><span>jours de test réel</span></div>
+      <div><b>0&nbsp;€</b><span>de données payantes</span></div>
+    </div>
+  </section>
+
+  <section>
+    <p class="label">La règle qui gouverne tout</p>
+    <h2>Interdiction de tricher avec le futur</h2>
+    <p>C’est le cœur du projet, et c’est aussi ce qui fait échouer la majorité des travaux de ce type — souvent sans que personne s’en aperçoive.</p>
+    <p>Un exemple concret. La production industrielle américaine de <strong>janvier 2008</strong> a été publiée à l’époque avec la valeur <span class="num">114,23</span>. Elle a ensuite été corrigée vingt-trois fois. Aujourd’hui, la même statistique, pour le même mois, vaut <span class="num">102,24</span>.</p>
+
+    <div class="plain">
+      <span class="tag">En clair</span>
+      <p>Si on entraîne un programme sur les chiffres <em>d’aujourd’hui</em> et qu’on lui demande de juger l’année 2008, il travaille avec des informations que personne ne possédait en 2008. C’est comme corriger la copie d’un élève avec un corrigé qu’il n’avait pas. Le programme paraît brillant, et il ne l’est pas.</p>
+    </div>
+
+    <p>Pour éviter ça, chaque observation de la base porte <strong>deux dates</strong> : celle qu’elle décrit, et celle à laquelle elle est devenue publique. Une information n’entre dans le programme que si elle était déjà connue ce jour-là.</p>
+    <p>Cette règle est vérifiée automatiquement. Un test rejoue la base telle qu’elle se présentait à une date passée et exige qu’elle n’ait pas bougé quand des données plus récentes arrivent. Au total, <strong>69 vérifications automatiques</strong> tournent à chaque modification du code.</p>
+  </section>
+
+  <section>
+    <p class="label">Ce qu’on a construit</p>
+    <h2>Cinq programmes, une seule règle du jeu</h2>
+    <p>Plutôt que de parier sur une méthode, on en a mis cinq en concurrence — des plus récentes aux plus anciennes — dans des conditions strictement identiques : mêmes indicateurs, mêmes dates, même façon de traduire le résultat en décision.</p>
+    <p>Aucune ne reçoit la réponse. On ne leur dit jamais « ceci est une crise ». Elles reçoivent les 50 indicateurs et doivent <strong>découvrir seules</strong> qu’il existe deux états distincts, puis dire chaque jour dans lequel on se trouve.</p>
+    <p>Les programmes sont réentraînés tous les six mois, comme le ferait une équipe réelle, et ne voient jamais que le passé. Entre deux réentraînements, ils classent chaque nouvelle journée à l’aveugle.</p>
+
+    <div class="plain">
+      <span class="tag">En clair</span>
+      <p>On entraîne sur 1992-2002, on teste sur 2002-2026. Les vingt-quatre dernières années sont un examen que les programmes passent sans avoir jamais vu les questions.</p>
+    </div>
+  </section>
+
+  <section>
+    <p class="label">Le premier résultat</p>
+    <h2>Ça marche : le programme reconnaît les crises</h2>
+    <p>Pour vérifier, on ne se juge pas soi-même. On compare les périodes que le programme a signalées aux <strong>dates officielles de récession américaine</strong>, établies par un comité d’économistes indépendant, et à une règle mécanique fixée à l’avance.</p>
+
+    <div class="scroll">
+      <table>
+        <thead><tr><th>Programme</th><th>Accord avec les récessions officielles</th></tr></thead>
+        <tbody>
+          <tr><td>Modèle à sauts (version parcimonieuse)</td><td class="n">93,2 %</td></tr>
+          <tr><td>Modèle à sauts</td><td class="n">93,3 %</td></tr>
+          <tr><td>Modèle de Markov caché</td><td class="n">84,7 %</td></tr>
+          <tr><td>Apprentissage automatique classique</td><td class="n">75,0 %</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p>Deux précisions qui comptent. D’abord, ce chiffre est corrigé pour tenir compte du fait que les récessions sont rares : <strong>un programme qui répondrait toujours « pas de crise » aurait 92 % de bonnes réponses</strong> sans rien comprendre. La mesure utilisée ici ne se laisse pas avoir.</p>
+    <p>Ensuite, les périodes sont reconnues <strong>au moment où elles se produisent</strong>, pas après coup. Le décalage mesuré est de zéro à treize jours.</p>
+  </section>
+
+  <section>
+    <p class="label">Le résultat principal</p>
+    <h2>Mais il ne dit qu’une moitié de la chose</h2>
+    <p class="lead">Le programme sait dire <strong>à quel point ça va bouger</strong>. Il ne sait pas dire <strong>dans quel sens</strong>. Et ce n’est pas la même information.</p>
+
+    <figure>
+      <div class="panels">
+        <div class="panel">
+          <h4>L’amplitude</h4>
+          <p class="sub">De combien le marché va-t-il osciller dans les semaines qui viennent ?</p>
+          <svg viewBox="0 0 300 110" role="img" aria-label="Une trajectoire de marché calme puis agitée : l'amplitude des oscillations change nettement entre les deux zones, et le programme identifie correctement la frontière.">
+            <rect x="0" y="0" width="150" height="110" fill="var(--calm-wash)"></rect>
+            <rect x="150" y="0" width="150" height="110" fill="var(--stress-wash)"></rect>
+            <line x1="150" y1="0" x2="150" y2="110" stroke="var(--ink-mute)" stroke-width="1" stroke-dasharray="3 3"></line>
+            <polyline id="pathA" fill="none" stroke="var(--ink)" stroke-width="1.6" stroke-linejoin="round" points=""></polyline>
+            <text x="8" y="16" fill="var(--calm)">CALME</text>
+            <text x="158" y="16" fill="var(--stress)">AGITÉ</text>
+          </svg>
+          <p class="verdict yes">le programme sait le dire</p>
+        </div>
+        <div class="panel">
+          <h4>La direction</h4>
+          <p class="sub">Le marché va-t-il monter ou descendre à partir d’ici ?</p>
+          <svg viewBox="0 0 300 110" role="img" aria-label="À partir du même point, deux trajectoires futures divergent, l'une vers le haut et l'autre vers le bas : le programme ne distingue pas laquelle se réalisera.">
+            <rect x="0" y="0" width="300" height="110" fill="var(--surface-2)"></rect>
+            <polyline id="pathB" fill="none" stroke="var(--ink)" stroke-width="1.6" stroke-linejoin="round" points=""></polyline>
+            <polyline id="pathUp" fill="none" stroke="var(--calm)" stroke-width="1.6" stroke-dasharray="4 3" stroke-linejoin="round" points=""></polyline>
+            <polyline id="pathDown" fill="none" stroke="var(--stress)" stroke-width="1.6" stroke-dasharray="4 3" stroke-linejoin="round" points=""></polyline>
+            <line x1="150" y1="0" x2="150" y2="110" stroke="var(--ink-mute)" stroke-width="1" stroke-dasharray="3 3"></line>
+            <text x="243" y="26" fill="var(--calm)">? </text>
+            <text x="243" y="98" fill="var(--stress)">?</text>
+            <text x="8" y="16" fill="var(--ink-mute)">AUJOURD’HUI</text>
+          </svg>
+          <p class="verdict no">le programme n’en sait rien</p>
+        </div>
+      </div>
+      <figcaption>Illustration du résultat central. La frontière entre calme et agité est repérée de façon fiable ; la pente qui suit ne l’est pas.</figcaption>
+    </figure>
+
+    <h3>Comment on s’en est assuré</h3>
+    <p>Une affirmation de ce genre ne vaut rien sans point de comparaison. On a donc fabriqué un <strong>concurrent volontairement stupide</strong> : une règle d’une seule ligne qui dit « c’est calme » quand le marché a peu bougé le mois dernier, et « c’est agité » sinon. Aucun apprentissage, aucun indicateur sophistiqué.</p>
+    <p>Cette règle stupide reconnaît elle aussi les périodes agitées. Le vrai test est donc : <strong>les programmes savent-ils quelque chose qu’elle ne sait pas ?</strong></p>
+
+    <div class="scroll">
+      <table>
+        <thead><tr><th></th><th>Information ajoutée sur l’amplitude future</th><th>Sur la direction future</th></tr></thead>
+        <tbody>
+          <tr><td>Modèle à sauts parcimonieux</td><td class="n">+3,93</td><td class="n">+0,03</td></tr>
+          <tr><td>Modèle à sauts</td><td class="n">+3,47</td><td class="n">+0,02</td></tr>
+          <tr><td>Apprentissage automatique</td><td class="n">+2,13</td><td class="n">+0,02</td></tr>
+          <tr><td><strong>La règle stupide</strong></td><td class="n">+0,004</td><td class="n">+0,00</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p>Les programmes apportent une information réelle sur l’amplitude, que la règle simple n’a pas. Sur la direction, <strong>personne n’apporte rien</strong> — ni les programmes, ni la règle.</p>
+
+    <blockquote><p>Un signal qui dit combien ça va bouger sert à décider quelle somme risquer. Il ne sert pas à décider s’il faut acheter ou vendre.</p></blockquote>
+  </section>
+
+  <section>
+    <p class="label">La dernière étape</p>
+    <h2>Et si on en fait une stratégie d’investissement ?</h2>
+    <p>On a testé la conséquence naturelle : sortir du marché quand le programme signale un régime agité, y revenir quand il signale le calme.</p>
+    <p>Le résultat n’est pas meilleur qu’une méthode <strong>beaucoup plus simple</strong>, qui n’utilise aucun régime : ajuster mécaniquement la somme investie en fonction de l’agitation récente. Aucun des cinq programmes ne la bat une fois les frais de transaction payés.</p>
+
+    <div class="plain">
+      <span class="tag">En clair</span>
+      <p>Ce n’est pas surprenant, une fois le résultat principal admis. On demandait à un signal d’amplitude de répondre à une question de direction. Il ne pouvait pas.</p>
+    </div>
+
+    <h3>Et une réserve honnête sur ce « pas meilleur »</h3>
+    <p>Vingt-cinq ans de données paraissent beaucoup, mais les crises y sont rares : on en compte <strong>quatorze</strong>. Or c’est ce nombre-là, pas le nombre de jours, qui détermine ce qu’on peut prouver.</p>
+    <p>Le calcul est explicite dans le projet : pour trancher définitivement la question du placement, il faudrait entre <strong>46 et 101 ans</strong> de données. On en a vingt-cinq. Sur quatre des cinq programmes, la bonne réponse n’est donc pas « ça ne marche pas » mais <strong>« ces données ne permettent pas de le dire »</strong> — et on chiffre de combien elles en sont loin.</p>
+  </section>
+
+  <section>
+    <p class="label">La partie inconfortable</p>
+    <h2>Sept erreurs, dont six dans notre propre travail</h2>
+    <p>Aucune n’a provoqué de message d’erreur. Chacune produisait des résultats d’apparence parfaitement normale. Les voici, parce que les cacher enlèverait au projet ce qui lui donne sa valeur.</p>
+
+    <div class="mistake">
+      <b>Le fournisseur de données coupait discrètement</b>
+      <p>Deux séries économiques revenaient tronquées — l’une couvrant deux ans au lieu de trente-six, l’autre cinq ans sur trente-six — sans le moindre avertissement. Elles ont été écrites sur le disque avec l’air d’être complètes.</p>
+    </div>
+    <div class="mistake">
+      <b>Le test décisif se comparait à lui-même</b>
+      <p>La façon de mesurer choisie au départ était insensible au réglage qu’elle était censée tester. Le concurrent avait, au centième près, la même note que la stratégie qu’il devait défier.</p>
+    </div>
+    <div class="mistake">
+      <b>Deux parties du projet mesuraient des choses différentes</b>
+      <p>L’une comptait les gains en soustrayant le rendement sans risque, l’autre non. Deux chiffres censés être comparables ne l’étaient pas.</p>
+    </div>
+    <div class="mistake">
+      <b>Une famille d’indicateurs promise n’avait jamais été écrite</b>
+      <p>Aucun test ne peut détecter du code qu’on a oublié d’écrire. C’est une question posée par un relecteur qui l’a révélé.</p>
+    </div>
+    <div class="mistake">
+      <b>Le meilleur programme lisait ses propres étiquettes à l’envers</b>
+      <p>Il détectait <em>toutes</em> les récessions — mais appelait « calme » ce qui était agité, à cause d’une erreur de sens dans une seule ligne. Résultat : la stratégie achetait pendant les crises et sortait pendant le calme. Vu comme une stratégie, ça ressemblait à un programme médiocre. Il fallait juger le programme lui-même pour voir qu’il était <em>excellent et inversé</em>.</p>
+    </div>
+    <div class="mistake">
+      <b>Le dépôt public ne démarrait pas</b>
+      <p>Un fichier indispensable était exclu par un réglage invisible. Personne d’extérieur n’aurait pu faire tourner le projet — et les tests passaient quand même, parce qu’aucun ne touchait la partie cassée.</p>
+    </div>
+    <div class="mistake">
+      <b>Un document de résultats n’avait jamais été remis à jour</b>
+      <p>Il citait encore les chiffres d’avant la correction du programme inversé. Un audit indépendant l’a trouvé en lançant simplement le code. Cinq chiffres publiés étaient trop flatteurs ; ils ont été corrigés à la baisse.</p>
+    </div>
+
+    <p style="margin-top:1.5rem">Un auditeur extérieur, qui n’avait pas participé au travail, a passé le projet au crible en exécutant chaque programme. Il a confirmé qu’<strong>aucune information venue du futur ne s’était glissée dans les calculs</strong>, et il a trouvé les trois dernières erreurs de cette liste.</p>
+  </section>
+
+  <section>
+    <p class="label">Pourquoi ça compte</p>
+    <h2>Un résultat négatif, correctement établi</h2>
+    <p>Le projet ne débouche pas sur une stratégie qui gagne de l’argent. C’était une issue prévue et écrite à l’avance, avec les conditions exactes dans lesquelles elle serait déclarée.</p>
+    <p>Ce qu’il établit à la place est plus solide. <strong>La détection de régimes fonctionne</strong> : c’est mesuré contre une référence extérieure, comparé à une règle triviale, et vérifié sur vingt-quatre ans que les programmes n’avaient jamais vus. <strong>Ce qu’elle apporte est une information sur l’ampleur des mouvements, pas sur leur sens.</strong> Ce sont deux choses différentes, et les confondre est précisément ce qui fait publier des résultats faux.</p>
+    <p>La méthode compte autant que la conclusion : conditions de rejet écrites avant de regarder les résultats, empreinte du protocole publiée pour qu’on ne puisse pas le réécrire après coup, journal de toutes les modifications — <em>y compris une qui a été refusée parce qu’elle n’aurait pu qu’améliorer les chiffres</em> — et sept erreurs documentées plutôt qu’effacées.</p>
+  </section>
+
+  <section>
+    <p class="label">Pour aller voir</p>
+    <h2>Tout est public</h2>
+    <p>Le code, les données, les protocoles et les résultats sont accessibles à <a href="https://github.com/Guillaume-Beaudouin-Git/regime-lab">github.com/Guillaume-Beaudouin-Git/regime-lab</a>. N’importe qui peut le télécharger, le lancer, et obtenir les mêmes chiffres — c’était la condition posée au premier jour.</p>
+  </section>
+
+  <footer>
+    <span>regime-lab · septembre 2026</span>
+    <span>Protocole gelé avant résultats · sept erreurs documentées</span>
+  </footer>
+</div>
+
+<script>
+  (function () {
+    function polyline(id, pts) {
+      var el = document.getElementById(id);
+      if (el) el.setAttribute("points", pts.map(function (p) { return p[0].toFixed(1) + "," + p[1].toFixed(1); }).join(" "));
+    }
+    // Deterministic pseudo-random walk: calm first half, turbulent second.
+    function walk(seed, n, amp) {
+      var s = seed, out = [], v = 0;
+      for (var i = 0; i < n; i++) {
+        s = (s * 1103515245 + 12345) % 2147483648;
+        var step = ((s / 2147483648) - 0.5) * (typeof amp === "function" ? amp(i / n) : amp);
+        v += step;
+        out.push(v);
+      }
+      return out;
+    }
+
+    var n = 90;
+    var a = walk(7, n, function (t) { return t < 0.5 ? 3 : 15; });
+    var mn = Math.min.apply(null, a), mx = Math.max.apply(null, a);
+    polyline("pathA", a.map(function (v, i) {
+      return [i * (300 / (n - 1)), 96 - ((v - mn) / (mx - mn || 1)) * 78];
+    }));
+
+    // Panel two: one shared history, two equally plausible futures.
+    var half = 45;
+    var hist = walk(19, half, 6);
+    var hmn = Math.min.apply(null, hist), hmx = Math.max.apply(null, hist);
+    var scale = function (v) { return 62 - ((v - hmn) / (hmx - hmn || 1)) * 30; };
+    var histPts = hist.map(function (v, i) { return [i * (150 / (half - 1)), scale(v)]; });
+    polyline("pathB", histPts);
+
+    var last = histPts[histPts.length - 1];
+    function future(seed, drift) {
+      var w = walk(seed, half, 6), out = [];
+      for (var i = 0; i < half; i++) {
+        out.push([150 + i * (150 / (half - 1)), last[1] + w[i] * 1.1 - drift * i]);
+      }
+      return out;
+    }
+    polyline("pathUp", [last].concat(future(31, 0.55)));
+    polyline("pathDown", [last].concat(future(53, -0.55)));
+  })();
+</script>
