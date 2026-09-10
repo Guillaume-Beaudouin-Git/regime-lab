@@ -55,4 +55,7 @@ first and treats a positive result as provisional until the count is met**.
 
 | date | change | reason |
 | --- | --- | --- |
-| — | — | — |
+| 2026-09-10 | universe widened from 10 countries to 19 | The pre-specification assumed ten countries had usable free history. Nineteen do: the OECD sovereign yield series are keyed on two-letter country codes, and an initial availability check used three-letter codes and returned nothing. Corrected **before any return was computed**, and it moves the study toward the thirty-instrument minimum rather than away from it. |
+| 2026-09-10 | the currency theme uses the **nominal** exchange rate, not the real one | A real rate needs a CPI ratio, and CPI is revised. Building it from current-vintage foreign CPI would reintroduce exactly the leak that choosing market-based state variables was meant to remove. At a one-year horizon inflation differentials among these countries are small against nominal moves, so the simplification costs little and protects the point-in-time claim. |
+| 2026-09-10 | cell-level statistics are reported **before** any book is built | Hypothesis 1 failed because a sign map was fixed and a book assembled on top of it, which buried nine separate questions inside one number. Each theme-by-asset-class pair is now tested on its own, with a multiple-testing correction, and the book is only assembled from the pre-specified signs afterwards. Both are reported. |
+| 2026-09-10 | frequency declared monthly | The sovereign yield series are published monthly. The signal is a one-year change, so monthly sampling loses nothing, and the alternative — interpolating to daily — would invent observations. |
