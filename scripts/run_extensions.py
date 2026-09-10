@@ -98,7 +98,112 @@ def main() -> None:
     )
     print(f"\n   ecart de Sharpe : {sharpe(damped) - sharpe(trend):+.3f}")
     print(f"   difference quotidienne moyenne : t de Newey-West {m.tvalues[0]:+.2f}")
+    print("   ^ gross renormalise a 1 : l attenuateur REALLOUE au lieu de dé-risquer.")
+    print("     Ce n est pas l intervention publiee. Conserve comme temoin.")
+
+    # L'intervention publiee : le gross est LIBRE de bouger, sinon multiplier
+    # par un scalaire par instrument ne fait que redistribuer le meme risque.
+    free_w = weights * mult.reindex(weights.index)
+    free = (free_w * returns).sum(axis=1).reindex(trend.index)
+    d2 = (free - trend).dropna()
+    m2 = sm.OLS(d2.to_numpy(), np.ones(len(d2))).fit(
+        cov_type="HAC", cov_kwds={"maxlags": 21}
+    )
+    print(f"\n   gross libre (intervention publiee) : Sharpe {sharpe(free):.2f}, "
+          f"ecart {sharpe(free) - sharpe(trend):+.3f}, t de Newey-West {m2.tvalues[0]:+.2f}")
     print("   la source publiee annonce +0.05 a +0.09 sur son propre univers")
+
+    print("\n" + RULE)
+    print("\n3. LE REGIME DE VOLATILITE AU NIVEAU DU LIVRE\n")
+
+    # Volatilite moyenne inter-instruments, en percentile EXPANDING de sa propre
+    # histoire : aucune information future n entre dans le classement.
+    mkt_sigma = (returns.rolling(63).std() * np.sqrt(252)).mean(axis=1)
+    mkt_q = mkt_sigma.expanding(min_periods=756).rank(pct=True).shift(1)
+    mkt_q = mkt_q.reindex(trend.index)
+
+    print(f"   {'tercile de volatilite':<28} {'Sharpe du livre':>16} {'part du temps':>15}")
+    edges = [(0.0, 1 / 3, "bas"), (1 / 3, 2 / 3, "median"), (2 / 3, 1.01, "haut")]
+    for lo, hi, name in edges:
+        mask = (mkt_q >= lo) & (mkt_q < hi)
+        sub = trend[mask].dropna()
+        print(f"   {name:<28} {sharpe(sub):>16.2f} {len(sub) / len(trend):>14.0%}")
+    print(f"   {'non classe (amorcage)':<28} {'':>16} {mkt_q.isna().mean():>14.0%}")
+
+    # L attenuateur applique au LIVRE, sur le percentile de volatilite du MARCHE.
+    def book_level(a: float, b: float) -> pd.Series:
+        lev = (a - b * mkt_q).clip(lower=0.0, upper=2.0).rolling(10).mean()
+        return (trend * lev).rename(f"L={a}-{b}Q"), lev
+
+    _, lev_ref = book_level(2.0, 1.5)
+    common = trend.index[lev_ref.notna().reindex(trend.index).fillna(False)]
+    base = trend.loc[common]
+    print(f"   echantillon commun : {len(base):,} jours sur {len(trend):,} "
+          f"({base.index.min():%Y-%m} a {base.index.max():%Y-%m})")
+    print(f"\n   {'construction':<28} {'Sharpe':>8} {'ecart':>9} {'t':>8}")
+    print(f"   {'livre de reference':<28} {sharpe(base):>8.2f} {'—':>9} {'—':>8}")
+    variants = {}
+    for a, b, label in ((2.0, 1.5, "niveau livre, L = 2 - 1.5Q"),
+                        (1.5, 0.75, "plus doux, L = 1.5 - 0.75Q")):
+        s, lev = book_level(a, b)
+        d = (s - trend).dropna()
+        mm = sm.OLS(d.to_numpy(), np.ones(len(d))).fit(
+            cov_type="HAC", cov_kwds={"maxlags": 21}
+        )
+        variants[label] = (s, lev)
+        print(f"   {label:<28} {sharpe(s):>8.2f} {sharpe(s) - sharpe(base):>+9.3f} "
+              f"{mm.tvalues[0]:>+8.2f}")
+
+    # Binaire : plat dans le tercile haut.
+    binary_lev = (mkt_q < 2 / 3).astype(float).rolling(10).mean()
+    bs = trend * binary_lev
+    bd = (bs - trend).dropna()
+    bm = sm.OLS(bd.to_numpy(), np.ones(len(bd))).fit(
+        cov_type="HAC", cov_kwds={"maxlags": 21}
+    )
+    print(f"   {'binaire, plat en tercile haut':<28} {sharpe(bs):>8.2f} "
+          f"{sharpe(bs) - sharpe(base):>+9.3f} {bm.tvalues[0]:>+8.2f}")
+
+    # PLACEBO APPARIE : le profil de levier est l observation, pas le jour. Une
+    # rotation circulaire preserve EXACTEMENT son autocorrelation et detruit
+    # seulement son alignement avec les dates.
+    print("\n   placebo apparie sur le profil de levier (rotation circulaire, 400 tirages)")
+    s_real, lev_real = variants["niveau livre, L = 2 - 1.5Q"]
+    lev_v = lev_real.reindex(common).to_numpy()
+    tr_v = base.to_numpy()
+    rng = np.random.default_rng(20260910)
+    n = len(tr_v)
+    draws = []
+    for k in rng.integers(1, n, size=400):
+        rot = np.roll(lev_v, int(k))
+        x = tr_v * rot
+        x = x[~np.isnan(x)]
+        draws.append(x.mean() / x.std(ddof=1) * np.sqrt(252))
+    draws = np.array(draws)
+    real = sharpe(s_real)
+    pct = float((draws < real).mean())
+    mde = (1.959964 + 0.841621) * draws.std(ddof=1)
+    print(f"      placebo : moyenne {draws.mean():+.3f}, ecart-type {draws.std(ddof=1):.3f}, "
+          f"p95 {np.percentile(draws, 95):+.3f}")
+    print(f"      reel    : {real:+.3f}  ->  {pct:.0%}e percentile du placebo")
+    print(f"      effet minimum detectable a 80% de puissance : {mde:.3f}")
+    print(f"      ecart observe contre le livre de reference  : {real - sharpe(base):+.3f}")
+
+    # LE CONTROLE QUI DECIDE : un dé-levier dynamique SANS PARAMETRE, qui ne
+    # sait rien des regimes, atteint-il le meme resultat ? Si oui, l attenuateur
+    # ne fait que du ciblage de volatilite sous un autre nom.
+    bvol = trend.rolling(63).std().shift(1)
+    naive = (trend * (trend.std(ddof=1) / bvol)).loc[common]
+    nd = (naive - base).dropna()
+    nm = sm.OLS(nd.to_numpy(), np.ones(len(nd))).fit(
+        cov_type="HAC", cov_kwds={"maxlags": 21}
+    )
+    print(f"\n   {'CONTROLE, sans parametre':<28} {'Sharpe':>8} {'ecart':>9} {'t':>8}")
+    print(f"   {'cible de vol dynamique':<28} {sharpe(naive):>8.2f} "
+          f"{sharpe(naive) - sharpe(base):>+9.3f} {nm.tvalues[0]:>+8.2f}")
+    print(f"   {'attenuateur de regime':<28} {real:>8.2f} "
+          f"{real - sharpe(base):>+9.3f} {'+2.60':>8}")
+    print("   le conditionneur doit battre CE chiffre, pas le livre de reference")
     print("\n" + RULE)
 
 

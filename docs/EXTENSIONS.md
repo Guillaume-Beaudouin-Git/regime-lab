@@ -56,62 +56,81 @@ measured on a hundred-plus futures universe with that firm's own trend system.
 
 ## 2. The volatility regime is real and larger here than published
 
-Split by an expanding percentile of average cross-instrument volatility:
+Split by an **expanding** percentile of average cross-instrument volatility, so
+the ranking never sees the future:
 
 | volatility tercile | book Sharpe | share of time |
 | --- | --- | --- |
-| low | **0.88** | 38% |
-| middle | 0.89 | 29% |
-| **high** | **−0.45** | 20% |
+| low | **0.82** | 48% |
+| middle | 0.67 | 27% |
+| **high** | **−0.32** | 13% |
+| unclassified (756-day burn-in) | — | 12% |
 
 The published figures on 37 futures over 36 years are 0.49, 0.40 and 0.003. The
-conditional effect replicates and is **wider** here.
+conditional effect replicates, keeps its sign, and is **wider** here.
 
-## 3. The attenuator: right phenomenon, and the placebo still refuses it
+## 3. The attenuator passes its placebo — and is beaten by a rule with no parameters
 
 The published device is a continuous multiplier on each instrument's own
-volatility percentile, smoothed over ten days. Applied as written:
+volatility percentile, smoothed over ten days. Applied per instrument:
 
 | construction | Sharpe | gap | t |
 | --- | --- | --- | --- |
-| reference book | 0.55 | — | — |
-| per-instrument attenuator | 0.56 | +0.004 | +1.38 |
+| reference book, full sample | 0.51 | — | — |
+| per-instrument, gross renormalised to 1 | 0.51 | −0.003 | −0.35 |
+| per-instrument, gross free to move | 0.55 | +0.037 | +0.18 |
 
-Nothing. The first attempt was worse and for a mechanical reason worth
-recording: gross exposure was normalised to one, so multiplying by the
-attenuator **reallocated between instruments instead of reducing risk** — not
-the published intervention at all. With gross free to move it becomes the right
-operation, and still adds nothing.
+The first row is kept as a control because the mistake is worth recording: with
+gross exposure renormalised to one, multiplying by the attenuator **reallocates
+between instruments instead of reducing risk** — not the published intervention
+at all. With gross free it becomes the right operation, and a t of +0.18 says it
+adds nothing measurable.
 
-The device acts per instrument; the effect measured above is at market level. So
+The device acts per instrument; the effect in section 2 is at market level. So
 the same multiplier was applied to the book on the market's own volatility
-percentile:
+percentile. **Every comparison below is on the common sample** — the 5,994
+sessions from September 2003 where the expanding percentile exists. This matters:
+against the full-sample book the same gaps read +0.07 instead of +0.14, and the
+difference is the burn-in period, not the conditioning.
 
 | construction | Sharpe | gap | t |
 | --- | --- | --- | --- |
-| book-level, L = 2 − 1.5Q | **0.61** | **+0.053** | **+2.59** |
-| gentler, L = 1.5 − 0.75Q | 0.58 | +0.028 | +2.59 |
-| binary, flat in the top tercile | 0.60 | +0.047 | −0.41 |
+| reference book, common sample | 0.44 | — | — |
+| book-level, L = 2 − 1.5Q | **0.58** | **+0.144** | **+2.60** |
+| gentler, L = 1.5 − 0.75Q | 0.53 | +0.091 | +2.60 |
+| binary, flat in the top tercile | 0.64 | +0.199 | −0.47 |
 
-**+0.053 with a t of 2.59, inside the published range of +0.05 to +0.09.** And
-then the matched placebo:
+The binary row is the tell: the **largest** Sharpe gain of the three carries a
+**negative** t on the mean daily difference. The gain is arriving in the
+denominator, not the numerator — less volatility, not more return.
+
+Then the matched placebo. The leverage profile is the observation, not the day,
+so each draw rotates that profile circularly against the dates: autocorrelation
+preserved exactly, alignment destroyed.
 
 ```
-placebo (same leverage profile, dates shuffled) : mean +0.506, sd 0.068, p95 +0.609
-real                                            : +0.608  ->  94th percentile
-minimum detectable effect at 80% power          : 0.190
-observed gap                                    : +0.077
+placebo (leverage profile rotated, 400 draws)   : mean +0.428, sd 0.073, p95 +0.552
+real                                            : +0.583  ->  99th percentile
+minimum detectable effect at 80% power          : 0.205
+observed gap                                    : +0.144
 ```
 
-**Two independent reasons to refuse it.** It does not clear its own placebo, and
-the observed gap is less than half the effect this sample could resolve.
+The placebo mean of +0.428 sits on the unconditional book Sharpe of 0.44, which
+is the check that the placebo itself is unbiased rather than the signal.
 
-The disagreement between t = 2.59 and the 94th percentile is the finding, not a
-contradiction. The t-statistic treats each day as an observation; the placebo
-treats the leverage *profile* as the observation, and that profile is heavily
-autocorrelated. This is a direct replication of a methodology lesson already in
-the author's own registry: an autocorrelation-matched placebo catches what
-neither the t-statistic, the bootstrap, nor the walk-forward sees.
+**So the device clears its placebo.** It does not clear the second test, and the
+second test is the one that decides:
+
+| control, no parameters | Sharpe | gap | t |
+| --- | --- | --- | --- |
+| **dynamic volatility target** | **0.68** | **+0.244** | **+2.89** |
+| regime attenuator | 0.58 | +0.144 | +2.60 |
+
+Scaling the book by the inverse of its own trailing volatility — a rule that
+knows nothing about regimes, has no percentile, no threshold and no fitted
+constant — beats the regime device by a full tenth of a Sharpe. And the
+attenuator's own gap of +0.144 is below the 0.205 this sample can resolve at
+80% power, so it is **underpowered, not a pass**.
 
 One further caveat, stated because it would otherwise be buried: the choice to
 condition on **market** volatility came from measuring the tercile spread on the
@@ -121,7 +140,37 @@ look there is not out of sample.
 ## Verdict
 
 The volatility regime is real, replicates, and is larger on this universe than
-in the published source. **No device tested converts it into a detectable gain.**
-That is the same shape as the study's own central result — a conditional effect
-that is genuine and does not survive the trip to a portfolio — arrived at from a
-different direction.
+in the published source. **No device tested beats a parameter-free volatility
+target.** That is the same shape as the study's own central result — regimes
+carry variance rather than mean, so the honest use of one is sizing, and plain
+inverse-volatility sizing already collects it.
+
+This is now the third independent arrival at that conclusion in this repository:
+the classifier study measured it directly (+2 to +4 points of incremental R² on
+forward volatility, ~0.02 on returns); the Shu 2024 replication found the
+published jump-model overlay at 0.50 against 0.61 for the free rule at matched
+volatility; and this extension finds the practitioner attenuator at 0.58 against
+0.68. Three different devices, three different sources, same ordering.
+
+---
+
+## Amendment, 2026-09-10
+
+An earlier version of this file reported a tercile split of 0.88 / 0.89 / −0.45,
+a book-level gap of **+0.053 at t 2.59**, a reference book Sharpe of **0.55**,
+and a placebo verdict of **"94th percentile, does not clear"**. Those figures were
+produced in a working session and the code that produced them was never
+committed: `run_extensions.py` as committed computed only the per-instrument
+attenuator, and section 1 alone reproduced from it.
+
+The analysis has been rewritten into the script and re-run. Section 1 reproduced
+to the digit, confirming the data are unchanged. The t-statistics reproduced
+(+2.60 against +2.59, −0.47 against −0.41). The Sharpe levels did not, because
+the earlier run compared constructions measured on **different samples** — the
+attenuated book starts after a 756-day burn-in, the reference book did not.
+
+The verdict survives, and the reason for it does not. The device does **not**
+fail its placebo; it passes at the 99th percentile. It fails against a control
+the earlier version never ran. This is the same failure mode already caught once
+on `RESULTS_T2.md`: a document regenerated from a session rather than from the
+committed script.
