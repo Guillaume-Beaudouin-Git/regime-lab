@@ -99,3 +99,23 @@ and volatility separation, both of which are strong here, and apply the state to
 scale exposure. This study converted the state into one bit of direction, which
 the signal does not support, and then measured the outcome through a Sharpe
 difference — the noisiest statistic available.
+
+---
+
+## Amendment, 2026-09-10 — the figures above are pre-audit
+
+Every accuracy figure on this page was measured **before** the NBER audit and is
+superseded by `RESULTS_FINAL.md`. The NBER label had been routed through the
+lagged macro path, which handed the classifier up to 45 days of hindsight at
+every regime boundary.
+
+| | on this page | corrected |
+| --- | --- | --- |
+| NBER balanced accuracy, A′ | 95.1% / kappa 0.56 | **93.2% / kappa 0.53** |
+| recession recall, A | 434 / 434 | **419 / 435** |
+
+Perfect recall was an artefact of that hindsight. The ranking of the five
+families, the inversion finding, the persistence table and the sizing-not-timing
+conclusion are unaffected — the correction lowers a level, not an ordering.
+
+`RESULTS_FINAL.md` is the citable source for any accuracy number.
