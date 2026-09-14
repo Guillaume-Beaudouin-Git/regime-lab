@@ -137,15 +137,32 @@ Open, and declared rather than quietly omitted:
   0.2 point for every family. Measured: 0.007 to 0.030 point. It fires. The
   finding on forward *volatility* is what makes the study worth continuing, and
   that is a departure from the frozen rule, not a satisfaction of it.
-- **Three of the six falsification tests were never implemented.** T1 (the
-  volatility-quantile placebo at strategy level), T3 (matched-exposure placebo)
-  and T5 (adjusted Rand index between successive refits, at paired cadence) do
-  not exist in this repository. T4 was described in the code as "the placebo
-  test of the charter", which substituted one test for another.
-- **The five folds are declared and never used.** `walk_forward` is called once,
-  to take the first fold's start date. No per-fold result exists. The actual
-  protocol is one contiguous out-of-sample block with 49 semi-annual refits,
-  which is defensible but is not what the charter specifies.
+- **Three of the six falsification tests were never implemented — closed
+  2026-09-13, and two of the three weaken this study.** T1, T3 and T5 now exist
+  as `scripts/run_t1_control.py`, `run_t3_control.py` and
+  `run_t5_refit.py` + `run_t5_control.py`; results in
+  `docs/RESULTS_FALSIFICATION.md`. What they found: **T1** — no family beats the
+  one-line volatility-quantile placebo at strategy level, gaps of +0.04 to +0.06
+  Sharpe against minimum detectable effects of 0.22 to 0.44, and stopping rule 1
+  passes on 0 folds of 5 against a threshold of 3. **T3** — the overlay sits at
+  the 89th-97th percentile of its matched-exposure placebo on Sharpe and alpha
+  but at the 13th-76th on mean return and the **0th on beta**: the apparent alpha
+  arrives through the denominator, and the one-line placebo produces the same
+  profile. **T5** — the partition is stable, adjacent refits agreeing at 73-137×
+  the matched null with all 48 adjacent pairs above the 95th percentile of both
+  nulls, except C gradient boost, whose traded-block ARI is 0.255 with 19% of
+  blocks relabelled. T4 was described in the code as "the placebo test of the
+  charter", which substituted one test for another; that remains true.
+- **The five folds are declared and never used — closed 2026-09-13.** Evaluated
+  in `docs/RESULTS_FOLDS.md`. The central result survives fold fixed effects
+  (3.683 points, t −3.51, against 3.929 and t −3.40 pooled) and
+  leave-one-fold-out, never falling below 1.74 points at t −2.42. But **two of
+  A′ sparse jump's five folds contain a single state across 1,279 trading days**,
+  so the charter's three-of-five stopping rule is uncomputable for it: a
+  classifier with a 456-day mean run length cannot be cut into five five-year
+  windows and still vary inside each one. The expanding protocol with 49 refits
+  is now the declared walk-forward of record, journalled in
+  `docs/PROTOCOL_FREEZE.md`, with the fold slice kept as a dispersion diagnostic.
 - **The second frozen base strategy was never evaluated.** `equal_risk_momentum`
   has no call site. The charter says both are reported whatever happens.
 - **Revisions are not stored.** The loader requests initial releases only, so

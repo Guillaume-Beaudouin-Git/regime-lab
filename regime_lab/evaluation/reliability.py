@@ -83,8 +83,34 @@ def external_validation(states: pd.Series, reference: pd.Series) -> dict[str, fl
     how this kind of result is usually made to look good.
     """
     pair = pd.concat([states.rename("state"), reference.rename("ref")], axis=1).dropna()
+    undefined = {
+        "balanced_accuracy": np.nan,
+        "kappa": np.nan,
+        "majority": np.nan,
+        "raw_accuracy": np.nan,
+        "base_rate": np.nan,
+        "n": int(len(pair)),
+    }
     if len(pair) < 100:
-        return {"balanced_accuracy": np.nan, "kappa": np.nan, "majority": np.nan}
+        return undefined
+
+    # Two degeneracies are refused rather than scored, because in both cases the
+    # function used to return a float that read as a verdict.
+    #
+    # A state that never moves satisfies ``state == state.min()`` on every
+    # session, so the classifier was graded as though it had called a recession
+    # every single day. A reference with one class has no balanced accuracy at
+    # all: the "balanced" mean collapses onto the recall of the only class
+    # present, and kappa's denominator vanishes, so ``cohen_kappa_score``
+    # returns 0.0 — indistinguishable from a real absence of skill.
+    #
+    # Between them these produced six misleading per-fold cells with opposite
+    # signs: three reading 0.0% balanced accuracy, and three reading 0.17 to
+    # 0.98 at kappa exactly 0.000, the latter being specificities rather than
+    # balanced accuracies. No full-sample figure was affected, because there
+    # both series move.
+    if pair["state"].nunique() < 2 or pair["ref"].nunique() < 2:
+        return undefined
 
     weak = (pair["state"] == pair["state"].min()).astype(int)
     truth = pair["ref"].astype(int)
