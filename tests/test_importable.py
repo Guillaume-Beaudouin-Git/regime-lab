@@ -65,12 +65,18 @@ def test_every_script_imports(script):
         [
             sys.executable,
             "-c",
+            # Execute in the module's own __dict__, the way a real import does.
+            # Passing a bare {'__name__': ...} that disagrees with the name the
+            # module is registered under leaves sys.modules[__name__] unresolvable,
+            # and anything that looks its own module up then fails on a script that
+            # is perfectly importable — @dataclass does exactly that when it
+            # resolves string annotations. The module is named 'm', never
+            # '__main__', so a main() guard still does not fire.
             f"import importlib.util as u; "
             f"s=u.spec_from_file_location('m', {str(script)!r}); "
             f"m=u.module_from_spec(s); "
             f"__import__('sys').modules['m']=m; "
-            f"exec(compile(open({str(script)!r}).read(), 'm', 'exec'), "
-            f"{{'__name__': '__not_main__'}})",
+            f"exec(compile(open({str(script)!r}).read(), 'm', 'exec'), m.__dict__)",
         ],
         capture_output=True,
         text=True,

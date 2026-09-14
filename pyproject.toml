@@ -38,5 +38,12 @@ target-version = "py312"
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP", "B", "SIM"]
 
+[tool.ruff.lint.per-file-ignores]
+# run_barrier.py prints the propfirm geometry it was given, parameter by
+# parameter, inside triple-quoted blocks. Those lines are output text, not code:
+# rewrapping them changes the printed table and breaks the reproduction check
+# that makes the script worth keeping. Narrowed to this one rule, this one file.
+"scripts/run_barrier.py" = ["E501"]
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
