@@ -12,7 +12,8 @@ was written.
 
 **Verdict: KILL.** The book dies on K1 under every admissible construction. The
 research gate is missed on the level and on the maximum drawdown. H-a is not
-established. H-b is not established, and **the programme's regime line closes**.
+established. H-b is not established, and **the regime line closes as this programme
+built it** — a qualifier that carries weight, and §6 says exactly how much.
 
 ---
 
@@ -61,7 +62,7 @@ merely un-pinning gross exposure from volatility targeting proper takes it to
 **+0.068** — 0.28× the locked MDE. Volatility targeting is not demonstrated as the
 universal base layer practice claims it to be, net of cost, on this universe.
 
-**K4 closes the regime line.** The gap is +0.014, which is 0.3× the resolution of
+**K4 closes the regime line as built here.** The gap is +0.014, which is 0.3× the resolution of
 its own pairing. That is not a test too coarse to see the effect; it is a test fine
 enough to say the effect is smaller than anything it can see. It fails under the
 *lagged* states, which favour H-b, and under both sensitivities. **Sixth independent
@@ -122,10 +123,34 @@ that the gate is not cleared, not that the book is worthless.
 
 ## 5. What this means for the programme
 
-**The regime line closes.** H-b was the sixth and last test, its prior was low and
-written before the measurement, and it fails on a gap 0.3× its own resolution. Six
-independent devices, one known mechanism — 13 state transitions in 6,377 sessions —
-and a classification that carries variance rather than mean.
+**The regime line closes as this programme built it.** H-b was the sixth and last test
+of *that* construction, its prior was low and written before the measurement, and it
+fails on a gap 0.3× its own resolution. Six independent devices, one known mechanism —
+13 state transitions in 6,377 sessions, 0.514 a year — and a classification that carries
+variance rather than mean.
+
+What those six measurements license, stated at its real width:
+
+> A state classifier **ordered by training volatility**, changing state **0.514 times a
+> year**, used as a **sizing multiplier or a switch at portfolio level**, on a **single
+> 12-minus-1 trend book** whose effective dimension is 3.86 across eleven candidate
+> signals, adds nothing beyond realised volatility under its own expanding median. Six
+> devices tested it; each is either beaten by that one-line control or underpowered
+> against its own resolution.
+
+And what they do **not** license. These six say nothing about a state with more than one
+transition a year, nothing about a latent variable that is not volatility, nothing about
+use as **selection between signals**, as **portfolio construction**, or in **execution**,
+and nothing about a conditioned object of effective dimension above four. Every one of
+those axes is untested here, and each is how a documented practitioner actually uses
+regimes — Bridgewater balances risk *across* four macro quadrants rather than predicting
+one, Man AHL detects trend against consolidation rather than high against low volatility,
+Two Sigma arbitrates *between* signals, a question with no meaning when you hold one.
+
+The earlier phrasing — that the regime line closes, full stop — was a generalisation these
+measurements do not support, and it is withdrawn here rather than left standing. Five
+pre-registerable plans across those axes are in `5_Plans_de_recherche/`, outside this
+repository.
 
 One correction travels with that closure: the mechanism the conclusion invoked is not
 the one the evaluated arm shows. The 163.9% against 151.6% describes the *unscaled*
