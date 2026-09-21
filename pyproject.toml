@@ -44,6 +44,9 @@ select = ["E", "F", "I", "UP", "B", "SIM"]
 # rewrapping them changes the printed table and breaks the reproduction check
 # that makes the script worth keeping. Narrowed to this one rule, this one file.
 "scripts/run_barrier.py" = ["E501"]
+# Same reason: run_m3_evaluation.py prints wide result tables, and rewrapping the
+# f-strings that build them changes the printed output rather than the code.
+"scripts/run_m3_evaluation.py" = ["E501"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
