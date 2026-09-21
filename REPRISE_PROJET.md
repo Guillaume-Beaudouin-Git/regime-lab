@@ -478,6 +478,60 @@ dépasse 100 bps annualisés).
 
 ---
 
+## 8bis. État au 21 septembre 2026 — LIRE CECI AVANT LA SECTION 9
+
+La section 9 ci-dessous est **périmée**. Elle liste cinq pistes ; quatre sont
+tranchées et la cinquième a changé de nature. Résumé de ce qui a bougé.
+
+**Le programme a désormais quatre falsifications, pas trois.** H3 (surprises macro,
+noyau exponentiel à décroissance — la construction de Dedale) a été gelée puis
+falsifiée le 10/09 : aucun des quatre actifs n'atteint le seuil de Šidák. Elle
+répond donc à la piste n°1 du document, qui est **fermée**. Le consensus n'a pas
+eu à être acheté : la surprise est modélisée par autorégression sur les premières
+publications antérieures, et le proxy est validé contre le SPF de Philadelphie à
+r = +0,667 avant usage.
+
+**Les trois contrôles promis et les cinq plis sont faits** (`docs/RESULTS_FALSIFICATION.md`,
+`docs/RESULTS_FOLDS.md`). T1 : aucune famille ne bat le placebo d'une ligne, 0 pli
+sur 5. T3 : l'alpha apparent passe par le bêta, au 0ᵉ percentile, et le placebo
+d'une ligne a le même profil. T5 : partitions stables à 73-137× le nul, sauf
+C gradient boost. Les cinq plis confirment le résultat central mais deux d'entre
+eux ne contiennent qu'un seul état, donc la règle « 3 plis sur 5 » est
+incalculable pour A′ — le protocole expansif est déclaré walk-forward de référence.
+
+**La piste n°2, barrière propfirm, est fermée** (`docs/RESULTS_BARRIER.md`) :
+Δp(pass) +0,28 point contre un MDE de 6,10, au 16ᵉ percentile de son placebo, et
+89 % des comptes qui échouent ne quittent jamais un seul état. La p(pass) s'achète
+avec de l'exposition, pas avec du timing de variance.
+
+**La piste n°3, dispersion macro, est écrite** — `docs/RESULT_DISPERSION.md` et
+`docs/NOTE_DISPERSION_FR.md` dans macro-momentum. Au passage, l'affirmation
+centrale de `RESULTS_H1.md` a été **rétractée** : son placebo était un mélange iid
+là où `PRESPEC.md` demandait un placebo à cycle apparié, et sous quatre nuls
+corrects le signal est au 16ᵉ-23ᵉ percentile. H1 ne portait aucune information.
+
+**La piste n°4, marchés émergents, n'est pas instruite** — et les chiffres qui la
+motivaient (rapport EM/G10 de 0,7× à 1,5×) ne sont vérifiés nulle part : aucun
+code ni donnée émergente n'existe dans macro-momentum. La vérification passe avant
+le pré-enregistrement.
+
+**Ce qui est ouvert, et c'est neuf.** `docs/PRESPEC_TREND_VEHICLE.md`, verrouillé
+le 21/09 : le livre de tendance à 46 instruments devient le **sujet** au lieu du
+véhicule. Motif : les audits ont trouvé que le livre de référence de toutes les
+comparaisons publiées est brut, non dimensionné, avec dix séries de change
+décalées d'une séance et l'or et l'argent non back-ajustés, et que le coût en
+mange 48,8 %. Et que le vainqueur d'`EXTENSIONS.md` est **dépendant du véhicule** :
++0,244 t +2,91 en futures, mais +0,106 t +1,23 sur un mélange de détail, sous son
+propre MDE. Trois modifications, pas une de plus. Le régime y entre comme
+covariable de budget de risque, jamais comme interrupteur — c'est son sixième et
+dernier test.
+
+La feuille de route complète, avec les pistes classées par espérance, est dans
+`../../4_Feuille_de_route/PISTES.md` et `CONCLUSIONS.md` — hors de ce dépôt, qui
+est public, parce qu'elles citent des Sharpe de stratégies live.
+
+---
+
 ## 9. Pistes ouvertes, par priorité
 
 **1. Le notebook Dedale** — `https://github.com/brieuctrader/Dedale/blob/main/Python/macro_score_overview.ipynb`
