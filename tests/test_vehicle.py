@@ -117,3 +117,23 @@ def test_turnover_counts_both_sides_and_annualises():
     flipping = pd.DataFrame({"^GSPC": [0.0, 1.0] * 126 + [0.0]}, index=index)
     assert turnover(flipping) > 200.0, "a daily flip is a very high turnover"
     assert turnover(pd.DataFrame({"^GSPC": [1.0] * 253}, index=index)) == 0.0
+
+
+def test_financing_and_cost_ask_different_questions():
+    """§6 is a market property, §7 is a data property. They were the same tuple once."""
+    from regime_lab.extensions.vehicle import FUNDED_ON_CASH
+
+    # Every bond and credit ETF is funded, including the three that cost_class
+    # routes to fixed_income because their exposure would really trade as a future.
+    for name in ("IEF", "SHY", "TLT"):
+        assert name in FUNDED_ON_CASH, f"{name} is a total-return ETF and must be funded"
+        assert cost_class(name) == "fixed_income", f"{name} trades as a future"
+        assert name not in NO_FUTURES_VEHICLE
+
+    # And the two currencies with no futures contract are a cost question only:
+    # spot FX carries no coupon, so there is nothing to fund.
+    for name in ("NOK=X", "SEK=X"):
+        assert name in NO_FUTURES_VEHICLE
+        assert name not in FUNDED_ON_CASH, f"{name} is spot FX and carries no coupon"
+
+    assert len(FUNDED_ON_CASH) == 9, "nine bond and credit ETFs are total-return"

@@ -34,12 +34,31 @@ import pandas as pd
 
 from regime_lab.extensions.trend import MAX_LEVERAGE, VOL_TARGET, tsmom_signal
 
-#: Instruments whose exposure has no liquid futures contract and must be traded
-#: as cash or an ETF. NOK and SEK have no liquid CME or ICE contract; the rest are
-#: credit, global-aggregate or inflation-linked baskets with no futures equivalent.
+#: §6, the COST question: which exposures have no liquid futures contract and must
+#: therefore be traded as cash or an ETF. NOK and SEK have no liquid CME or ICE
+#: contract; the rest are credit, global-aggregate or inflation-linked baskets with
+#: no futures equivalent. A property of the market.
 NO_FUTURES_VEHICLE = (
     "NOK=X", "SEK=X",
     "AGG", "BWX", "EMB", "HYG", "LQD", "TIP",
+)
+
+#: §7, the FINANCING question, which is a different one: which stored series already
+#: contain a cash return that must be subtracted to reach an excess return.
+#:
+#: `scripts/fetch_trend_universe.py` downloads with `auto_adjust=True`, so every ETF
+#: column is a TOTAL return series. All nine bond and credit ETFs therefore carry
+#: their coupon and must be funded — SHY, a 1-3 year Treasury ETF, drifts at 1.92%
+#: a year against a mean cash rate of 1.77%, which is very nearly the cash rate
+#: itself. Equity indices are price indices, futures are excess by construction, and
+#: spot FX carries no coupon, so none of those are funded here.
+#:
+#: These two tuples were the same object until 2026-09-22, which was a defect: the
+#: §6 list was built by a market property and reused for a data property, so IEF,
+#: SHY and TLT fell through `cost_class`'s default branch and were never funded
+#: while six identical bond ETFs were. It cost 0.0414 of Sharpe on the headline.
+FUNDED_ON_CASH = (
+    "AGG", "BWX", "EMB", "HYG", "IEF", "LQD", "SHY", "TIP", "TLT",
 )
 
 #: Round-trip basis points by class, docs/PRESPEC_TREND_VEHICLE.md §6.
