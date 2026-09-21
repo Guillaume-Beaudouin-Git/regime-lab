@@ -106,7 +106,7 @@ republier avec l'outil Artifact en passant l'URL ci-dessus en paramètre `url`.
 
 ## 3. Les règles non négociables du projet
 
-Elles viennent du `CLAUDE.md` de `~/Desktop/Algo_claude/` et s'appliquent partout.
+Elles viennent du `CLAUDE.md` du dépôt privé voisin et s'appliquent partout.
 
 - **Signal en T-1, trade en T.** Aucune exception.
 - **Rendements en excess** du taux sans risque. HAC lag-6. Correction pour tests
@@ -543,7 +543,7 @@ discipline, et dire ce qui tient. Une partie a déjà été testée indirectemen
 
 **2. Le régime branché sur la géométrie de barrière** — troisième orientation du
 scan praticien, jamais exécutée. Elle a besoin du simulateur FTMO qui vit dans
-`~/Desktop/Algo_claude/Portfolio/risk/trailing_dd_simulator.py`. Sortie utile :
+le simulateur de barrière du dépôt privé voisin (`SIMULATOR_PATH` dans `.env`). Sortie utile :
 **Δp(pass) et Δdurée**, pas ΔSharpe.
 
 **3. Écrire le résultat de dispersion macro.** H1 + H2 forment un seul résultat

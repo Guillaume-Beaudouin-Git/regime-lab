@@ -16,7 +16,7 @@ Reported quantities are dp(pass) and d(duration). Not dSharpe: a Sharpe here
 would be answering a different question.
 
 Nothing is written into either repository. The propfirm geometry comes from
-Algo_claude and is used, not reimplemented; the states, the book, the frozen
+a private sibling repository and is used, not reimplemented; the states, the book, the frozen
 sizing rule and the block bootstrap come from regime-lab and are used, not
 reimplemented.
 """
@@ -33,37 +33,28 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-from regime_lab.config import CACHE, ROOT  # noqa: E402
+from regime_lab.config import CACHE  # noqa: E402
 
 
 # This is the only script here that needs a sibling repository. The propfirm
 # barrier geometry is not reimplemented: it is imported from the audited
-# simulator in Algo_claude, because a geometry written here would be the thing
-# under test rather than the thing tested against. Algo_claude is NOT a declared
-# dependency of this package and a fresh clone will not have it, so the failure
-# is made loud rather than arriving as a bare ImportError.
-#
 # The path is resolved through ROOT rather than __file__ so that the module still
 # loads under the exec harness in tests/test_importable.py, which supplies no
 # __file__. The guard raises only when main() is reached, for the same reason:
 # importing this file must stay free of side effects.
-def _find_algo_claude() -> Path:
-    """ALGO_CLAUDE_PATH if set, else the first candidate that actually holds the
-    simulator. The sibling repository is not version-controlled alongside this
-    one and has moved twice already, so its location is searched, not assumed."""
-    override = os.environ.get("ALGO_CLAUDE_PATH")
-    if override:
-        return Path(override)
-    here = ROOT
-    for _ in range(4):
-        here = here.parent
-        candidate = here / "Algo_claude"
-        if (candidate / "Portfolio" / "risk" / "trailing_dd_simulator.py").exists():
-            return candidate
-    return Path.home() / "Desktop" / "Algo_claude"
+def _simulator_root() -> Path:
+    """Where the audited propfirm simulator lives.
+
+    The barrier geometry is imported rather than reimplemented, because a geometry
+    written here would be the thing under test rather than the thing tested
+    against. It lives in a private sibling repository which is not a declared
+    dependency of this package and is not public, so its location is configuration
+    and never a literal here: set SIMULATOR_PATH in .env, which is gitignored."""
+    configured = os.environ.get("SIMULATOR_PATH")
+    return Path(configured).expanduser() if configured else Path()
 
 
-ALGO_CLAUDE = _find_algo_claude()
+ALGO_CLAUDE = _simulator_root()
 OUT = Path(os.environ.get("BARRIER_OUT", CACHE))
 _SIMULATOR = ALGO_CLAUDE / "Portfolio" / "risk" / "trailing_dd_simulator.py"
 if _SIMULATOR.exists():
@@ -75,10 +66,10 @@ def _require_simulator() -> None:
     if not _SIMULATOR.exists():
         raise SystemExit(
             "scripts/run_barrier.py needs the audited propfirm simulator, which "
-            f"lives in a separate repository and was not found at {ALGO_CLAUDE}.\n"
-            "Set ALGO_CLAUDE_PATH to its checkout. Every other script in this "
-            "repository runs without it, and the published barrier figures are "
-            "in docs/RESULTS_BARRIER.md."
+            "lives in a private sibling repository.\n"
+            "Set SIMULATOR_PATH in .env to its checkout. Every other script in "
+            "this repository runs without it, and the published barrier figures "
+            "are in docs/RESULTS_BARRIER.md."
         )
 
 
@@ -197,14 +188,14 @@ COST_CLASS = {
 
 
 # ---------------------------------------------------------------------------
-# 1 -- the real geometry, read off the two Algo_claude modules
+# 1 -- the real geometry, read off the two simulator modules
 # ---------------------------------------------------------------------------
 
 def report_geometry() -> PropfirmConfig:
     cfg = PropfirmConfig()
     lock = cfg.capital + cfg.trailing_dd_funded + cfg.lock_trigger_excess
     print(RULE)
-    print("1. GEOMETRIE REELLE, citee depuis Algo_claude/Portfolio/risk/")
+    print("1. GEOMETRIE REELLE, citee depuis le simulateur audite")
     print(RULE)
     print(f"""
   trailing_dd_simulator.py -- Tradeify Select Flex 25K, parametres cites :

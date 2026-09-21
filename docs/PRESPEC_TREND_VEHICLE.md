@@ -121,7 +121,7 @@ conditioning.
 - **End:** 2026-09-10, the last session in the stored panel.
 - **Length:** 23.2 years.
 - **No data is re-downloaded.** Back-adjusted futures series, where used, come
-  from `Algo_claude/strategies/trend_futures/daily/`, which is validated against
+  from a private sibling repository's back-adjusted daily futures set, validated against
   Databento at 0.975 weekly return correlation.
 
 Declared breadth, to be used in any appeal to the fundamental law: over 2008+ on
@@ -190,7 +190,7 @@ favoured the thesis. The binding rate is reported in every table.
 ## 6. Cost model, declared before any result
 
 Round-trip basis points by class, all applied to the change in exposure. Values
-are the programme's own schedule; futures values are the range `Algo_claude`
+are the programme's own schedule; futures values are the range that sibling repository
 measured per contract from tick size, notional and commission (0.57–2.11 bp per
 side including roll cost).
 
@@ -318,7 +318,7 @@ unconditional book Sharpe, as it did at +0.428 against 0.44.
 **P2 — signals re-derived on block-shuffled returns.** Never a permutation of the
 P&L column. The signal is recomputed from shuffled prices so that the placebo
 inherits the estimation noise of the signal itself. Convention taken from
-`Algo_claude/strategies/trend_futures/PREREG.md` K2, which is stricter than this
+that repository's own pre-registration, whose K2 is stricter than this
 repository's.
 
 **P3 — matched-exposure control.** Every conditioned arm is compared against a

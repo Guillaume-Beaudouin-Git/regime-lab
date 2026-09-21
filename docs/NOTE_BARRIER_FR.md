@@ -5,7 +5,7 @@ résultat central qui ne soit pas déjà réfutée. Sortie : **Δp(pass) et Δdu
 Aucun Sharpe n'est rapporté comme résultat.
 
 Tout est produit par un seul fichier, `regime_barrier.py`, exécuté dans le venv
-du dépôt. Aucune écriture dans `regime-lab` ni dans `Algo_claude` ;
+du dépôt. Aucune écriture dans `regime-lab` ni dans `le dépôt privé voisin` ;
 `scripts/run_phase2.py` n'a pas été relancé ; aucune donnée re-téléchargée ;
 `docs/CHARTER.html` n'a pas été touché.
 
@@ -29,7 +29,7 @@ par quantile de volatilité réalisée est le nul qui décide.
 
 ## 1. La géométrie réelle, citée et non supposée
 
-`Algo_claude/Portfolio/risk/trailing_dd_simulator.py` — Tradeify Select Flex 25K.
+`le dépôt privé voisin/Portfolio/risk/trailing_dd_simulator.py` — Tradeify Select Flex 25K.
 Paramètres cités depuis `PropfirmConfig` :
 
 | paramètre | valeur | en % du capital |
