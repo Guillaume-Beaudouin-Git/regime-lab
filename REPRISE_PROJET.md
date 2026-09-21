@@ -526,9 +526,15 @@ propre MDE. Trois modifications, pas une de plus. Le régime y entre comme
 covariable de budget de risque, jamais comme interrupteur — c'est son sixième et
 dernier test.
 
-La feuille de route complète, avec les pistes classées par espérance, est dans
-`../../4_Feuille_de_route/PISTES.md` et `CONCLUSIONS.md` — hors de ce dépôt, qui
-est public, parce qu'elles citent des Sharpe de stratégies live.
+**La liste de tout ce qui reste à faire, avec l'ordre recommandé, est dans
+`../../4_Feuille_de_route/TACHES.md`** ; les conclusions et les pistes classées par
+espérance sont à côté dans `CONCLUSIONS.md` et `PISTES.md`. Ces trois fichiers sont
+hors de ce dépôt, qui est public, parce qu'ils citent des Sharpe de stratégies live.
+
+Première tâche de l'étude, faite le 21/09 : `scripts/audit_fx_alignment.py` établit
+que **huit** séries de change sont décalées d'une séance et que **CAD et MXN sont
+alignées** — le pré-enregistrement en verrouillait dix, et les décaler aurait
+introduit le défaut qu'il sert à retirer. Amendement journalisé.
 
 ---
 
