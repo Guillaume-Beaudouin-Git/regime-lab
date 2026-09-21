@@ -35,6 +35,7 @@ import pandas as pd
 
 from regime_lab.config import CACHE, ROOT  # noqa: E402
 
+
 # This is the only script here that needs a sibling repository. The propfirm
 # barrier geometry is not reimplemented: it is imported from the audited
 # simulator in Algo_claude, because a geometry written here would be the thing
@@ -46,7 +47,23 @@ from regime_lab.config import CACHE, ROOT  # noqa: E402
 # loads under the exec harness in tests/test_importable.py, which supplies no
 # __file__. The guard raises only when main() is reached, for the same reason:
 # importing this file must stay free of side effects.
-ALGO_CLAUDE = Path(os.environ.get("ALGO_CLAUDE_PATH", ROOT.parent / "Algo_claude"))
+def _find_algo_claude() -> Path:
+    """ALGO_CLAUDE_PATH if set, else the first candidate that actually holds the
+    simulator. The sibling repository is not version-controlled alongside this
+    one and has moved twice already, so its location is searched, not assumed."""
+    override = os.environ.get("ALGO_CLAUDE_PATH")
+    if override:
+        return Path(override)
+    here = ROOT
+    for _ in range(4):
+        here = here.parent
+        candidate = here / "Algo_claude"
+        if (candidate / "Portfolio" / "risk" / "trailing_dd_simulator.py").exists():
+            return candidate
+    return Path.home() / "Desktop" / "Algo_claude"
+
+
+ALGO_CLAUDE = _find_algo_claude()
 OUT = Path(os.environ.get("BARRIER_OUT", CACHE))
 _SIMULATOR = ALGO_CLAUDE / "Portfolio" / "risk" / "trailing_dd_simulator.py"
 if _SIMULATOR.exists():
