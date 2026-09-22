@@ -190,7 +190,10 @@ def main() -> None:
     readings = []
     for block in BLOCKS:
         draws = np.array([
-            delta(hit_fast, hit_slow, weight, state, dates[stationary_indices(len(dates), block, rng)])
+            delta(
+                hit_fast, hit_slow, weight, state,
+                dates[stationary_indices(len(dates), block, rng)],
+            )
             for _ in range(DRAWS)
         ])
         se = float(np.nanstd(draws, ddof=1))
