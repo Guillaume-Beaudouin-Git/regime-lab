@@ -1,0 +1,14 @@
+/data/
+*.parquet
+*.csv
+!docs/**/*.csv
+__pycache__/
+*.py[cod]
+.venv/
+.pytest_cache/
+.ruff_cache/
+.env
+.env.*
+!.env.example
+.DS_Store
+!config.py
