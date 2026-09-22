@@ -125,7 +125,7 @@ def online_states(x: np.ndarray, centroids: np.ndarray, penalty: float) -> np.nd
     window and keeping its last value gives the same answer at a cost that grows
     with the square of the sample, which is why it is done this way.
     """
-    n, k = len(x), len(centroids)
+    n = len(x)
     loss = 0.5 * ((x[:, None, :] - centroids[None, :, :]) ** 2).sum(axis=2)
     value = loss[0].copy()
     out = np.empty(n, dtype=np.int64)

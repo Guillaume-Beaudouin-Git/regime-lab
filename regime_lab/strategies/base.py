@@ -69,6 +69,26 @@ def equal_risk_momentum(
 
     Signal at t-1, traded at t. The skip month is the standard control for
     short-horizon reversal.
+
+    **Declared, not wired, not deleted — see docs/PROTOCOL_FREEZE.md, 2026-09-22.**
+
+    The charter promises two frozen base strategies and reports both whatever
+    happens. This is the second, and it has never had a call site. It is left here
+    rather than removed, because deleting it would quietly drop a promise, and it is
+    left uncalled rather than wired in, because on this panel it cannot be called
+    honestly:
+
+    * two of the six series in the panel are **rates quoted in per cent**, and
+      `pct_change()` on a rate is not a return. Correcting it moves the book by
+      **+0.176 of Sharpe** (0.337 naive against 0.513 with a proper bond return),
+      which is larger than most effects this programme has measured;
+    * six instruments is below the programme's own N >= 30 rule for any
+      cross-sectional claim, by a factor of five.
+
+    Wiring it would therefore require choosing between two constructions that differ
+    by more than the quantity under test, on a panel too narrow to carry the claim —
+    and choosing after seeing which reads higher is the adjustment the protocol
+    exists to forbid. The honest state is this docstring.
     """
     returns = panel[assets].pct_change()
     momentum = panel[assets].shift(skip) / panel[assets].shift(lookback) - 1.0
