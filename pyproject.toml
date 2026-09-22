@@ -4,6 +4,12 @@ version = "0.1.0"
 description = "Do changes in macro conditions predict cross-asset returns, where levels do not?"
 requires-python = ">=3.12"
 dependencies = [
+    # This project imports regime_lab for the point-in-time contract, the
+    # coverage guard, the stationary block bootstrap and the trial register.
+    # It was installed editable by hand and declared nowhere, so moving the
+    # programme folder broke the venv silently — twice. Declared as a path
+    # dependency so `uv sync` rebuilds it instead of the next person guessing.
+    "regime-lab",
     "pandas>=2.2", "numpy>=1.26", "pyarrow>=16", "requests>=2.31",
     "yfinance>=0.2.40", "python-dotenv>=1.0", "scipy>=1.13",
     "statsmodels>=0.14", "scikit-learn>=1.5", "openpyxl>=3.1",
@@ -22,3 +28,6 @@ target-version = "py312"
 select = ["E", "F", "I", "UP", "B", "SIM"]
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+
+[tool.uv.sources]
+regime-lab = { path = "../../1_Etude_principale/regime-lab", editable = true }
