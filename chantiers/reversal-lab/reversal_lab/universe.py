@@ -26,4 +26,16 @@ FRENCH = {
 
 #: Large, liquid US names for the conditioning layer. Survivorship-biased and
 #: labelled as such everywhere it is used.
-TICKERS = ["AAPL", "MSFT", "AMZN", "GOOGL", "META", "NVDA", "TSLA", "BRK-B", "JPM", "V", "JNJ", "WMT", "PG", "MA", "HD", "CVX", "ABBV", "KO", "PEP", "COST", "BAC", "AVGO", "MRK", "ADBE", "CSCO", "ACN", "LLY", "MCD", "TMO", "ABT", "CRM", "NKE", "DHR", "TXN", "LIN", "NEE", "VZ", "CMCSA", "PM", "WFC", "UPS", "RTX", "INTC", "AMD", "QCOM", "HON", "SPGI", "LOW", "UNP", "BA", "CAT", "GS", "IBM", "BLK", "DE", "ELV", "AMGN", "SBUX", "GILD", "MDT", "ISRG", "PLD", "BKNG", "ADP", "MMM", "AXP", "TJX", "CVS", "MDLZ", "SYK", "CI", "ZTS", "MO", "CB", "SO", "DUK", "BDX", "MU", "LRCX", "ADI", "KLAC", "SNPS", "CDNS", "ORLY", "MAR", "APD", "ECL", "SHW", "NSC", "CSX", "PSA", "AMT", "CCI", "EQIX", "SPG", "O", "WELL", "VTR", "DLR", "ITW", "EMR", "ETN", "PH", "ROK", "DOV", "XYL", "FDX", "LUV", "DAL", "UAL", "AAL", "CCL", "RCL", "MGM", "WYNN", "LVS", "F", "GM", "HOG", "WHR", "LEG", "NWL", "HAS", "MAT"]
+TICKERS = [
+    "AAPL", "MSFT", "AMZN", "GOOGL", "META", "NVDA", "TSLA", "BRK-B", "JPM", "V", "JNJ",
+    "WMT", "PG", "MA", "HD", "CVX", "ABBV", "KO", "PEP", "COST", "BAC", "AVGO", "MRK",
+    "ADBE", "CSCO", "ACN", "LLY", "MCD", "TMO", "ABT", "CRM", "NKE", "DHR", "TXN", "LIN",
+    "NEE", "VZ", "CMCSA", "PM", "WFC", "UPS", "RTX", "INTC", "AMD", "QCOM", "HON", "SPGI",
+    "LOW", "UNP", "BA", "CAT", "GS", "IBM", "BLK", "DE", "ELV", "AMGN", "SBUX", "GILD",
+    "MDT", "ISRG", "PLD", "BKNG", "ADP", "MMM", "AXP", "TJX", "CVS", "MDLZ", "SYK", "CI",
+    "ZTS", "MO", "CB", "SO", "DUK", "BDX", "MU", "LRCX", "ADI", "KLAC", "SNPS", "CDNS",
+    "ORLY", "MAR", "APD", "ECL", "SHW", "NSC", "CSX", "PSA", "AMT", "CCI", "EQIX", "SPG",
+    "O", "WELL", "VTR", "DLR", "ITW", "EMR", "ETN", "PH", "ROK", "DOV", "XYL", "FDX", "LUV",
+    "DAL", "UAL", "AAL", "CCL", "RCL", "MGM", "WYNN", "LVS", "F", "GM", "HOG", "WHR", "LEG",
+    "NWL", "HAS", "MAT",
+]

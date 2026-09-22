@@ -65,7 +65,7 @@ def test_the_document_still_contains_a_readable_table():
 
 def test_the_code_map_matches_the_frozen_map_cell_by_cell():
     parsed = frozen_map()
-    assert SIGN_MAP == parsed, "the code and the pre-specification disagree"
+    assert parsed == SIGN_MAP, "the code and the pre-specification disagree"
 
 
 @pytest.mark.parametrize("theme", sorted(ROW_TO_THEME.values()))

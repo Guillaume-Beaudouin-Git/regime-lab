@@ -54,4 +54,12 @@ select = ["E", "F", "I", "UP", "B", "SIM"]
 "scripts/run_m3_evaluation.py" = ["E501"]
 
 [tool.pytest.ini_options]
-testpaths = ["tests"]
+testpaths = ["tests", "chantiers/macro-momentum/tests"]
+
+# One repository, one environment. The two derived studies were separate
+# repositories until 2026-09-22, each with its own venv and a path dependency on
+# this package; moving the programme folder broke all three twice. They are now
+# members of a single uv workspace: `uv sync --all-packages --extra dev` builds
+# one .venv at the root with the three packages installed editable.
+[tool.uv.workspace]
+members = ["chantiers/macro-momentum", "chantiers/reversal-lab"]

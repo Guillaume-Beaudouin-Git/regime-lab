@@ -19,8 +19,8 @@ Read-only with respect to the repository. Writes nothing.
 from __future__ import annotations
 
 import sys
-from pathlib import Path
 import warnings
+from pathlib import Path
 
 import numpy as np
 import pandas as pd
@@ -30,9 +30,9 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from macro_momentum.book import inverse_vol_weight  # noqa: E402
 from macro_momentum.exposures import CONTESTED, SIGN_MAP  # noqa: E402
+from macro_momentum.signals import all_themes, standardise  # noqa: E402
 from macro_momentum.universe import ASSETS  # noqa: E402
 from scripts.run import load  # noqa: E402
-from macro_momentum.signals import all_themes, standardise  # noqa: E402
 
 warnings.filterwarnings("ignore")
 RULE = "=" * 78

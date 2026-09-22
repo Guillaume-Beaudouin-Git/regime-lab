@@ -156,7 +156,8 @@ def main() -> None:
             r = cross_sectional_ic(signal_for(theme, cls), fwd)
             cells[(theme, cls)] = r
             if np.isfinite(r["t"]):
-                row += f"{f'IC {r[chr(39)+chr(39)] if False else r["ic"]:+.4f}  t {r["t"]:+.2f}':>22}"
+                label = f"IC {r['ic']:+.4f}  t {r['t']:+.2f}"
+                row += f"{label:>22}"
             else:
                 row += f"{'—':>22}"
         print(row)
