@@ -73,9 +73,44 @@ Same data, same harness, same period:
 
 | | CAGR | volatility | Sharpe | worst drawdown |
 | --- | --- | --- | --- | --- |
-| jump model (penalty by cross-validation) | 8.6% | 13.0% | **0.50** | −32.0% |
+| jump model (penalty by cross-validation) | ~~8.6%~~ | ~~13.0%~~ | ~~**0.50**~~ | ~~−32.0%~~ |
 | volatility target, matched to the model's volatility | 10.3% | 13.4% | **0.61** | −35.4% |
 | volatility target, at the training-period volatility | 11.9% | 15.9% | **0.62** | −41.8% |
+
+
+> ### ⚠ Correction, 2026-09-22 — the cross-validation row is withdrawn
+>
+> **No code ever produced it.** `scripts/replicate_shu2024.py` swept eight fixed
+> penalties and none of its rows reads 8.6% / 13.0% / 0.50 / −32.0% / 76.6% / 112%.
+> This is the fourth time this programme has published a figure whose generating code
+> was not committed, and the remedy it used the first time is to write the missing
+> analysis rather than retract unexamined. So it was written: `select_penalty` now
+> re-chooses the penalty on each refit's own training window, scoring candidates on a
+> held-out block by the excess-return separation the model exists to produce.
+>
+> **It does not reproduce the row either.**
+>
+> | | CAGR | vol | Sharpe | maxDD | exposure | turnover |
+> |---|---|---|---|---|---|---|
+> | cross-validation, as now written | 7.8% | 10.2% | 0.54 | −25.0% | 63.6% | **762%** |
+> | the withdrawn published row | 8.6% | 13.0% | 0.50 | −32.0% | 76.6% | **112%** |
+>
+> Turnover is the tell: 762% against 112%. The selection lands on λ = 0 on **44 of 90
+> refits**, and λ = 0 is the unpenalised model, which turns over 1448% a year. A
+> criterion that scores state separation on a held-out block is indifferent to how much
+> the resulting state flips, so it buys separation with turnover.
+>
+> **Why this stops here rather than continuing.** "Penalty by cross-validation" does not
+> say cross-validated *on what*, and the criterion is therefore underdetermined by the
+> document. Scoring on validation Sharpe instead, or on any measure that charges
+> turnover, would select differently and would land somewhere else. Trying criteria
+> until one returns 112% would be fitting the procedure to a remembered answer, which is
+> the failure this repository exists to make visible. The row is withdrawn, what a
+> defensible arm actually produces is published beside it, and the gap is left open.
+>
+> Nothing else in this document moves: the buy-and-hold reproduces to the decimal, the
+> eight-penalty sweep is unchanged, and the conclusion — the risk reproduces, the return
+> does not — rests on the sweep and not on the withdrawn row.
 
 **At the same volatility, the free rule returns 1.7 points more a year and
 scores 0.11 higher.** The jump model's advantage over buy and hold is real and
