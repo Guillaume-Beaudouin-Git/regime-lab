@@ -1,6 +1,6 @@
 """AHL day 1, step 3 — the MDE of the panel statistic, under the null.
 
-`5_Plans_de_recherche/ahl/PLAN.md` §c refuses to guess this number. It brackets it
+`pilotage/plans_de_recherche/ahl/PLAN.md` §c refuses to guess this number. It brackets it
 analytically between 0.8 points (clustering by date) and 4.5-6.0 points (clustering by
 63-session episode), declares an expectation of 2 to 4, and fixes the *procedure*:
 

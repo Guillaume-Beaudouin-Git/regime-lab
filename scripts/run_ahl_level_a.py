@@ -1,6 +1,6 @@
 """AHL level A — speed selection on a trend/chop change point.
 
-The construction is frozen in `5_Plans_de_recherche/ahl/PRESPEC_AHL.md` §5 and nothing
+The construction is frozen in `pilotage/plans_de_recherche/ahl/PRESPEC_AHL.md` §5 and nothing
 here is a choice made after seeing a result.
 
     latent A     ER63 = |log P_t - log P_{t-63}| / sum|d log P|, cross-sectional median

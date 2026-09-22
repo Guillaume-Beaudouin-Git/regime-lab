@@ -528,7 +528,7 @@ covariable de budget de risque, jamais comme interrupteur — c'est son sixième
 dernier test.
 
 **La liste de tout ce qui reste à faire, avec l'ordre recommandé, est dans
-`../../4_Feuille_de_route/TACHES.md`** ; les conclusions et les pistes classées par
+`pilotage/feuille_de_route/TACHES.md`** ; les conclusions et les pistes classées par
 espérance sont à côté dans `CONCLUSIONS.md` et `PISTES.md`. Ces trois fichiers sont
 hors de ce dépôt, qui est public, parce qu'ils citent des Sharpe de stratégies live.
 

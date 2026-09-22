@@ -149,7 +149,7 @@ Two Sigma arbitrates *between* signals, a question with no meaning when you hold
 
 The earlier phrasing — that the regime line closes, full stop — was a generalisation these
 measurements do not support, and it is withdrawn here rather than left standing. Five
-pre-registerable plans across those axes are in `5_Plans_de_recherche/`, outside this
+pre-registerable plans across those axes are in `pilotage/plans_de_recherche/`, outside this
 repository.
 
 One correction travels with that closure: the mechanism the conclusion invoked is not
