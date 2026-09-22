@@ -16,7 +16,13 @@ from regime_lab.config import CACHE
 
 warnings.filterwarnings("ignore")
 
-TICKERS = ["^GSPC", "^NDX", "^RUT", "^STOXX50E", "^N225", "^FTSE", "^GDAXI", "^FCHI", "^AEX", "^HSI", "^AXJO", "^GSPTSE", "^IBEX", "TLT", "IEF", "SHY", "AGG", "TIP", "LQD", "HYG", "EMB", "BWX", "GC=F", "SI=F", "CL=F", "NG=F", "HG=F", "ZC=F", "ZS=F", "ZW=F", "KC=F", "PL=F", "CT=F", "SB=F", "HO=F", "DX-Y.NYB", "EURUSD=X", "JPY=X", "GBPUSD=X", "AUDUSD=X", "CAD=X", "CHF=X", "NZDUSD=X", "SEK=X", "NOK=X", "MXN=X"]
+TICKERS = [
+    "^GSPC", "^NDX", "^RUT", "^STOXX50E", "^N225", "^FTSE", "^GDAXI", "^FCHI", "^AEX",
+    "^HSI", "^AXJO", "^GSPTSE", "^IBEX", "TLT", "IEF", "SHY", "AGG", "TIP", "LQD", "HYG",
+    "EMB", "BWX", "GC=F", "SI=F", "CL=F", "NG=F", "HG=F", "ZC=F", "ZS=F", "ZW=F", "KC=F",
+    "PL=F", "CT=F", "SB=F", "HO=F", "DX-Y.NYB", "EURUSD=X", "JPY=X", "GBPUSD=X", "AUDUSD=X",
+    "CAD=X", "CHF=X", "NZDUSD=X", "SEK=X", "NOK=X", "MXN=X",
+]
 
 
 def main() -> None:

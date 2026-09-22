@@ -209,6 +209,7 @@ cd ~/Desktop/regime-lab
 .venv/bin/python scripts/run_evaluation.py        # couches 1 et 2
 .venv/bin/python scripts/run_t2.py                # test décisif
 .venv/bin/python scripts/run_layer3.py            # timing contre dimensionnement
+.venv/bin/python scripts/fetch_trend_universe.py  # PRÉREQUIS DUR de run_extensions
 .venv/bin/python scripts/run_extensions.py        # les suites post-étude
 .venv/bin/python -m pytest -q                     # 74 tests
 ```

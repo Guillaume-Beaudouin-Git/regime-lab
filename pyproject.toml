@@ -19,6 +19,11 @@ dependencies = [
     "hmmlearn>=0.3",
     "lightgbm>=4.0",
     "jumpmodels>=0.1",
+    # scripts/replicate_shu2024.py reads Shiller's ie_data.xls over HTTP with
+    # pandas.read_excel, which needs an .xls engine. It was installed by hand and
+    # absent from this list, so a fresh clone failed with an ImportError that the
+    # tests could not see because main() is never called by them.
+    "xlrd>=2.0",
 ]
 
 [project.optional-dependencies]

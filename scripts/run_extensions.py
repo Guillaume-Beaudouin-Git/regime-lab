@@ -27,7 +27,17 @@ def sharpe(x: pd.Series) -> float:
 
 
 def main() -> None:
-    px = pd.read_parquet(CACHE / "trend_universe.parquet")
+    # Hard prerequisite: scripts/fetch_trend_universe.py writes this file and nothing
+    # else does. It was documented in no execution order, so a fresh clone reached
+    # here and failed on a missing path rather than on a missing step.
+    panel = CACHE / "trend_universe.parquet"
+    if not panel.exists():
+        raise SystemExit(
+            "data/cache/trend_universe.parquet is missing. Run "
+            "scripts/fetch_trend_universe.py first; it is the only thing that "
+            "writes it."
+        )
+    px = pd.read_parquet(panel)
     returns = px.pct_change()
     trend, weights = book(px)
     trend = trend.dropna()

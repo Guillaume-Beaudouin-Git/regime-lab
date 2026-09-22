@@ -39,7 +39,11 @@ Every observation here therefore carries two dates:
 | `available_at` | the first instant a real-time observer could have known it |
 
 A value may enter a model at `t` only if `available_at <= t`. Superseded
-revisions are kept, so any past panel can be rebuilt exactly as it stood.
+only first releases are kept, so a past panel is rebuilt with the first print of
+each period rather than the vintage that stood at the time. That is conservative,
+not exact: `output_type=4` returns the initial release and revisions are not
+stored. The earlier claim that any past panel is rebuilt "exactly as it stood"
+was wrong and is corrected in docs/RESULTS_FINAL.md.
 `tests/test_pit.py` enforces this: a panel built for a past date must not move
 when later data arrives.
 

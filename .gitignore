@@ -24,3 +24,10 @@ __pycache__/
 
 # os
 .DS_Store
+
+# Shiller ie_data.xls and any other spreadsheet: fetched over HTTP by
+# scripts/replicate_shu2024.py, which reads the URL and never this file. Verified
+# live 2026-09-22 (HTTP 200), so the local copy is a convenience and not the only
+# one. History is not rewritten: a force-push over a published tag costs more than
+# 1.6 MB of blob, which is the same reasoning applied to the anonymisation.
+*.xls

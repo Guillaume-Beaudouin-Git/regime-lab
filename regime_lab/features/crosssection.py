@@ -76,8 +76,24 @@ def build(industries: pd.DataFrame, size_bm: pd.DataFrame, factors: pd.DataFrame
     cumulative = (1 + industries / 100.0).rolling(63).apply(np.prod, raw=True) - 1
     out["xs_breadth_63"] = (cumulative > 0).mean(axis=1)
 
+    # Promised features are named here and their absence is recorded rather than
+    # skipped. `ff_mom` is NOT in `factors_5.parquet`, whose series are ff_cma,
+    # ff_hml, ff_mkt-rf, ff_rf, ff_rmw and ff_smb: the loader fetches the five-factor
+    # set, which does not carry momentum. Under the previous `if name in factors`
+    # guard `xs_ff_mom_63` was silently never built — no error, no warning, and the
+    # feature count still looked right. That is the same failure mode as the four
+    # already logged in docs/PROTOCOL_FREEZE.md.
+    #
+    # It is recorded and not repaired: the study is frozen, no published figure ever
+    # contained this column, and adding a factor to the matrix now would change the
+    # frozen feature set rather than document it.
+    missing = []
     for name in ("ff_smb", "ff_hml", "ff_mom"):
         if name in factors:
             out[f"xs_{name}_63"] = factors[name].rolling(63).sum()
+        else:
+            missing.append(name)
+    if missing:
+        out.attrs["promised_but_absent"] = missing
 
     return out

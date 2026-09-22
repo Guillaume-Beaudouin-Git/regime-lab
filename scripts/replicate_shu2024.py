@@ -94,7 +94,45 @@ def load() -> tuple[pd.Series, pd.Series]:
     return frame["total_return"], frame["bill"]
 
 
-def build_states(x: pd.DataFrame, excess: pd.Series, penalty: float) -> pd.Series:
+def select_penalty(train: pd.DataFrame, train_excess: pd.Series) -> float:
+    """The jump penalty chosen on the training window alone, by cross-validation.
+
+    `docs/REPLICATION_SHU2024.md` publishes a row labelled "jump model (penalty by
+    cross-validation)" at 8.6% CAGR, 0.50 Sharpe and 112% turnover. No code produced
+    it: `main()` swept a fixed grid and none of its eight rows reads those numbers.
+    That is the fourth time this programme has published a figure whose generating
+    code was never committed, and the remedy the programme already used once is to
+    write the missing analysis rather than to retract the row unexamined.
+
+    The selection itself is not new: `regime_lab.models.calibrate.choose_jump_penalty`
+    is the routine the main study uses, scoring each grid value on the training window
+    only and never on the block being predicted.
+    """
+    holdout = int(VALIDATION_YEARS * 252)
+    if len(train) <= holdout + 500:
+        return LAMBDA_GRID[len(LAMBDA_GRID) // 2]
+    fit, validate = train.iloc[:-holdout], train.iloc[-holdout:]
+    target = train_excess.reindex(validate.index).to_numpy()
+
+    best, best_score = LAMBDA_GRID[len(LAMBDA_GRID) // 2], -np.inf
+    for candidate in LAMBDA_GRID:
+        centroids = fit_centroids(fit.to_numpy(), penalty=candidate)
+        states = online_states(validate.to_numpy(), centroids, candidate)
+        ordering = order_states(states, target)
+        bull = np.isin(states, ordering[-1:])
+        # Scored on the validation block by the separation the model is for: the
+        # excess return it puts on the bull side against the bear side.
+        if bull.sum() < 21 or (~bull).sum() < 21:
+            continue
+        score = np.nanmean(target[bull]) - np.nanmean(target[~bull])
+        if np.isfinite(score) and score > best_score:
+            best, best_score = candidate, score
+    return best
+
+
+def build_states(
+    x: pd.DataFrame, excess: pd.Series, penalty: float | None
+) -> tuple[pd.Series, list[float]]:
     """Refit centroids every six months, infer online in between.
 
     Standardisation uses the training window's own mean and deviation, never the
@@ -103,6 +141,7 @@ def build_states(x: pd.DataFrame, excess: pd.Series, penalty: float) -> pd.Serie
     dates = x.index
     refits = pd.date_range(dates[TRAIN_DAYS], dates[-1], freq=f"{REFIT_MONTHS}MS")
     states = pd.Series(np.nan, index=dates)
+    chosen: list[float] = []
 
     for i, refit in enumerate(refits):
         window = x.loc[x.index < refit].tail(TRAIN_DAYS)
@@ -113,13 +152,17 @@ def build_states(x: pd.DataFrame, excess: pd.Series, penalty: float) -> pd.Serie
         if len(train) < 500:
             continue
 
-        centroids = fit_centroids(train.to_numpy(), penalty=penalty)
+        # `penalty=None` is the published "by cross-validation" arm: the value is
+        # re-selected on each refit's own training window.
+        active = select_penalty(train, excess) if penalty is None else penalty
+        chosen.append(active)
+        centroids = fit_centroids(train.to_numpy(), penalty=active)
         ordering = order_states(
-            online_states(train.to_numpy(), centroids, penalty),
+            online_states(train.to_numpy(), centroids, active),
             excess.reindex(train.index).to_numpy(),
         )
         # Map the raw state ids onto the bull/bear ordering just established.
-        raw = online_states(train.to_numpy(), centroids, penalty)
+        raw = online_states(train.to_numpy(), centroids, active)
         lookup = {}
         for raw_state, ranked in zip(raw, ordering, strict=True):
             lookup[int(raw_state)] = int(ranked)
@@ -130,11 +173,11 @@ def build_states(x: pd.DataFrame, excess: pd.Series, penalty: float) -> pd.Serie
             continue
         context = pd.concat([window.tail(TRAIN_DAYS), block])
         scaled = ((context - mean) / std).dropna()
-        inferred = online_states(scaled.to_numpy(), centroids, penalty)
+        inferred = online_states(scaled.to_numpy(), centroids, active)
         mapped = np.array([lookup.get(int(s), int(s)) for s in inferred])
         states.loc[scaled.index[-len(block):]] = mapped[-len(block):]
 
-    return states
+    return states, chosen
 
 
 def strategy(states: pd.Series, asset: pd.Series, bill: pd.Series) -> tuple[pd.Series, pd.Series]:
@@ -185,16 +228,33 @@ def main() -> None:
 
     curves, weights = {}, {}
     for penalty in LAMBDA_GRID:
-        st = build_states(x, excess, penalty)
+        st, _ = build_states(x, excess, penalty)
         net, w = strategy(st, asset.reindex(x.index), bill)
         curves[penalty], weights[penalty] = net, w
         oos = net.loc[OOS_START:OOS_END]
         s = stats(oos, bill)
         print(f"   lambda {penalty:>6.1f}  CAGR {s.get('cagr', float('nan')):>6.1%}  "
-              f"vol {s.get('vol', float('nan')):>5.1%}  Sharpe {s.get('sharpe', float('nan')):>5.2f}  "
+              f"vol {s.get('vol', float('nan')):>5.1%}  "
+              f"Sharpe {s.get('sharpe', float('nan')):>5.2f}  "
               f"MDD {s.get('mdd', float('nan')):>6.1%}  "
               f"expo {w.loc[OOS_START:OOS_END].mean():>5.1%}  "
               f"rot {w.loc[OOS_START:OOS_END].diff().abs().sum()/((len(oos))/252):>4.0%}")
+
+    # The published row, now produced by code rather than asserted.
+    st_cv, chosen = build_states(x, excess, None)
+    net_cv, w_cv = strategy(st_cv, asset.reindex(x.index), bill)
+    oos_cv = net_cv.loc[OOS_START:OOS_END]
+    s_cv = stats(oos_cv, bill)
+    print(f"\n   VALIDATION CROISEE  CAGR {s_cv.get('cagr', float('nan')):>6.1%}  "
+          f"vol {s_cv.get('vol', float('nan')):>5.1%}  "
+          f"Sharpe {s_cv.get('sharpe', float('nan')):>5.2f}  "
+          f"MDD {s_cv.get('mdd', float('nan')):>6.1%}  "
+          f"expo {w_cv.loc[OOS_START:OOS_END].mean():>5.1%}  "
+          f"rot {w_cv.loc[OOS_START:OOS_END].diff().abs().sum()/(len(oos_cv)/252):>4.0%}")
+    picked = pd.Series(chosen).value_counts().sort_index()
+    print("   lambda retenus : " + ", ".join(f"{k:g} x{v}" for k, v in picked.items()))
+    print("   publie          CAGR   8.6%  vol 13.0%  Sharpe  0.50  MDD -32.0%  "
+          "expo 76.6%  rot 112%")
 
     jm = PUBLISHED["jump"]
     print(f"\n   publie JM   CAGR {jm['cagr']:>6.1%}  vol {jm['vol']:>5.1%}  "
