@@ -22,9 +22,14 @@ choice was open, the one inherited from committed code was taken.
                  definition that reproduces the disclosed ER63 correlation of §1 Q1 to
                  the third decimal (+0.096 / -0.043 against +0.096 / -0.044).
     CUSUM input  the residual, standardised on an expanding window with a 252-session
-                 minimum — detector A's standardisation, §5. Causal, which the
-                 pre-lock count of 7.26 alarms a year was not: it reproduces at 6.91
-                 only with a full-sample standardisation.
+                 minimum — detector A's standardisation, §5.
+    returns      simple returns, as everywhere else in the book. CORRECTED AFTER THE
+                 MDE: the pre-lock script, found later in a temporary scratchpad, used
+                 LOG returns, and that alone reproduces the disclosed 7.26 alarms a
+                 year exactly. The earlier claim in this docstring that 7.26 came from
+                 a non-causal standardisation was wrong: that script standardises
+                 causally, as this one does. On log returns the threshold is 52.2% of
+                 the mean error instead of 49.6%, so the verdict does not depend on it.
     dwell        the CUSUM resets at every crossing; a crossing within 21 sessions of
                  the last ACCEPTED alarm resets it but is not accepted
     the book     the M3 headline book of `extensions/vehicle.py`, 46 instruments, the
@@ -308,7 +313,7 @@ def main() -> None:
           f"alarms, {n_alarms / years:.2f} a year ({ups} upward, {n_alarms - ups} downward)")
     n_cross = int(pieces["crossings"].loc[dates.min() : dates.max()].sum())
     print(f"               before the dwell: {n_cross} crossings, {n_cross / years:.2f} a year "
-          f"(pre-lock disclosure: 7.26, non-causal standardisation)")
+          f"(pre-lock disclosure: 7.26, on log returns)")
     n_vol = int(pieces["vol_alarms"].loc[dates.min() : dates.max()].sum())
     print(f"   placebo V   same detector on VOL63: {n_vol} alarms, {n_vol / years:.2f} a year")
     share_b, share_v = float(frame["b"].mean()), float(frame["v"].mean())

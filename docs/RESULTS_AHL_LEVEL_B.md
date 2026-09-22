@@ -63,10 +63,15 @@ This was written into the docstring before the MDE was run, and is repeated here
 
 - The CUSUM crosses its threshold **166 times, 9.10 a year**, but the crossings cluster.
   After the 21-session dwell, **48 alarms, 2.63 a year**, are accepted. §1 had disclosed
-  7.26 a year, a figure that reproduces only when the input is standardised on the full
-  sample (6.91). That standardisation is not causal. 2.63 a year still clears the
-  ~2-a-year threshold of the rule on a seventh device, but by a quarter rather than by
-  the factor of 3.6 that §2 implied for this latent.
+  7.26 a year. That figure is not a different detector: it is the same one run on **log**
+  returns, where this instrument uses simple returns. The pre-lock script, found later in
+  a temporary scratchpad, reproduces 7.26 exactly on log returns. A first version of this
+  document blamed a non-causal standardisation, and that was wrong. 2.63 a year still
+  clears the ~2-a-year threshold of the rule on a seventh device, but by a quarter rather
+  than by the factor of 3.6 that §2 implied for this latent.
+- **The verdict does not depend on the return type.** Run on log returns, the instrument
+  accepts 43 alarms (2.35 a year), B is on for 20.0% of 4,507 sessions, and the threshold
+  is **0.1324, 52.2% of the mean error**. That is still undecidable, and by a wider margin.
 - B is on for 21.2% of sessions rather than about half.
 - The matched volatility detector fires 12 times (0.66 a year), and its overlap with B
   is +0.055. The two detectors fire on different sessions, so volatility would not
