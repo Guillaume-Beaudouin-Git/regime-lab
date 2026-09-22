@@ -24,7 +24,7 @@ import pandas as pd
 import statsmodels.api as sm
 from scipy import stats
 
-REPO = Path("/Users/guillaumebeaudouin/Desktop/M2/Projet_Big_Data_Regimes/1_Etude_principale/regime-lab")
+REPO = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO))
 from regime_lab.config import CACHE, RAW  # noqa: E402
 

@@ -26,7 +26,6 @@ def main() -> None:
             blocks.append(f)
     rates = pd.concat(blocks, ignore_index=True)
     config.write(rates, "h2", "rates", origin="FRED / OECD, monthly sovereign and policy rates")
-    n_long = rates["series_id"].str.startswith("long_").groupby(rates["series_id"]).any().sum()
     print(f"taux       {rates['series_id'].nunique():>3} series  {len(rates):>7,} lignes  "
           f"{rates['period'].min():%Y-%m} a {rates['period'].max():%Y-%m}")
 

@@ -65,7 +65,8 @@ def main() -> None:
     g, n = summary(gross), summary(net)
     print(f"   {'':<20} {'Sharpe':>8} {'vol':>8} {'perte max':>11}")
     print(f"   {'brut':<20} {g['sharpe']:>8.2f} {g['vol']:>7.1%} {g['max_drawdown']:>11.1%}")
-    print(f"   {'net de couts':<20} {n['sharpe']:>8.2f} {n['vol']:>7.1%} {n['max_drawdown']:>11.1%}")
+    print(f"   {'net de couts':<20} {n['sharpe']:>8.2f} {n['vol']:>7.1%} "
+          f"{n['max_drawdown']:>11.1%}")
     print(f"   rotation moyenne : {weights.diff().abs().sum(axis=1).mean():.4f} par jour")
 
     print("\n   par classe d'actif, signal seul :")
@@ -104,7 +105,8 @@ def main() -> None:
         gb, wb = build(returns, sig, ASSETS)
         shuffles.append(summary(charge(gb, wb, ASSETS))["sharpe"])
     shuffles = np.array(shuffles)
-    print(f"   placebo : moyenne {np.nanmean(shuffles):+.2f}, ecart-type {np.nanstd(shuffles):.2f}, "
+    print(f"   placebo : moyenne {np.nanmean(shuffles):+.2f}, "
+          f"ecart-type {np.nanstd(shuffles):.2f}, "
           f"p95 {np.nanpercentile(shuffles, 95):+.2f}")
     print(f"   signal reel {n['sharpe']:+.2f}  ->  percentile "
           f"{100.0*(shuffles < n['sharpe']).mean():.0f}")
