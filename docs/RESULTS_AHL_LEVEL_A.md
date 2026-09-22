@@ -1,4 +1,4 @@
-# AHL level A — the state does not move the speed ranking
+# AHL level A — the state does not move the speed ranking, on the leg that was read
 
 `docs/PRESPEC_AHL.md`, locked 2026-09-23 before any statistic of the tree existed.
 A1 spent one trial; the register now holds 84 distinct configurations.
@@ -8,8 +8,41 @@ A1 spent one trial; the register now holds 84 distinct configurations.
 .venv/bin/python scripts/run_ahl_level_a.py --read   # A1, a trial
 ```
 
-**A1 is refuted, on the sign.** Δ = **−0.068 points** of hit rate against a
-tree-corrected decision threshold of **2.119**, and the stated direction was positive.
+> ## ⚠ Correction, 2026-09-22 — this is the sensitivity leg, not the headline
+>
+> **What follows was read on F′ = (63, 5). The locked §4 names F = (126, 10) as the
+> headline fast leg** and (63, 5) as "a declared sensitivity, not a separate trial".
+> I fixed `FAST = (63, 5)` in both `run_ahl_panel_power.py` and `run_ahl_level_a.py`,
+> so the 2.12-point threshold was measured on the sensitivity leg as well.
+>
+> It is worse than a mix-up of two arms. §6 of the same locked text had already
+> declared F′ **dead on cost** before any return was seen — it dies at 7.9 bp blended
+> round trip, against F which survives to the conservative column. The pre-registration
+> chose (126, 10) as the headline *for that reason*. I measured the leg it had already
+> discarded.
+>
+> **So the locked A1 has not been read, and the refutation below is a refutation of
+> F′.** What it establishes about F′ stands: on that leg, on an instrument resolving
+> 2.12 points, the state moves the speed ranking by −0.068. What it establishes about
+> the headline is nothing.
+>
+> I am not inferring the headline result from this one. The two legs are not
+> interchangeable — F agrees with S on 74.4% of instrument-sessions against 64.1% for
+> F′, so F is the *thinner* contrast — but "thinner, therefore also null" is an
+> argument, not a measurement, and this programme does not publish arguments as
+> measurements. The headline reading is owed, its own MDE must be measured under the
+> null first, and whether to spend that trial is a decision about the tree rather than
+> a repair. It is logged as open in `docs/PROTOCOL_FREEZE.md` and in `AVANCEMENT.md`.
+>
+> One consequence for the register: the trial logged as `ahl_level_a` carries
+> `fast=[63, 5]`. §11 says a declared sensitivity is not a separate trial, so that
+> entry is an over-count against the headline and an under-description of what was
+> measured. It is left in place and annotated rather than deleted — removing a logged
+> trial is exactly what the register exists to prevent.
+
+**A1 was read on F′ and is refuted there, on the sign.** Δ = **−0.068 points** of hit
+rate against a tree-corrected decision threshold of **2.119** measured on the same leg,
+and the stated direction was positive.
 
 ## Why this refutation is not like the six before it
 
@@ -20,7 +53,7 @@ resolution, with the wrong sign. This is not a failure to see. It is seeing noth
 
 ## The mechanism, measured rather than inferred
 
-| | fast F (63, 5) | slow S (252, 21) | F − S |
+| | fast **F′** (63, 5) — the sensitivity | slow S (252, 21) | F′ − S |
 |---|---|---|---|
 | consolidating, 2,607 sessions | 49.331% | 49.805% | **−0.474%** |
 | trending, 2,362 sessions | 49.041% | 49.447% | **−0.407%** |
