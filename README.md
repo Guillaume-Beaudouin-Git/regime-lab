@@ -1,106 +1,94 @@
-# regime-lab
+# regime-lab — détection de régimes de marché, et ce qu'elle vaut vraiment
 
-Market regime detection under a point-in-time data contract, and the question of
-whether the regimes it finds are worth conditioning a portfolio on.
+Projet de Big Data appliqué à la finance. On y apprend à une machine à reconnaître les
+**régimes de marché** (calme, stress, crise…), puis on se demande honnêtement si cette
+reconnaissance **rapporte quelque chose** une fois pris en compte les coûts, les données
+réellement disponibles à chaque date, et le nombre de tests effectués.
 
-## The question
+*English summary at the bottom of this page.*
 
-> Does a machine-learned regime model carry tradable information beyond what a
-> plain volatility measure already captures — and if so, does that information
-> survive transaction costs, point-in-time data constraints and a correction for
-> multiple testing?
+## Par où commencer
 
-It is a decomposition, not a yes/no question: the binary version is already
-settled in the literature (Cederburg, O'Doherty, Wang & Yan, *JFE* 2020), while
-the magnitudes are not.
+| si vous voulez… | lisez |
+|---|---|
+| savoir où en est le projet et ce qu'il reste à faire | **`AVANCEMENT.md`** |
+| les résultats de l'étude principale | `docs/RESULTS_FINAL.md` |
+| le protocole fixé avant toute mesure | `docs/CHARTER.html` (gelé), `docs/PROTOCOL_FREEZE.md` (écarts) |
+| la liste détaillée des tâches | `pilotage/feuille_de_route/TACHES.md` |
+| ce qui est établi, ce qui est mort | `pilotage/feuille_de_route/CONCLUSIONS.md` |
 
-The protocol is allowed to answer that the effect is absent, or that the data
-cannot tell. Stopping rules and admissible outcomes are fixed before results are
-looked at: see `docs/CHARTER.html`, frozen at
+## La question, et la réponse
+
+> Un modèle de régimes appris par machine apporte-t-il une information exploitable
+> au-delà de ce qu'une simple mesure de volatilité capte déjà ?
+
+1. **Le classifieur fonctionne.** 93,2 % d'exactitude équilibrée contre les récessions
+   officielles (NBER), sur 6 377 jours jamais vus à l'entraînement. Cinq méthodes
+   différentes s'accordent.
+2. **Il prédit la volatilité, pas la direction.** Il ajoute +3,93 points de R² sur la
+   volatilité future, et rien sur les rendements futurs (+0,03 point, t 0,27).
+3. **Personne n'a réussi à en tirer de l'argent.** Sept dispositifs ont été testés et
+   aucun ne bat une règle d'une ligne : « la volatilité récente est-elle sous sa
+   médiane ? ». La raison est mécanique : le régime change **13 fois en 25 ans**, soit
+   trop peu de décisions pour qu'un signal de trading en émerge.
+
+Ce résultat négatif est le résultat. Il a été obtenu par des mesures conçues **à
+l'avance** pour pouvoir dire non.
+
+## Ce que contient le dépôt
 
 ```
-SHA-256  5791c1887c41d1f6b0449bafad2125013b82dc6b3506b4d72564e14ec1abc0db
+README.md, AVANCEMENT.md       entrée et état d'avancement
+regime_lab/                    le code de l'étude principale (données, variables, modèles, évaluation)
+scripts/                       les scripts qui produisent chaque résultat publié
+tests/                         114 tests
+docs/                          cadrage, résultats, registre des écarts au protocole
+chantiers/macro-momentum/      trois hypothèses dérivées (H1, H2, H3), toutes falsifiées
+chantiers/reversal-lab/        la prime de retour à la moyenne, disparue depuis 2020
+pilotage/                      feuille de route et plans de recherche
 ```
 
-and `docs/PROTOCOL_FREEZE.md` for what the freeze commits us to.
+Trois familles de modèles sont comparées : des modèles à sauts statistiques (A, A′), un
+modèle de Markov caché (B) et des prédicteurs supervisés (C, C′). Toutes les données macro
+respectent un **contrat point-in-time** : une valeur n'entre dans un modèle qu'à partir du
+jour où elle était réellement publiée.
 
-## Why point-in-time comes first
+## Installation
 
-Macro series are revised. Industrial production for March 2008, as published
-today, is not the figure an observer had in March 2008. Building features from
-today's series leaks information backwards and inflates any model that keys on
-recessions — invisibly, and in the direction that flatters the result.
-
-Every observation here therefore carries two dates:
-
-| column | meaning |
-| --- | --- |
-| `period` | the date the observation describes |
-| `available_at` | the first instant a real-time observer could have known it |
-
-A value may enter a model at `t` only if `available_at <= t`. Superseded
-only first releases are kept, so a past panel is rebuilt with the first print of
-each period rather than the vintage that stood at the time. That is conservative,
-not exact: `output_type=4` returns the initial release and revisions are not
-stored. The earlier claim that any past panel is rebuilt "exactly as it stood"
-was wrong and is corrected in docs/RESULTS_FINAL.md.
-`tests/test_pit.py` enforces this: a panel built for a past date must not move
-when later data arrives.
-
-## Data
-
-| block | source | coverage |
-| --- | --- | --- |
-| Cross-asset daily prices | Yahoo Finance, adjusted | 1990– |
-| Macro, financial conditions, credit | FRED / ALFRED | 1990– |
-
-Credit stress uses Moody's Baa and Aaa spreads over the 10-year Treasury rather
-than ICE BofA option-adjusted spreads: FRED serves ICE BofA series for the
-trailing two years only, which would leave the credit block empty before 2023.
-
-**Macro vintages.** With a free [FRED API key](https://fred.stlouisfed.org/docs/api/api_key.html)
-in `.env`, macro series are downloaded as full real-time histories and
-`available_at` is the true publication date. Without a key the loader falls back
-to the current vintage plus a conservative publication lag: this removes the
-timing leak but not the revision leak, and every result on that path is
-provisional.
-
-## Setup
+Il faut Python 3.12 et [uv](https://docs.astral.sh/uv/).
 
 ```bash
-uv venv --python 3.12
-uv pip install -e ".[dev]"
-cp .env.example .env          # optional: paste a free FRED key
-python scripts/fetch_data.py
-pytest
+git clone https://github.com/Guillaume-Beaudouin-Git/regime-lab.git
+cd regime-lab
+uv sync --all-packages --extra dev          # un seul environnement pour tout le dépôt
+.venv/bin/python -m pytest -q               # 122 tests
 ```
 
-## Layout
+Utilisez toujours `.venv/bin/python`, jamais le Python du système.
 
-```
-regime_lab/data/pit.py         the point-in-time contract: validate, as_of, build_panel
-regime_lab/data/store.py       immutable parquet store with content-hashed manifests
-regime_lab/data/sources/       one module per provider
-regime_lab/data/universe.py    the catalogue of series the study draws on
-tests/test_pit.py              temporal integrity regression tests
-docs/CHARTER.html              the frozen charter (v2)
-docs/PROTOCOL_FREEZE.md        content hash, amendment log, what the freeze binds
-docs/DATA_NOTES.md             data traps found and how they were resolved
+**Les données ne sont pas dans git** (36 Mo, régénérables). L'inventaire exact, fichier
+par fichier (source, période, script qui le produit), est dans `AVANCEMENT.md` §3. Pour
+les télécharger soi-même, une clé API FRED gratuite suffit : copiez `.env.example` vers
+`.env` et renseignez `FRED_API_KEY`.
 
-regime_lab/features/           50 features in eight families, expanding standardisation
-regime_lab/models/protocol.py  folds, refit schedule, what every family shares
-regime_lab/models/jump.py      family A, the statistical jump model
-regime_lab/models/hmm.py       family B, a Gaussian HMM with filtered probabilities only
-regime_lab/models/supervised.py family C, direct prediction with no latent state
-regime_lab/models/mapping.py   the one state-to-position rule, fixed before any fit
-regime_lab/analysis/trials.py  append-only log of every configuration evaluated
-regime_lab/evaluation/         the classifier judged as a classifier, no portfolio
-regime_lab/data/coverage.py    refuses a source that returns less than it was asked for
-```
+## Les règles de méthode
 
-## Status
+- Le signal est calculé en T−1 et la position prise en T.
+- On juge sur des rendements **nets de coûts et en excès du taux sans risque**.
+- Erreurs-types robustes (HAC), correction dès qu'il y a plusieurs tests, bootstrap par
+  blocs.
+- **Le critère de décision est écrit et commité avant de produire le chiffre.** Un effet
+  plus petit que ce que l'échantillon peut détecter est déclaré « sous-puissant », jamais
+  « validé ».
+- Chaque configuration évaluée est journalisée, pour qu'on puisse corriger du nombre
+  d'essais.
 
-Study closed. Results in `docs/RESULTS_FINAL.md` (the three evaluation layers),
-`docs/RESULTS_CLASSIFIER.md` (label quality) and `docs/RESULTS_T2.md` (the
-portfolio comparison). Deviations from the frozen charter, including two the
-audit forced, are in `docs/PROTOCOL_FREEZE.md`.
+## English summary
+
+A study of machine-learned market regimes under a point-in-time data contract. The
+classifier works (93.2% balanced accuracy against NBER recessions, out of sample) and
+carries information about **variance, not mean**: +3.93 points of incremental R² on
+forward volatility, nothing on forward returns. None of seven devices built to monetise
+it beats a one-line volatility rule, because the state changes 13 times in 25 years. Four
+derived hypotheses are falsified in `chantiers/`. The English description of the main
+study is in `docs/OVERVIEW_EN.md`.

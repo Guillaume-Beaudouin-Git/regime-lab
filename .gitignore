@@ -31,3 +31,10 @@ __pycache__/
 # one. History is not rewritten: a force-push over a published tag costs more than
 # 1.6 MB of blob, which is the same reasoning applied to the anonymisation.
 *.xls
+
+# Measurement scripts and inputs of the five research plans and of the A4
+# counter-expertises, rescued on 2026-09-22 from a temporary scratchpad that a
+# reboot would have erased. Kept on disk but not published: almost every file
+# carries absolute paths, and the Rentec ones point into a private repository.
+# Sanitising and committing them is an open task (pilotage/feuille_de_route/TACHES.md).
+/pilotage/mesures_brutes/

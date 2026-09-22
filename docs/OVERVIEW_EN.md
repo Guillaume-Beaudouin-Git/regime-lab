@@ -1,0 +1,110 @@
+# regime-lab — the main study, in English
+
+> The French entry point for the whole programme is `../README.md`; current state in
+> `../AVANCEMENT.md`. This page describes the main study only.
+
+Market regime detection under a point-in-time data contract, and the question of
+whether the regimes it finds are worth conditioning a portfolio on.
+
+## The question
+
+> Does a machine-learned regime model carry tradable information beyond what a
+> plain volatility measure already captures — and if so, does that information
+> survive transaction costs, point-in-time data constraints and a correction for
+> multiple testing?
+
+It is a decomposition, not a yes/no question: the binary version is already
+settled in the literature (Cederburg, O'Doherty, Wang & Yan, *JFE* 2020), while
+the magnitudes are not.
+
+The protocol is allowed to answer that the effect is absent, or that the data
+cannot tell. Stopping rules and admissible outcomes are fixed before results are
+looked at: see `docs/CHARTER.html`, frozen at
+
+```
+SHA-256  5791c1887c41d1f6b0449bafad2125013b82dc6b3506b4d72564e14ec1abc0db
+```
+
+and `docs/PROTOCOL_FREEZE.md` for what the freeze commits us to.
+
+## Why point-in-time comes first
+
+Macro series are revised. Industrial production for March 2008, as published
+today, is not the figure an observer had in March 2008. Building features from
+today's series leaks information backwards and inflates any model that keys on
+recessions — invisibly, and in the direction that flatters the result.
+
+Every observation here therefore carries two dates:
+
+| column | meaning |
+| --- | --- |
+| `period` | the date the observation describes |
+| `available_at` | the first instant a real-time observer could have known it |
+
+A value may enter a model at `t` only if `available_at <= t`. Superseded
+only first releases are kept, so a past panel is rebuilt with the first print of
+each period rather than the vintage that stood at the time. That is conservative,
+not exact: `output_type=4` returns the initial release and revisions are not
+stored. The earlier claim that any past panel is rebuilt "exactly as it stood"
+was wrong and is corrected in docs/RESULTS_FINAL.md.
+`tests/test_pit.py` enforces this: a panel built for a past date must not move
+when later data arrives.
+
+## Data
+
+| block | source | coverage |
+| --- | --- | --- |
+| Cross-asset daily prices | Yahoo Finance, adjusted | 1990– |
+| Macro, financial conditions, credit | FRED / ALFRED | 1990– |
+
+Credit stress uses Moody's Baa and Aaa spreads over the 10-year Treasury rather
+than ICE BofA option-adjusted spreads: FRED serves ICE BofA series for the
+trailing two years only, which would leave the credit block empty before 2023.
+
+**Macro vintages.** With a free [FRED API key](https://fred.stlouisfed.org/docs/api/api_key.html)
+in `.env`, macro series are downloaded as full real-time histories and
+`available_at` is the true publication date. Without a key the loader falls back
+to the current vintage plus a conservative publication lag: this removes the
+timing leak but not the revision leak, and every result on that path is
+provisional.
+
+## Setup
+
+The repository is a uv workspace since 2026-09-22 (see `../README.md`):
+
+```bash
+uv sync --all-packages --extra dev
+cp .env.example .env          # optional: paste a free FRED key
+.venv/bin/python scripts/fetch_data.py
+.venv/bin/python -m pytest -q
+```
+
+## Layout
+
+```
+regime_lab/data/pit.py         the point-in-time contract: validate, as_of, build_panel
+regime_lab/data/store.py       immutable parquet store with content-hashed manifests
+regime_lab/data/sources/       one module per provider
+regime_lab/data/universe.py    the catalogue of series the study draws on
+tests/test_pit.py              temporal integrity regression tests
+docs/CHARTER.html              the frozen charter (v2)
+docs/PROTOCOL_FREEZE.md        content hash, amendment log, what the freeze binds
+docs/DATA_NOTES.md             data traps found and how they were resolved
+
+regime_lab/features/           50 features in eight families, expanding standardisation
+regime_lab/models/protocol.py  folds, refit schedule, what every family shares
+regime_lab/models/jump.py      family A, the statistical jump model
+regime_lab/models/hmm.py       family B, a Gaussian HMM with filtered probabilities only
+regime_lab/models/supervised.py family C, direct prediction with no latent state
+regime_lab/models/mapping.py   the one state-to-position rule, fixed before any fit
+regime_lab/analysis/trials.py  append-only log of every configuration evaluated
+regime_lab/evaluation/         the classifier judged as a classifier, no portfolio
+regime_lab/data/coverage.py    refuses a source that returns less than it was asked for
+```
+
+## Status
+
+Study closed. Results in `docs/RESULTS_FINAL.md` (the three evaluation layers),
+`docs/RESULTS_CLASSIFIER.md` (label quality) and `docs/RESULTS_T2.md` (the
+portfolio comparison). Deviations from the frozen charter, including two the
+audit forced, are in `docs/PROTOCOL_FREEZE.md`.
