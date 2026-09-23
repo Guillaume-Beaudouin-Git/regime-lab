@@ -11,6 +11,7 @@ part of a backtest that is usually invisible.
 
 from __future__ import annotations
 
+import fcntl
 import hashlib
 import json
 from datetime import UTC, datetime
@@ -38,9 +39,19 @@ def log(family: str, config: dict, metrics: dict, *, path: Path = TRIALS) -> Non
         **{f"m_{k}": v for k, v in metrics.items()},
     }
     frame = pd.DataFrame([row])
-    if path.exists():
-        frame = pd.concat([pd.read_parquet(path), frame], ignore_index=True)
-    _text_where_mixed(frame).to_parquet(path, index=False)
+    # Several studies can run at once: the read-append-write must not interleave, or
+    # a row is silently lost. An exclusive lock on a sibling file serialises writers.
+    lock_path = path.with_suffix(".lock")
+    with lock_path.open("a") as lock:
+        fcntl.flock(lock, fcntl.LOCK_EX)
+        try:
+            if path.exists():
+                frame = pd.concat([pd.read_parquet(path), frame], ignore_index=True)
+            tmp = path.with_suffix(".tmp.parquet")
+            _text_where_mixed(frame).to_parquet(tmp, index=False)
+            tmp.replace(path)
+        finally:
+            fcntl.flock(lock, fcntl.LOCK_UN)
 
 
 def _text_where_mixed(frame: pd.DataFrame) -> pd.DataFrame:
