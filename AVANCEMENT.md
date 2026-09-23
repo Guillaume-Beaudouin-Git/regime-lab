@@ -122,6 +122,14 @@ d'essais compte 84 configurations distinctes (`data/trials.parquet`).
   couplage n'est utile**. Deux stratégies sont pénalisées, la tendance crypto et la prime
   overnight Nasdaq, qui gagnent précisément en période de stress. C'est la matière de la
   présentation.
+- **Un support de présentation en PDF est prêt** pour construire les diapositives :
+  `docs/presentation/presentation_regimes.pdf`, 14 pages et 4 annexes. Il couvre d'où
+  viennent les données, comment marchent les cinq modèles, pourquoi le Sparse Jump
+  Model, les résultats de chaque modèle et le couplage aux stratégies. Il est régénéré par
+  `scripts/build_presentation.py` : frise et états lus dans `data/`, les autres chiffres
+  recopiés des `docs/RESULTS_*.md` cités en pied de page. Les Sharpe y sont **sans coût**,
+  comme partout dans ce projet. Pour l'oral de 10 minutes, il reste à en tirer 8 à 10
+  diapositives.
 - **Remesurés à partir de code commité, plusieurs chiffres du brouillon étaient
   optimistes.** L'horloge tourne à 12,6 transitions par an hors échantillon, et non 8,3.
   Elle dépend davantage de la volatilité qu'annoncé : η² de 0,14, jusqu'à 0,6 sur un

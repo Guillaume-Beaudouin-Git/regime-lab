@@ -191,6 +191,9 @@ cette machine.
 
 **C1. La présentation de 10 minutes.** Le matériau est complet. Ce qui manque n'est pas
 du résultat, c'est de la mise en évidence — voir `PISTES.md`, piste 3, P ≈ 90 %.
+*23/09 :* un support complet existe, `docs/presentation/presentation_regimes.pdf`
+(généré par `scripts/build_presentation.py`). Reste à le réduire à 8-10 diapositives et
+à écrire le texte oral.
 
 **C2. H3 n'a pas son écrit.** H1 et H2 ont `RESULT_DISPERSION.md` et
 `NOTE_DISPERSION_FR.md`. H3 — les surprises macro, la construction de Dedale — n'a

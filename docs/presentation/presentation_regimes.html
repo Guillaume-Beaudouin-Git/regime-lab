@@ -1,0 +1,436 @@
+<!doctype html><html lang="fr"><head><meta charset="utf-8">
+<title>Régimes de marché — présentation</title>
+<style>
+@page { size: 13.333in 7.5in; margin: 0; }
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; background: #fff; }
+body { font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; color: #0b0b0b;
+  -webkit-print-color-adjust: exact; print-color-adjust: exact;
+  font-variant-numeric: tabular-nums; }
+.slide { width: 13.333in; height: 7.5in; position: relative; overflow: hidden;
+  padding: 0.5in 0.72in 0.62in; page-break-after: always; break-after: page; background: #fff; }
+.slide::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 0.12in;
+  background: #0f2a44; }
+.slide.appendix::before { background: #898781; }
+.eyebrow { font: 600 10.5pt "Avenir Next", "Helvetica Neue", sans-serif; letter-spacing: 0.12em;
+  text-transform: uppercase; color: #2a78d6; margin-bottom: 0.08in; }
+.appendix .eyebrow { color: #52514e; }
+h1 { font: 600 28pt/1.15 "Avenir Next", "Helvetica Neue", sans-serif; color: #0f2a44;
+  margin: 0 0 0.3in; letter-spacing: -0.01em; max-width: 11.8in; }
+h3 { font: 600 14.5pt/1.25 "Avenir Next", "Helvetica Neue", sans-serif; color: #0f2a44;
+  margin: 0 0 0.07in; }
+p, li { font-size: 15pt; line-height: 1.45; color: #1b1f24; margin: 0 0 0.08in; }
+b { font-weight: 600; }
+.body { position: relative; }
+footer { position: absolute; left: 0.72in; right: 0.72in; bottom: 0.26in; display: flex;
+  align-items: baseline; gap: 0.3in; border-top: 1px solid #e1e0d9; padding-top: 0.08in; }
+footer .src { flex: 1; font-size: 8.5pt; color: #898781; }
+footer .brand { font-size: 8.5pt; color: #898781; letter-spacing: 0.04em; }
+footer .pn { font: 600 9pt "Avenir Next", sans-serif; color: #0f2a44; min-width: 0.25in;
+  text-align: right; }
+table { border-collapse: collapse; width: 100%; }
+th { font: 600 10pt "Avenir Next", sans-serif; text-transform: uppercase; letter-spacing: 0.06em;
+  color: #52514e; text-align: left; padding: 0.07in 0.1in; border-bottom: 1.5px solid #0f2a44; }
+td { font-size: 14pt; line-height: 1.34; padding: 0.1in 0.12in; border-bottom: 1px solid #e1e0d9;
+  vertical-align: top; }
+td.num, th.num { text-align: right; white-space: nowrap; }
+tr.hl td { background: #eef4fc; }
+tr.hl td:first-child { box-shadow: inset 3px 0 0 #2a78d6; font-weight: 600; }
+table.compact td { font-size: 13pt; padding: 0.08in 0.1in; }
+table.compact td:first-child { white-space: nowrap; }
+table.data td:nth-child(3), table.data td:nth-child(4) { white-space: nowrap; }
+.note { font-size: 13pt; line-height: 1.45; color: #52514e; margin-top: 0.24in;
+  border-left: 3px solid #e1e0d9; padding-left: 0.14in; }
+.note.small { font-size: 11.5pt; }
+.card { background: #f7f8fa; border: 1px solid #e6e8ec; border-radius: 6px; padding: 0.22in 0.24in; }
+.card p { font-size: 13.5pt; margin: 0; }
+.card.tall { min-height: 3.7in; }
+.grid4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.24in; }
+.facts { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.24in; margin-top: 0.36in; }
+.facts div { border-top: 3px solid #0f2a44; padding-top: 0.1in; }
+.facts b { display: block; font: 600 28pt/1.1 "Avenir Next", sans-serif; color: #0f2a44; }
+.facts span { display: block; font-size: 12.5pt; line-height: 1.35; color: #52514e; margin-top: 0.05in; }
+.grid3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.24in; margin-top: 0.36in; }
+.two { display: grid; grid-template-columns: 1.35fr 1fr; gap: 0.45in; align-items: start; }
+.two.even { grid-template-columns: 1fr 1fr; }
+.two.chart-left { grid-template-columns: 1.45fr 1fr; }
+.side h3 { margin-top: 0.02in; }
+.side p { font-size: 14pt; }
+.callout { background: #eef4fc; border-left: 3px solid #2a78d6; padding: 0.1in 0.14in;
+  border-radius: 0 4px 4px 0; }
+.question { font: 500 20pt/1.35 "Avenir Next", sans-serif; color: #0f2a44; border-left: 4px solid
+  #2a78d6; padding: 0.06in 0 0.06in 0.2in; margin: 0.05in 0 0.34in; max-width: 11in; }
+.kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.3in; margin-bottom: 0.45in; }
+.kpi { border-top: 3px solid #0f2a44; padding-top: 0.12in; }
+.kv { font: 600 38pt/1 "Avenir Next", sans-serif; color: #0f2a44; }
+.kpi:first-child .kv, .kpi:nth-child(2) .kv { color: #2a78d6; }
+.kl { font: 600 14pt/1.3 "Avenir Next", sans-serif; margin: 0.08in 0 0.05in; color: #0b0b0b; }
+.kd { font-size: 12pt; line-height: 1.35; color: #52514e; }
+ol.msgs { margin: 0; padding-left: 0.28in; }
+ol.msgs li { margin-bottom: 0.16in; font-size: 16pt; }
+.flow { display: flex; align-items: stretch; gap: 0.08in; }
+.step { flex: 1; background: #0f2a44; color: #fff; border-radius: 6px; padding: 0.2in 0.2in; }
+.step h3 { color: #fff; font-size: 15pt; }
+.step p { color: #d5dde7; font-size: 12.5pt; margin: 0; line-height: 1.35; }
+.step .sn { font: 600 9pt "Avenir Next", sans-serif; color: #86b6ef; margin-bottom: 0.04in; }
+.arrow { align-self: center; color: #898781; font-size: 16pt; }
+.formula { white-space: nowrap; font: 17pt/1.6 "Times New Roman", Times, serif; color: #0b0b0b; background: #f7f8fa;
+  border: 1px solid #e6e8ec; border-radius: 6px; padding: 0.16in 0.22in; }
+.formula-caption { font-size: 12.5pt; color: #52514e; margin: 0.06in 0 0.2in; }
+ol.steps3 { margin: 0; padding-left: 0.28in; }
+ol.steps3 li { margin-bottom: 0.14in; }
+ul.kvlist { list-style: none; padding: 0; margin: 0 0 0.2in; }
+ul.kvlist li { display: flex; justify-content: space-between; gap: 0.2in; border-bottom: 1px solid
+  #e1e0d9; padding: 0.08in 0; font-size: 13pt; margin: 0; }
+ul.kvlist li span { color: #52514e; white-space: nowrap; }
+ul.kvlist li b { text-align: right; }
+.ref { font-size: 12.5pt; color: #52514e; }
+ul.ticks { padding-left: 0.2in; margin: 0; }
+ul.ticks li { font-size: 14pt; margin-bottom: 0.14in; }
+ul.ticks.big li { font-size: 16pt; margin-bottom: 0.22in; }
+.limit { margin-top: 0.22in; background: #fdf1f0; border-left: 3px solid #e34948;
+  padding: 0.16in 0.2in; font-size: 14pt; border-radius: 0 4px 4px 0; }
+.chart-title { font: 600 13pt "Avenir Next", sans-serif; color: #52514e; margin-bottom: 0.1in; }
+.legend { display: flex; gap: 0.3in; font-size: 12pt; color: #0b0b0b; margin: 0 0 0.08in; }
+.legend.inline { display: inline-flex; margin: 0 0 0 0.3in; font-weight: 400; }
+.legend i { display: inline-block; width: 0.16in; height: 0.16in; border-radius: 3px;
+  vertical-align: -0.02in; margin-right: 0.07in; }
+.concl { display: grid; grid-template-columns: 1fr 1fr; gap: 0.45in 0.5in; }
+.cl { display: flex; gap: 0.18in; }
+.banner { margin-top: 0.5in; background: #0f2a44; color: #fff; border-radius: 6px;
+  padding: 0.22in 0.3in; font: 500 17pt/1.4 "Avenir Next", sans-serif; }
+.banner b { color: #86b6ef; }
+.cn { font: 600 30pt/1 "Avenir Next", sans-serif; color: #2a78d6; min-width: 0.36in; }
+.cl p { font-size: 15pt; }
+.cl h3 { font-size: 17pt; }
+code { font: 11.5pt Menlo, monospace; background: #f1f2f4; padding: 0 0.04in; border-radius: 3px; }
+.cover { background: #0f2a44; padding: 0; }
+.cover::before { display: none; }
+.cover-band { position: absolute; left: 0; right: 0; bottom: 0; height: 0.14in; background: #2a78d6; }
+.cover-inner { position: absolute; left: 0.9in; right: 1.6in; top: 1.7in; }
+.eyebrow.light { color: #86b6ef; }
+.cover-title { font: 600 44pt/1.12 "Avenir Next", sans-serif; color: #fff; margin: 0.1in 0 0.3in;
+  max-width: 10in; }
+.cover-sub { font-size: 17pt; line-height: 1.45; color: #d5dde7; max-width: 9.6in; }
+.cover-sub b { color: #fff; }
+.cover-meta { margin-top: 0.5in; font: 500 10.5pt "Avenir Next", sans-serif; letter-spacing: 0.06em;
+  color: #86b6ef; text-transform: uppercase; }
+</style></head><body>
+<section class="slide cover">
+  <div class="cover-band"></div>
+  <div class="cover-inner">
+    <div class="eyebrow light">Projet Big Data · Master 2 · Septembre 2026</div>
+    <h1 class="cover-title">Régimes de marché&nbsp;: ce que la classification apporte vraiment</h1>
+    <p class="cover-sub">Cinq modèles comparés sur 24 ans hors échantillon, un protocole fixé
+    avant les résultats, et une conclusion nette&nbsp;: <b>le régime mesure le risque, pas la
+    direction du marché.</b></p>
+    <div class="cover-meta">Sparse Jump Model · HMM · Gradient boosting · HAR-RV · données publiques</div>
+  </div>
+</section>
+<section class="slide ">
+  <div class="eyebrow">Synthèse</div>
+  <h1>Le classifieur fonctionne&nbsp;; il prédit le risque, pas le sens</h1>
+  <div class="body"><div class="kpis"><div class="kpi"><div class="kv">93,2 %</div><div class="kl">des récessions officielles reconnues</div><div class="kd">exactitude équilibrée du Sparse Jump Model contre le NBER, en temps réel</div></div><div class="kpi"><div class="kv">+3,93 pts</div><div class="kl">d'information sur le risque futur</div><div class="kd">R² incrémental sur la volatilité à 21 jours, au-delà d'une règle de volatilité</div></div><div class="kpi"><div class="kv">+0,03 pt</div><div class="kl">d'information sur la direction</div><div class="kd">R² incrémental sur les rendements futurs : statistiquement nul (t = 0,27)</div></div><div class="kpi"><div class="kv">0 / 24</div><div class="kl">couplages utiles à des stratégies</div><div class="kd">8 stratégies × 3 façons de coupler le filtre : aucune amélioration démontrée</div></div></div>
+        <ol class="msgs">
+          <li><b>Il reconnaît les crises, et en temps réel.</b> Les états de stress coïncident avec
+          les récessions datées après coup par le NBER, avec 0 à 13 jours de latence.</li>
+          <li><b>Il informe sur la volatilité future, pas sur les rendements futurs.</b> C'est un
+          thermomètre du risque, pas un signal de direction.</li>
+          <li><b>Donc c'est un outil de dimensionnement, pas de coupure.</b> Utilisé comme filtre
+          «&nbsp;on coupe en stress&nbsp;», il n'améliore aucune des 8 stratégies testées.</li>
+        </ol></div>
+  <footer><div class="src">Source : docs/RESULTS_FINAL.md, docs/RESULTS_COUPLAGE_STRATEGIES.md</div><div class="brand">Régimes de marché · Projet Big Data M2</div>
+  <div class="pn">2</div></footer>
+</section>
+<section class="slide ">
+  <div class="eyebrow">La question et la démarche</div>
+  <h1>Une question précise, testée pour pouvoir répondre non</h1>
+  <div class="body"><div class="question">« Un modèle de régimes appris par machine apporte-t-il une
+        information exploitable au-delà de ce qu'une simple mesure de volatilité capte déjà&nbsp;? »</div>
+        <div class="grid4">
+          <div class="card"><h3>Pré-enregistré</h3><p>Modèles, règles et critères écrits et gelés
+          <b>avant</b> tout résultat, scellés par empreinte SHA-256.</p></div>
+          <div class="card"><h3>Point-in-time</h3><p>Chaque donnée n'est utilisée qu'à partir du
+          jour de sa publication réelle, en première version.</p></div>
+          <div class="card"><h3>Hors échantillon</h3><p>Réestimés tous les 6 mois sur le passé
+          seul&nbsp;; états <b>filtrés</b>, jamais lissés&nbsp;; signal en T−1, position en T.</p></div>
+          <div class="card"><h3>Un témoin partout</h3><p>Chaque modèle doit battre une règle d'une
+          ligne&nbsp;: «&nbsp;la volatilité récente est-elle sous sa médiane&nbsp;?&nbsp;»</p></div>
+        </div>
+        <div class="facts">
+          <div><b>6 377</b><span>séances hors échantillon, avril 2002 – septembre 2026</span></div>
+          <div><b>49</b><span>réestimations de chaque modèle, sur le passé seul</span></div>
+          <div><b>5</b><span>modèles comparés sous un protocole identique</span></div>
+          <div><b>109</b><span>configurations testées dans le programme, toutes journalisées</span></div>
+        </div></div>
+  <footer><div class="src">Source : docs/CHARTER.html, docs/PROTOCOL_FREEZE.md, data/trials.parquet</div><div class="brand">Régimes de marché · Projet Big Data M2</div>
+  <div class="pn">3</div></footer>
+</section>
+<section class="slide ">
+  <div class="eyebrow">D'où viennent les données</div>
+  <h1>Cinq sources publiques, transformées en 50 variables sur 36 ans</h1>
+  <div class="body"><table class="wide data"><thead><tr><th class="">Bloc</th><th class="">Contenu</th><th class="">Source</th><th class="">Période</th><th class="">Usage</th></tr></thead><tbody><tr><td class=""><b>Prix de marché</b></td><td class="">S&amp;P 500, Russell 2000, Nasdaq, Nikkei, taux US 10 et 30 ans, dollar, VIX</td><td class="">Yahoo Finance</td><td class="">1990 – 2026</td><td class="">Momentum, volatilité, asymétrie</td></tr><tr><td class=""><b>Pétrole WTI</b></td><td class="">Prix spot quotidien</td><td class="">FRED</td><td class="">1990 – 2026</td><td class="">Momentum des matières premières</td></tr><tr><td class=""><b>Macroéconomie</b></td><td class="">Production industrielle, emploi, inflation, chômage (premières publications)&nbsp;; spreads de crédit, taux, NFCI</td><td class="">FRED / ALFRED</td><td class="">1990 – 2026</td><td class="">Cycle, crédit, conditions financières</td></tr><tr><td class=""><b>Panels d'actions</b></td><td class="">49 secteurs, 25 portefeuilles taille × valeur, 5 facteurs</td><td class="">Ken French</td><td class="">1990 – 2026</td><td class="">Dispersion, corrélation, concentration</td></tr><tr><td class=""><b>Récessions NBER</b></td><td class="">Indicateur mensuel des récessions US</td><td class="">FRED</td><td class="">1990 – 2026</td><td class=""><b>Validation seulement</b> — jamais vu par les modèles</td></tr></tbody></table><div class="note">Les 50 variables couvrent 8 familles&nbsp;: momentum (7), volatilité
+        (9), asymétrie et mémoire longue (6), transversal (8), macroéconomie (9), crédit (4),
+        conditions financières (2) et taux (5). Un bloc de variables <b>indépendantes de la
+        volatilité</b> (dispersion, corrélation moyenne, crédit, pente des taux) a été imposé pour
+        que le modèle ne se réduise pas à un simple indicateur de volatilité. Détail en annexe.</div></div>
+  <footer><div class="src">Source : docs/DATA_NOTES.md, data/raw/, AVANCEMENT.md §3</div><div class="brand">Régimes de marché · Projet Big Data M2</div>
+  <div class="pn">4</div></footer>
+</section>
+<section class="slide ">
+  <div class="eyebrow">Comment on évalue</div>
+  <h1>Un protocole identique pour les cinq modèles</h1>
+  <div class="body"><div class="flow"><div class="step"><div class="sn">1</div><h3>Données</h3><p>5 sources publiques, point-in-time, depuis 1990</p></div><div class="arrow">→</div><div class="step"><div class="sn">2</div><h3>50 variables</h3><p>standardisées sur le passé seul</p></div><div class="arrow">→</div><div class="step"><div class="sn">3</div><h3>Modèle</h3><p>réestimé tous les 6 mois, fenêtre expansive</p></div><div class="arrow">→</div><div class="step"><div class="sn">4</div><h3>État du jour</h3><p>stress ou calme, filtré, connu la veille</p></div><div class="arrow">→</div><div class="step"><div class="sn">5</div><h3>Évaluation</h3><p>3 couches, toujours contre le témoin</p></div></div>
+        <div class="grid3">
+          <div class="card"><h3>Couche 1 — Classification</h3><p>Les états reconnaissent-ils les
+          récessions officielles&nbsp;? Sont-ils stables et reconnus en temps réel&nbsp;?</p></div>
+          <div class="card"><h3>Couche 2 — Information</h3><p>L'état apporte-t-il de l'information
+          sur la volatilité et sur les rendements futurs <b>au-delà du témoin</b>&nbsp;?</p></div>
+          <div class="card"><h3>Couche 3 — Portefeuille</h3><p>Un portefeuille 60/40 piloté par
+          l'état (tout ou rien, ou taille) fait-il mieux que le 60/40 seul&nbsp;?</p></div>
+        </div>
+        <div class="note">Équité entre modèles&nbsp;: même calendrier de réestimation, même
+        sous-ensemble de variables (choisi par le Sparse Jump Model sur le passé seul), même règle
+        de position fixée d'avance, deux états ordonnés par la volatilité d'entraînement.</div></div>
+  <footer><div class="src">Source : regime_lab/models/protocol.py, docs/CHARTER.html</div><div class="brand">Régimes de marché · Projet Big Data M2</div>
+  <div class="pn">5</div></footer>
+</section>
+<section class="slide ">
+  <div class="eyebrow">Les cinq modèles</div>
+  <h1>Deux familles à états cachés, deux prédicteurs directs</h1>
+  <div class="body"><table class="wide"><thead><tr><th class="">Modèle</th><th class="">Comment ça marche</th><th class="">Réglages</th><th class="">Rôle</th></tr></thead><tbody><tr class="hl"><td class=""><b>A′ Sparse Jump Model</b></td><td class="">Regroupe les jours semblables et <b>fait payer chaque changement d'état</b>&nbsp;; sélectionne lui-même ses variables</td><td class="">2 états, pénalité λ choisie à chaque réestimation, ≈ 10 variables effectives</td><td class="">Modèle principal</td></tr><tr><td class="">A Jump model</td><td class="">Même principe, sans sélection de variables</td><td class="">2 états, λ choisie à chaque réestimation</td><td class="">Variante</td></tr><tr><td class="">B HMM gaussien</td><td class="">Chaîne de Markov cachée, lois gaussiennes par état, probabilité <b>filtrée</b></td><td class="">2 états, matrice de transition</td><td class="">Référence classique</td></tr><tr><td class="">C Gradient boosting</td><td class="">Pas d'état caché&nbsp;: prédit la volatilité à 21 jours, puis la coupe à sa médiane</td><td class="">LightGBM, seuil appris sur le passé</td><td class="">Défi du machine learning</td></tr><tr><td class="">C′ HAR-RV</td><td class="">Modèle linéaire de volatilité (1, 5, 21 jours), coupé de même</td><td class="">Régression à 3 termes</td><td class="">Référence de la littérature</td></tr></tbody></table><div class="note">C et C′ sont <b>supervisés</b>&nbsp;: ils apprennent, sur le passé,
+        à prédire directement la volatilité future. A, A′ et B ne voient jamais cette cible. Les
+        premiers sont donc avantagés sur la prévision de volatilité&nbsp;: c'est voulu, pour
+        vérifier si la notion d'«&nbsp;état caché&nbsp;» apporte quelque chose.</div></div>
+  <footer><div class="src">Source : regime_lab/models/, docs/CHARTER.html §03</div><div class="brand">Régimes de marché · Projet Big Data M2</div>
+  <div class="pn">6</div></footer>
+</section>
+<section class="slide ">
+  <div class="eyebrow">Le modèle principal</div>
+  <h1>Le Sparse Jump Model&nbsp;: regrouper, stabiliser, sélectionner</h1>
+  <div class="body"><div class="two">
+          <div>
+            <div class="formula">min<sub>&nbsp;états, centres, poids</sub> &nbsp;
+            Σ<sub>t</sub> ‖ x<sub>t</sub> − μ<sub>s<sub>t</sub></sub> ‖<sup>2</sup><sub>w</sub>
+            &nbsp;+&nbsp; <b>λ</b> · Σ<sub>t</sub> 1{ s<sub>t</sub> ≠ s<sub>t−1</sub> }</div>
+            <div class="formula-caption">avec des poids de variables <i>w</i> contraints en
+            norme L1&nbsp;: une dizaine de variables seulement comptent réellement.</div>
+            <ol class="steps3">
+              <li><b>Regrouper.</b> Comme un k-moyennes, il affecte chaque jour à l'état dont le
+              profil (centre μ) lui ressemble le plus.</li>
+              <li><b>Stabiliser.</b> La pénalité λ fait «&nbsp;payer&nbsp;» chaque changement
+              d'état&nbsp;: les régimes durent, le signal ne clignote pas.</li>
+              <li><b>Sélectionner.</b> La contrainte L1 annule le poids des variables inutiles&nbsp;:
+              le modèle reste lisible.</li>
+            </ol>
+          </div>
+          <div class="side">
+            <h3>Réglages retenus</h3>
+            <ul class="kvlist">
+              <li><span>États</span><b>2 (stress, calme)</b></li>
+              <li><span>Pénalité λ</span><b>choisie dans {1, 3, 10, 30, 100, 300} à chaque
+              réestimation</b></li>
+              <li><span>Variables</span><b>≈ 10 effectives sur 50</b></li>
+              <li><span>Réestimation</span><b>tous les 6 mois, passé seul</b></li>
+              <li><span>Ordre des états</span><b>par la volatilité d'entraînement</b></li>
+            </ul>
+            <h3>Références</h3>
+            <p class="ref">Nystrup, Kolm &amp; Lindström (2020-2021)&nbsp;; Aydınhan, Kolm, Mulvey
+            &amp; Shu (2024). Implémentation de référence des auteurs (jumpmodels).</p>
+          </div>
+        </div></div>
+  <footer><div class="src">Source : regime_lab/models/jump.py, regime_lab/models/calibrate.py</div><div class="brand">Régimes de marché · Projet Big Data M2</div>
+  <div class="pn">7</div></footer>
+</section>
+<section class="slide ">
+  <div class="eyebrow">Résultat 1 — Qualité de classification</div>
+  <h1>93&nbsp;% des récessions reconnues, en temps réel</h1>
+  <div class="body"><div class="two chart-left">
+          <div><div class="chart-title">Exactitude équilibrée contre les récessions NBER
+          — pointillé&nbsp;: hasard (50&nbsp;%)</div><svg viewBox="0 0 600 344" width="100%" role="img"><line x1="170.0" y1="4" x2="170.0" y2="316" stroke="#c3c2b7" stroke-width="1.5"/><text x="170.0" y="332.0" font-size="12" fill="#898781" font-weight="400" text-anchor="middle" dominant-baseline="middle">0 %</text><line x1="240.0" y1="4" x2="240.0" y2="316" stroke="#e1e0d9" stroke-width="1"/><text x="240.0" y="332.0" font-size="12" fill="#898781" font-weight="400" text-anchor="middle" dominant-baseline="middle">25 %</text><line x1="310.0" y1="4" x2="310.0" y2="316" stroke="#e1e0d9" stroke-width="1"/><text x="310.0" y="332.0" font-size="12" fill="#898781" font-weight="400" text-anchor="middle" dominant-baseline="middle">50 %</text><line x1="380.0" y1="4" x2="380.0" y2="316" stroke="#e1e0d9" stroke-width="1"/><text x="380.0" y="332.0" font-size="12" fill="#898781" font-weight="400" text-anchor="middle" dominant-baseline="middle">75 %</text><line x1="450.0" y1="4" x2="450.0" y2="316" stroke="#e1e0d9" stroke-width="1"/><text x="450.0" y="332.0" font-size="12" fill="#898781" font-weight="400" text-anchor="middle" dominant-baseline="middle">100 %</text><line x1="310.0" y1="4" x2="310.0" y2="316" stroke="#898781" stroke-dasharray="4 4"/><text x="158.0" y="33.0" font-size="16" fill="#0b0b0b" font-weight="600" text-anchor="end" dominant-baseline="middle">A′ Sparse Jump</text><rect x="170" y="19.0" width="261.0" height="28" rx="4" fill="#2a78d6"/><text x="441.0" y="33.0" font-size="16" fill="#0b0b0b" font-weight="600" text-anchor="start" dominant-baseline="middle">93,2 %</text><text x="513.0" y="33.0" font-size="14" fill="#52514e" font-weight="400" text-anchor="start" dominant-baseline="middle">kappa 0,53</text><text x="158.0" y="95.0" font-size="16" fill="#0b0b0b" font-weight="400" text-anchor="end" dominant-baseline="middle">A Jump model</text><rect x="170" y="81.0" width="261.2" height="28" rx="4" fill="#c3c2b7"/><text x="441.2" y="95.0" font-size="16" fill="#0b0b0b" font-weight="400" text-anchor="start" dominant-baseline="middle">93,3 %</text><text x="513.2" y="95.0" font-size="14" fill="#52514e" font-weight="400" text-anchor="start" dominant-baseline="middle">kappa 0,49</text><text x="158.0" y="157.0" font-size="16" fill="#0b0b0b" font-weight="400" text-anchor="end" dominant-baseline="middle">B HMM filtré</text><rect x="170" y="143.0" width="237.2" height="28" rx="4" fill="#c3c2b7"/><text x="417.2" y="157.0" font-size="16" fill="#0b0b0b" font-weight="400" text-anchor="start" dominant-baseline="middle">84,7 %</text><text x="489.2" y="157.0" font-size="14" fill="#52514e" font-weight="400" text-anchor="start" dominant-baseline="middle">kappa 0,24</text><text x="158.0" y="219.0" font-size="16" fill="#0b0b0b" font-weight="400" text-anchor="end" dominant-baseline="middle">C′ HAR-RV</text><rect x="170" y="205.0" width="219.0" height="28" rx="4" fill="#c3c2b7"/><text x="399.0" y="219.0" font-size="16" fill="#0b0b0b" font-weight="400" text-anchor="start" dominant-baseline="middle">78,2 %</text><text x="471.0" y="219.0" font-size="14" fill="#52514e" font-weight="400" text-anchor="start" dominant-baseline="middle">kappa 0,17</text><text x="158.0" y="281.0" font-size="16" fill="#0b0b0b" font-weight="400" text-anchor="end" dominant-baseline="middle">C Gradient boosting</text><rect x="170" y="267.0" width="210.0" height="28" rx="4" fill="#c3c2b7"/><text x="390.0" y="281.0" font-size="16" fill="#0b0b0b" font-weight="400" text-anchor="start" dominant-baseline="middle">75,0 %</text><text x="462.0" y="281.0" font-size="14" fill="#52514e" font-weight="400" text-anchor="start" dominant-baseline="middle">kappa 0,12</text></svg></div>
+          <div><div class="chart-title">Stabilité des états</div>
+          <table class="compact"><thead><tr><th class="">Modèle</th><th class="num">Durée moy.</th><th class="num">Chgts / an</th><th class="num">Instabilité</th></tr></thead><tbody><tr class="hl"><td class="">A′ Sparse Jump</td><td class="num">456 j</td><td class="num">0,53</td><td class="num">0,6 %</td></tr><tr><td class="">A Jump model</td><td class="num">456 j</td><td class="num">0,53</td><td class="num">0,9 %</td></tr><tr><td class="">B HMM filtré</td><td class="num">128 j</td><td class="num">2,01</td><td class="num">0,7 %</td></tr><tr><td class="">C Gradient boosting</td><td class="num">18 j</td><td class="num">14,08</td><td class="num">0,0 %</td></tr><tr><td class="">C′ HAR-RV</td><td class="num">14 j</td><td class="num">18,41</td><td class="num">0,0 %</td></tr><tr><td class="">Témoin volatilité</td><td class="num">34 j</td><td class="num">6,75</td><td class="num">0,0 %</td></tr></tbody></table>
+          <div class="note small">Instabilité&nbsp;: part des étiquettes qui changeraient si l'on
+          connaissait la suite du semestre. Latence de détection mesurée&nbsp;: 0 à 13 jours.</div>
+          </div></div></div>
+  <footer><div class="src">Source : docs/RESULTS_FINAL.md (couche 1), data/cache/states.parquet</div><div class="brand">Régimes de marché · Projet Big Data M2</div>
+  <div class="pn">8</div></footer>
+</section>
+<section class="slide ">
+  <div class="eyebrow">Résultat 1 — Les régimes dans le temps</div>
+  <h1>13 changements d'état en 24 ans, calés sur les grandes crises</h1>
+  <div class="body"><div class="chart-title">S&amp;P 500, échelle logarithmique, avril 2002 – septembre 2026
+        <span class="legend inline"><span><i style="background:#e34948;opacity:.3"></i>état de
+        stress du Sparse Jump Model</span></span></div><svg viewBox="0 0 1180 410" width="100%" role="img"><rect x="56.0" y="30" width="52.4" height="350" fill="#e34948" fill-opacity="0.16"/><rect x="312.8" y="30" width="2.5" height="350" fill="#e34948" fill-opacity="0.16"/><rect x="319.4" y="30" width="76.1" height="350" fill="#e34948" fill-opacity="0.16"/><rect x="397.3" y="30" width="5.0" height="350" fill="#e34948" fill-opacity="0.16"/><rect x="872.5" y="30" width="18.2" height="350" fill="#e34948" fill-opacity="0.16"/><rect x="897.9" y="30" width="21.1" height="350" fill="#e34948" fill-opacity="0.16"/><rect x="920.6" y="30" width="2.0" height="350" fill="#e34948" fill-opacity="0.16"/><line x1="56" y1="344.8" x2="1168" y2="344.8" stroke="#e1e0d9"/><text x="48.0" y="344.8" font-size="12" fill="#898781" font-weight="400" text-anchor="end" dominant-baseline="middle">800</text><line x1="56" y1="315.0" x2="1168" y2="315.0" stroke="#e1e0d9"/><text x="48.0" y="315.0" font-size="12" fill="#898781" font-weight="400" text-anchor="end" dominant-baseline="middle">1 000</text><line x1="56" y1="260.7" x2="1168" y2="260.7" stroke="#e1e0d9"/><text x="48.0" y="260.7" font-size="12" fill="#898781" font-weight="400" text-anchor="end" dominant-baseline="middle">1 500</text><line x1="56" y1="222.2" x2="1168" y2="222.2" stroke="#e1e0d9"/><text x="48.0" y="222.2" font-size="12" fill="#898781" font-weight="400" text-anchor="end" dominant-baseline="middle">2 000</text><line x1="56" y1="167.9" x2="1168" y2="167.9" stroke="#e1e0d9"/><text x="48.0" y="167.9" font-size="12" fill="#898781" font-weight="400" text-anchor="end" dominant-baseline="middle">3 000</text><line x1="56" y1="129.4" x2="1168" y2="129.4" stroke="#e1e0d9"/><text x="48.0" y="129.4" font-size="12" fill="#898781" font-weight="400" text-anchor="end" dominant-baseline="middle">4 000</text><line x1="56" y1="75.2" x2="1168" y2="75.2" stroke="#e1e0d9"/><text x="48.0" y="75.2" font-size="12" fill="#898781" font-weight="400" text-anchor="end" dominant-baseline="middle">6 000</text><text x="135.7" y="398.0" font-size="12" fill="#898781" font-weight="400" text-anchor="middle" dominant-baseline="middle">2004</text><text x="226.8" y="398.0" font-size="12" fill="#898781" font-weight="400" text-anchor="middle" dominant-baseline="middle">2006</text><text x="317.7" y="398.0" font-size="12" fill="#898781" font-weight="400" text-anchor="middle" dominant-baseline="middle">2008</text><text x="408.8" y="398.0" font-size="12" fill="#898781" font-weight="400" text-anchor="middle" dominant-baseline="middle">2010</text><text x="499.8" y="398.0" font-size="12" fill="#898781" font-weight="400" text-anchor="middle" dominant-baseline="middle">2012</text><text x="590.8" y="398.0" font-size="12" fill="#898781" font-weight="400" text-anchor="middle" dominant-baseline="middle">2014</text><text x="681.8" y="398.0" font-size="12" fill="#898781" font-weight="400" text-anchor="middle" dominant-baseline="middle">2016</text><text x="772.8" y="398.0" font-size="12" fill="#898781" font-weight="400" text-anchor="middle" dominant-baseline="middle">2018</text><text x="863.8" y="398.0" font-size="12" fill="#898781" font-weight="400" text-anchor="middle" dominant-baseline="middle">2020</text><text x="954.8" y="398.0" font-size="12" fill="#898781" font-weight="400" text-anchor="middle" dominant-baseline="middle">2022</text><text x="1045.8" y="398.0" font-size="12" fill="#898781" font-weight="400" text-anchor="middle" dominant-baseline="middle">2024</text><text x="1136.9" y="398.0" font-size="12" fill="#898781" font-weight="400" text-anchor="middle" dominant-baseline="middle">2026</text><polyline points="56.5,299.5 57.4,300.9 58.2,299.2 59.1,305.1 60.0,305.5 60.9,307.8 61.7,301.4 62.6,304.2 63.5,306.3 64.3,311.3 65.2,314.0 66.1,316.4 67.0,316.3 67.8,316.4 68.7,325.9 69.6,337.1 70.5,336.3 71.3,334.5 72.2,327.8 73.1,324.8 73.9,323.1 74.8,326.7 75.7,330.0 76.6,330.6 77.4,337.4 78.3,340.3 79.2,344.7 80.0,339.0 80.9,331.4 81.8,329.4 82.7,328.9 83.5,329.8 84.4,327.6 85.3,324.6 86.1,323.8 87.0,327.2 87.9,330.6 88.8,329.7 89.6,332.8 90.5,327.8 91.4,325.0 92.3,328.8 93.1,334.9 94.0,335.8 94.9,339.9 95.7,339.1 96.6,337.0 97.5,338.1 98.4,340.1 99.2,339.4 100.1,329.7 101.0,334.6 101.8,332.2 102.7,333.9 103.6,330.0 104.5,329.2 105.3,324.7 106.2,324.2 107.1,322.6 107.9,324.2 108.8,319.9 109.7,316.6 110.6,316.5 111.4,315.5 112.3,318.2 113.2,316.9 114.1,315.2 114.9,315.8 115.8,315.1 116.7,317.6 117.5,318.0 118.4,316.2 119.3,315.9 120.2,313.9 121.0,312.1 121.9,312.5 122.8,310.2 123.6,315.4 124.5,311.0 125.4,310.0 126.3,309.8 127.1,311.1 128.0,308.3 128.9,308.0 129.8,308.4 130.6,310.3 131.5,307.4 132.4,307.0 133.2,305.4 134.1,303.6 135.0,302.7 135.9,301.2 136.7,299.6 137.6,297.4 138.5,297.2 139.3,298.5 140.2,297.1 141.1,296.7 142.0,296.9 142.8,296.8 143.7,295.5 144.6,299.7 145.4,301.0 146.3,301.2 147.2,297.2 148.1,297.5 148.9,298.1 149.8,297.3 150.7,301.3 151.6,302.4 152.4,302.7 153.3,303.0 154.2,299.7 155.0,299.5 155.9,297.8 156.8,298.0 157.7,298.1 158.5,299.1 159.4,300.6 160.3,302.0 161.1,303.9 162.0,302.0 162.9,306.7 163.8,306.5 164.6,302.4 165.5,301.3 166.4,300.5 167.2,299.3 168.1,298.8 169.0,301.0 169.9,298.4 170.7,299.5 171.6,301.2 172.5,302.7 173.4,298.6 174.2,294.4 175.1,292.3 176.0,293.9 176.8,292.5 177.7,291.5 178.6,291.9 179.5,291.2 180.3,289.4 181.2,289.2 182.1,292.1 182.9,292.3 183.8,294.2 184.7,293.8 185.6,290.2 186.4,290.0 187.3,290.4 188.2,289.3 189.1,288.1 189.9,290.5 190.8,291.7 191.7,293.8 192.5,293.6 193.4,292.7 194.3,297.1 195.2,296.0 196.0,295.5 196.9,293.8 197.8,295.8 198.6,291.8 199.5,290.7 200.4,291.0 201.3,290.8 202.1,288.7 203.0,291.5 203.9,291.2 204.7,289.2 205.6,287.5 206.5,286.8 207.4,286.8 208.2,287.6 209.1,287.2 210.0,288.4 210.9,290.0 211.7,288.6 212.6,286.0 213.5,286.4 214.3,288.9 215.2,287.4 216.1,291.0 217.0,292.1 217.8,292.8 218.7,290.7 219.6,288.3 220.4,286.7 221.3,285.3 222.2,283.1 223.1,283.5 223.9,284.1 224.8,283.2 225.7,283.1 226.5,285.3 227.4,281.3 228.3,281.1 229.2,283.9 230.0,281.5 230.9,283.6 231.8,283.3 232.7,281.2 233.5,280.9 234.4,281.2 235.3,281.8 236.1,279.1 237.0,279.5 237.9,280.4 238.8,280.3 239.6,281.0 240.5,278.7 241.4,278.8 242.2,277.2 243.1,280.7 244.0,283.3 244.9,281.9 245.7,281.1 246.6,284.8 247.5,284.9 248.4,285.7 249.2,282.9 250.1,283.4 251.0,286.6 251.8,286.1 252.7,282.1 253.6,282.0 254.5,283.3 255.3,279.6 256.2,280.3 257.1,278.7 257.9,280.0 258.8,277.8 259.7,278.3 260.6,276.2 261.4,274.8 262.3,273.3 263.2,273.0 264.0,272.1 264.9,273.4 265.8,271.8 266.7,269.8 267.5,269.8 268.4,270.2 269.3,269.0 270.2,267.4 271.0,268.9 271.9,268.2 272.8,269.0 273.6,267.0 274.5,267.0 275.4,267.8 276.3,265.4 277.1,266.3 278.0,264.7 278.9,265.1 279.7,271.2 280.6,269.7 281.5,271.2 282.4,266.5 283.2,267.9 284.1,265.8 285.0,265.0 285.8,262.1 286.7,261.2 287.6,260.2 288.5,260.2 289.3,258.7 290.2,259.3 291.1,257.5 292.0,260.0 292.8,257.8 293.7,260.5 294.6,260.4 295.4,258.0 296.3,256.1 297.2,257.7 298.1,264.4 298.9,266.8 299.8,264.9 300.7,265.6 301.5,262.5 302.4,263.0 303.3,264.9 304.2,262.1 305.0,258.4 305.9,258.3 306.8,255.6 307.7,255.3 308.5,260.6 309.4,257.6 310.3,259.8 311.1,264.9 312.0,264.4 312.9,266.1 313.8,262.4 314.6,260.3 315.5,263.6 316.4,262.1 317.2,262.6 318.1,268.8 319.0,269.8 319.9,277.3 320.7,276.7 321.6,270.4 322.5,276.7 323.3,274.8 324.2,274.5 325.1,276.7 326.0,280.5 326.8,281.1 327.7,276.8 328.6,278.3 329.5,272.8 330.3,276.5 331.2,270.9 332.1,270.1 332.9,268.6 333.8,271.0 334.7,267.5 335.6,272.2 336.4,269.9 337.3,273.7 338.2,273.8 339.0,278.0 339.9,282.1 340.8,283.7 341.7,286.2 342.5,284.0 343.4,284.3 344.3,284.0 345.1,280.2 346.0,280.0 346.9,280.6 347.8,281.6 348.6,285.9 349.5,284.9 350.4,284.5 351.3,289.1 352.1,302.3 353.0,329.2 353.9,323.2 354.7,332.6 355.6,319.2 356.5,324.5 357.4,333.1 358.2,344.8 359.1,329.6 360.0,332.7 360.8,332.1 361.7,330.9 362.6,333.2 363.5,324.4 364.3,330.5 365.2,336.7 366.1,339.6 367.0,340.6 367.8,333.8 368.7,340.4 369.6,349.9 370.4,356.1 371.3,365.9 372.2,352.3 373.1,350.2 373.9,342.2 374.8,337.9 375.7,335.7 376.5,333.7 377.4,334.2 378.3,332.4 379.2,324.8 380.0,331.6 380.9,331.0 381.8,326.2 382.6,323.2 383.5,322.4 384.4,325.9 385.3,326.3 386.1,329.6 387.0,332.2 387.9,323.2 388.8,317.8 389.6,316.6 390.5,313.6 391.4,314.4 392.2,311.5 393.1,311.1 394.0,312.8 394.9,309.4 395.7,306.1 396.6,309.1 397.5,311.6 398.3,305.7 399.2,303.7 400.1,304.7 401.0,310.2 401.8,306.0 402.7,303.0 403.6,303.2 404.4,303.2 405.3,301.5 406.2,301.4 407.1,301.9 407.9,299.0 408.8,300.4 409.7,296.8 410.6,297.9 411.4,303.2 412.3,305.4 413.2,306.4 414.0,305.2 414.9,301.1 415.8,301.7 416.7,297.6 417.5,296.2 418.4,295.1 419.3,294.3 420.1,293.0 421.0,291.2 421.9,291.4 422.8,288.6 423.6,292.0 424.5,300.9 425.4,297.9 426.3,303.7 427.1,303.5 428.0,306.5 428.9,303.2 429.7,300.1 430.6,305.1 431.5,312.0 432.4,304.9 433.2,306.5 434.1,301.9 435.0,302.0 435.8,299.6 436.7,304.7 437.6,305.7 438.5,306.6 439.3,301.6 440.2,301.0 441.1,299.1 441.9,296.4 442.8,296.7 443.7,294.5 444.6,293.2 445.4,292.5 446.3,292.4 447.2,287.7 448.1,290.6 448.9,290.6 449.8,291.7 450.7,287.8 451.5,286.1 452.4,285.7 453.3,284.4 454.2,284.3 455.0,282.8 455.9,280.5 456.8,281.6 457.6,282.3 458.5,278.7 459.4,276.9 460.3,275.5 461.1,277.8 462.0,277.7 462.9,279.4 463.7,282.0 464.6,278.4 465.5,276.5 466.4,277.0 467.2,277.8 468.1,276.0 469.0,273.4 469.9,275.8 470.7,276.0 471.6,276.5 472.5,276.7 473.3,279.8 474.2,282.9 475.1,282.8 476.0,283.1 476.8,275.8 477.7,275.4 478.6,278.2 479.4,275.3 480.3,280.6 481.2,290.6 482.1,292.9 482.9,299.4 483.8,293.2 484.7,293.5 485.6,295.8 486.4,288.8 487.3,297.8 488.2,298.4 489.0,295.6 489.9,287.8 490.8,286.4 491.7,281.4 492.5,284.7 493.4,283.6 494.3,288.8 495.1,295.2 496.0,285.7 496.9,284.5 497.8,288.4 498.6,283.5 499.5,284.3 500.4,282.1 501.2,281.0 502.1,278.3 503.0,278.2 503.9,275.3 504.7,275.5 505.6,273.7 506.5,273.2 507.4,272.9 508.2,272.7 509.1,269.5 510.0,270.2 510.8,269.1 511.7,270.1 512.6,272.8 513.5,272.0 514.3,269.6 515.2,272.9 516.1,274.5 516.9,280.3 517.8,278.0 518.7,282.1 519.6,277.2 520.4,275.5 521.3,276.3 522.2,273.6 523.0,274.3 523.9,274.1 524.8,273.5 525.7,271.3 526.5,270.8 527.4,269.4 528.3,268.2 529.2,268.9 530.0,269.3 530.9,266.3 531.8,263.8 532.6,264.3 533.5,266.1 534.4,264.2 535.3,267.2 536.1,266.8 537.0,268.8 537.9,268.6 538.7,271.9 539.6,273.8 540.5,269.1 541.4,268.4 542.2,268.2 543.1,268.6 544.0,267.1 544.9,269.7 545.7,263.7 546.6,263.2 547.5,261.9 548.3,260.4 549.2,259.5 550.1,259.1 551.0,258.9 551.8,259.3 552.7,259.1 553.6,256.2 554.4,255.4 555.3,255.7 556.2,254.7 557.1,256.0 557.9,253.0 558.8,255.8 559.7,253.5 560.5,250.9 561.4,249.3 562.3,246.5 563.2,248.0 564.0,249.5 564.9,248.5 565.8,249.8 566.7,252.7 567.5,251.5 568.4,249.4 569.3,245.5 570.1,244.6 571.0,244.6 571.9,243.2 572.8,244.6 573.6,247.5 574.5,246.8 575.4,249.3 576.2,247.5 577.1,244.9 578.0,243.2 578.9,244.6 579.7,244.7 580.6,243.7 581.5,240.5 582.3,239.3 583.2,239.2 584.1,238.5 585.0,236.4 585.8,235.9 586.7,235.9 587.6,235.9 588.5,238.1 589.3,234.9 590.2,233.2 591.1,234.0 591.9,233.2 592.8,233.4 593.7,237.0 594.6,237.6 595.4,236.5 596.3,233.4 597.2,233.6 598.0,231.9 598.9,230.6 599.8,233.3 600.7,231.4 601.5,232.1 602.4,231.5 603.3,235.1 604.2,231.6 605.0,231.7 605.9,230.4 606.8,230.6 607.6,230.6 608.5,229.0 609.4,227.4 610.3,225.6 611.1,226.5 612.0,224.7 612.9,224.8 613.7,223.2 614.6,224.4 615.5,223.7 616.4,223.6 617.2,227.3 618.1,226.8 619.0,225.2 619.8,223.0 620.7,222.0 621.6,221.7 622.5,223.2 623.3,221.5 624.2,223.3 625.1,224.4 626.0,228.6 626.8,230.0 627.7,224.6 628.6,221.0 629.4,220.1 630.3,219.6 631.2,218.0 632.1,217.7 632.9,217.2 633.8,222.0 634.7,217.5 635.5,216.4 636.4,218.4 637.3,219.2 638.2,220.9 639.0,218.8 639.9,222.5 640.8,218.5 641.7,215.9 642.5,215.0 643.4,215.4 644.3,217.5 645.1,218.7 646.0,215.1 646.9,218.2 647.8,217.8 648.6,215.5 649.5,216.9 650.4,214.5 651.2,215.1 652.1,214.6 653.0,214.2 653.9,214.0 654.7,215.2 655.6,216.1 656.5,216.0 657.3,215.0 658.2,215.6 659.1,217.1 660.0,217.2 660.8,214.0 661.7,217.0 662.6,215.4 663.5,217.1 664.3,216.2 665.2,224.2 666.1,222.9 666.9,227.6 667.8,224.8 668.7,225.0 669.6,226.9 670.4,225.5 671.3,221.2 672.2,220.0 673.0,217.3 673.9,217.0 674.8,215.7 675.7,220.7 676.5,216.4 677.4,216.3 678.3,216.2 679.1,221.4 680.0,221.8 680.9,218.2 681.8,219.3 682.6,227.5 683.5,230.4 684.4,228.6 685.3,226.2 686.1,230.5 687.0,231.6 687.9,227.8 688.7,225.7 689.6,222.2 690.5,220.7 691.4,218.9 692.2,219.8 693.1,217.4 694.0,219.0 694.8,216.9 695.7,216.2 696.6,217.9 697.5,218.4 698.3,219.1 699.2,218.7 700.1,215.7 701.0,215.7 701.8,215.9 702.7,217.5 703.6,219.7 704.4,215.5 705.3,213.8 706.2,211.8 707.1,211.0 707.9,211.1 708.8,210.5 709.7,210.4 710.5,210.4 711.4,211.3 712.3,210.7 713.2,213.9 714.0,213.2 714.9,211.6 715.8,211.4 716.6,212.3 717.5,213.6 718.4,213.1 719.3,214.0 720.1,216.6 721.0,211.6 721.9,210.5 722.8,208.6 723.6,209.9 724.5,205.9 725.4,205.9 726.2,205.6 727.1,207.1 728.0,204.8 728.9,205.0 729.7,205.2 730.6,203.8 731.5,203.6 732.3,202.6 733.2,200.5 734.1,199.6 735.0,198.7 735.8,199.3 736.7,199.0 737.6,201.0 738.4,199.9 739.3,200.3 740.2,201.8 741.1,200.7 741.9,198.7 742.8,197.8 743.7,198.3 744.6,198.8 745.4,196.9 746.3,195.6 747.2,196.0 748.0,196.0 748.9,195.7 749.8,196.5 750.7,196.4 751.5,194.5 752.4,193.8 753.3,193.8 754.1,193.6 755.0,195.5 755.9,196.4 756.8,195.4 757.6,193.6 758.5,194.4 759.4,192.3 760.3,192.2 761.1,191.3 762.0,189.7 762.9,189.5 763.7,188.4 764.6,188.1 765.5,187.7 766.4,188.0 767.2,188.2 768.1,187.0 769.0,184.9 769.8,184.5 770.7,183.2 771.6,182.9 772.5,183.3 773.3,179.9 774.2,177.8 775.1,176.7 775.9,173.7 776.8,179.0 777.7,186.1 778.6,180.4 779.4,179.7 780.3,182.5 781.2,177.8 782.1,179.5 782.9,187.7 783.8,185.0 784.7,186.8 785.5,184.2 786.4,183.5 787.3,183.5 788.2,183.9 789.0,180.7 789.9,181.4 790.8,181.0 791.6,180.3 792.5,178.2 793.4,178.1 794.3,179.3 795.1,181.1 796.0,179.1 796.9,177.1 797.7,177.1 798.6,176.3 799.5,175.2 800.4,175.6 801.2,174.8 802.1,173.6 803.0,172.4 803.9,173.8 804.7,172.2 805.6,171.1 806.5,171.8 807.3,173.1 808.2,178.7 809.1,178.7 810.0,184.1 810.8,180.9 811.7,178.1 812.6,180.2 813.4,185.4 814.3,179.1 815.2,185.4 816.1,187.1 816.9,196.9 817.8,193.1 818.7,190.6 819.6,187.3 820.4,183.5 821.3,183.8 822.2,181.7 823.0,181.6 823.9,178.3 824.8,177.5 825.7,177.0 826.5,179.9 827.4,176.1 828.3,177.1 829.1,175.5 830.0,172.8 830.9,172.1 831.8,172.2 832.6,170.6 833.5,170.4 834.4,173.3 835.2,174.3 836.1,175.9 837.0,179.5 837.9,173.7 838.7,173.1 839.6,170.2 840.5,170.6 841.4,168.4 842.2,167.3 843.1,169.0 844.0,166.8 844.8,171.0 845.7,171.6 846.6,173.0 847.5,174.9 848.3,171.2 849.2,168.9 850.1,167.6 850.9,168.3 851.8,169.6 852.7,170.1 853.6,169.3 854.4,168.5 855.3,166.9 856.2,165.0 857.0,163.8 857.9,162.7 858.8,163.1 859.7,161.8 860.5,161.6 861.4,160.6 862.3,158.4 863.2,157.6 864.0,157.8 864.9,156.6 865.8,154.0 866.6,155.4 867.5,158.2 868.4,154.1 869.3,152.0 870.1,153.7 871.0,170.0 871.9,169.2 872.7,181.5 873.6,203.2 874.5,190.1 875.4,192.9 876.2,177.6 877.1,173.6 878.0,175.4 878.9,175.7 879.7,171.1 880.6,174.2 881.5,169.9 882.3,166.0 883.2,159.5 884.1,166.1 885.0,163.6 885.8,167.5 886.7,162.3 887.6,159.9 888.4,158.3 889.3,158.6 890.2,156.3 891.1,153.1 891.9,152.3 892.8,151.3 893.7,147.0 894.5,150.1 895.4,153.5 896.3,154.4 897.2,155.2 898.0,153.2 898.9,148.2 899.8,147.9 900.7,148.6 901.5,156.4 902.4,146.9 903.3,144.1 904.1,145.1 905.0,142.1 905.9,139.9 906.8,141.2 907.6,139.5 908.5,139.8 909.4,137.8 910.2,135.4 911.1,137.4 912.0,134.8 912.9,139.3 913.7,133.3 914.6,131.6 915.5,132.6 916.3,135.9 917.2,134.8 918.1,131.3 919.0,132.4 919.8,130.3 920.7,128.8 921.6,125.2 922.5,123.4 923.3,123.5 924.2,123.5 925.1,121.9 925.9,123.7 926.8,124.3 927.7,122.8 928.6,121.9 929.4,121.4 930.3,124.0 931.2,120.4 932.0,118.1 932.9,117.6 933.8,118.9 934.7,116.3 935.5,116.8 936.4,115.6 937.3,114.6 938.2,115.4 939.0,113.4 939.9,112.6 940.8,114.9 941.6,115.7 942.5,115.0 943.4,118.0 944.3,116.9 945.1,114.5 946.0,112.3 946.9,110.6 947.7,107.9 948.6,108.3 949.5,107.9 950.4,110.9 951.2,112.5 952.1,107.5 953.0,110.1 953.8,107.1 954.7,106.0 955.6,108.5 956.5,108.9 957.3,116.7 958.2,115.7 959.1,113.7 960.0,116.1 960.8,118.2 961.7,117.1 962.6,118.9 963.4,122.8 964.3,114.8 965.2,112.4 966.1,112.3 966.9,114.0 967.8,116.9 968.7,120.6 969.5,125.1 970.4,125.4 971.3,128.6 972.2,132.8 973.0,124.2 973.9,125.8 974.8,132.8 975.6,140.8 976.5,132.4 977.4,135.4 978.3,132.8 979.1,134.1 980.0,130.7 980.9,125.1 981.8,124.7 982.6,120.4 983.5,122.0 984.4,127.5 985.2,132.0 986.1,127.2 987.0,133.7 987.9,140.1 988.7,144.1 989.6,142.1 990.5,144.2 991.3,138.0 992.2,132.8 993.1,137.3 994.0,129.7 994.8,130.6 995.7,128.6 996.6,127.1 997.5,131.6 998.3,134.5 999.2,134.7 1000.1,134.9 1000.9,133.0 1001.8,129.5 1002.7,130.3 1003.6,127.1 1004.4,124.9 1005.3,126.4 1006.2,126.8 1007.0,130.4 1007.9,127.9 1008.8,134.1 1009.7,132.2 1010.5,130.4 1011.4,125.8 1012.3,126.0 1013.1,124.9 1014.0,125.0 1014.9,123.9 1015.8,124.9 1016.6,125.3 1017.5,123.2 1018.4,122.7 1019.3,120.3 1020.1,119.8 1021.0,116.4 1021.9,118.3 1022.7,115.1 1023.6,116.7 1024.5,113.5 1025.4,112.6 1026.2,111.2 1027.1,114.3 1028.0,114.7 1028.8,117.6 1029.7,116.5 1030.6,113.2 1031.5,114.9 1032.3,115.2 1033.2,119.1 1034.1,120.1 1034.9,119.5 1035.8,118.9 1036.7,122.1 1037.6,125.6 1038.4,117.9 1039.3,116.2 1040.2,113.2 1041.1,111.9 1041.9,110.9 1042.8,110.6 1043.7,107.3 1044.5,106.3 1045.4,105.9 1046.3,107.9 1047.2,105.5 1048.0,103.9 1048.9,102.5 1049.8,100.7 1050.6,98.9 1051.5,99.4 1052.4,97.2 1053.3,95.9 1054.1,96.3 1055.0,96.5 1055.9,93.4 1056.8,92.9 1057.6,94.2 1058.5,96.3 1059.4,100.4 1060.2,96.9 1061.1,96.2 1062.0,93.7 1062.9,91.7 1063.7,91.6 1064.6,92.3 1065.5,90.6 1066.3,88.5 1067.2,87.7 1068.1,87.8 1069.0,85.2 1069.8,84.0 1070.7,86.7 1071.6,87.8 1072.4,90.6 1073.3,90.7 1074.2,85.5 1075.1,83.6 1075.9,83.2 1076.8,89.1 1077.7,83.8 1078.6,82.0 1079.4,81.1 1080.3,80.8 1081.2,79.4 1082.0,78.2 1082.9,79.5 1083.8,81.4 1084.7,75.3 1085.5,78.1 1086.4,75.9 1087.3,74.4 1088.1,73.2 1089.0,74.0 1089.9,76.7 1090.8,75.8 1091.6,76.5 1092.5,79.1 1093.4,75.2 1094.2,72.9 1095.1,74.3 1096.0,74.6 1096.9,72.6 1097.7,74.9 1098.6,76.2 1099.5,80.4 1100.4,83.5 1101.2,82.8 1102.1,84.9 1103.0,97.6 1103.8,90.2 1104.7,92.2 1105.6,86.2 1106.5,82.3 1107.3,83.0 1108.2,76.1 1109.1,79.6 1109.9,77.2 1110.8,75.2 1111.7,75.7 1112.6,75.9 1113.4,71.4 1114.3,69.1 1115.2,69.5 1116.1,68.7 1116.9,66.8 1117.8,70.0 1118.7,66.8 1119.5,65.5 1120.4,65.1 1121.3,65.3 1122.2,64.8 1123.0,62.7 1123.9,61.1 1124.8,61.5 1125.6,60.1 1126.5,63.4 1127.4,61.1 1128.3,58.6 1129.1,57.6 1130.0,59.8 1130.9,59.7 1131.7,62.4 1132.6,57.5 1133.5,57.0 1134.4,57.9 1135.2,57.7 1136.1,55.9 1137.0,57.3 1137.9,55.2 1138.7,55.7 1139.6,56.2 1140.5,55.7 1141.3,55.8 1142.2,57.7 1143.1,56.3 1144.0,56.9 1144.8,59.6 1145.7,61.8 1146.6,64.3 1147.4,67.2 1148.3,62.8 1149.2,58.1 1150.1,52.1 1150.9,51.4 1151.8,50.2 1152.7,47.1 1153.5,46.9 1154.4,45.8 1155.3,43.9 1156.2,47.4 1157.0,46.5 1157.9,45.3 1158.8,47.9 1159.7,45.6 1160.5,44.0 1161.4,46.1 1162.3,46.9 1163.1,45.5 1164.0,40.8 1164.9,40.3 1165.8,42.2 1166.6,41.6 1167.5,41.5 1168.4,42.0" fill="none" stroke="#0b0b0b" stroke-width="1.6"/><text x="58.0" y="17.0" font-size="13" fill="#52514e" font-weight="600" text-anchor="start" dominant-baseline="middle">Après la bulle internet</text><text x="314.8" y="17.0" font-size="13" fill="#52514e" font-weight="600" text-anchor="start" dominant-baseline="middle">Crise financière</text><text x="874.5" y="17.0" font-size="13" fill="#52514e" font-weight="600" text-anchor="start" dominant-baseline="middle">Covid</text><line x1="990.5" y1="150.2" x2="990.5" y2="178.2" stroke="#52514e"/><text x="990.5" y="190.2" font-size="13" fill="#52514e" font-weight="400" text-anchor="middle" dominant-baseline="middle">2022 : baisse de 25 %, non signalée</text></svg>
+        <div class="note">Le modèle est resté en état calme depuis avril 2021&nbsp;: la baisse de
+        2022 (−25&nbsp;% sur le S&amp;P 500, choc de taux) n'a pas été classée comme un régime de
+        stress. Treize décisions en 24 ans&nbsp;: c'est un indicateur de fond, pas un signal de
+        trading.</div></div>
+  <footer><div class="src">Source : data/cache/states.parquet, data/raw/prices/cross_asset.parquet</div><div class="brand">Régimes de marché · Projet Big Data M2</div>
+  <div class="pn">9</div></footer>
+</section>
+<section class="slide ">
+  <div class="eyebrow">Résultat 2 — Ce que l'état apporte</div>
+  <h1>Il informe sur le risque futur, pas sur la direction</h1>
+  <div class="body"><div class="two chart-left">
+          <div><div class="chart-title">R² incrémental au-delà du témoin, en points, horizon 21 jours</div>
+          <div class="legend"><span><i style="background:#2a78d6"></i>volatilité future</span>
+          <span><i style="background:#eb6834"></i>rendements futurs</span></div>
+          <svg viewBox="0 0 620 394" width="100%" role="img"><line x1="170.0" y1="4" x2="170.0" y2="366" stroke="#c3c2b7" stroke-width="1.5"/><text x="170.0" y="382.0" font-size="12" fill="#898781" font-weight="400" text-anchor="middle" dominant-baseline="middle">0 pt</text><line x1="265.0" y1="4" x2="265.0" y2="366" stroke="#e1e0d9" stroke-width="1"/><text x="265.0" y="382.0" font-size="12" fill="#898781" font-weight="400" text-anchor="middle" dominant-baseline="middle">1 pt</text><line x1="360.0" y1="4" x2="360.0" y2="366" stroke="#e1e0d9" stroke-width="1"/><text x="360.0" y="382.0" font-size="12" fill="#898781" font-weight="400" text-anchor="middle" dominant-baseline="middle">2 pt</text><line x1="455.0" y1="4" x2="455.0" y2="366" stroke="#e1e0d9" stroke-width="1"/><text x="455.0" y="382.0" font-size="12" fill="#898781" font-weight="400" text-anchor="middle" dominant-baseline="middle">3 pt</text><line x1="550.0" y1="4" x2="550.0" y2="366" stroke="#e1e0d9" stroke-width="1"/><text x="550.0" y="382.0" font-size="12" fill="#898781" font-weight="400" text-anchor="middle" dominant-baseline="middle">4 pt</text><text x="158.0" y="30.0" font-size="15" fill="#0b0b0b" font-weight="600" text-anchor="end" dominant-baseline="middle">A′ Sparse Jump</text><rect x="170" y="11" width="373.4" height="19" rx="4" fill="#2a78d6"/><text x="551.4" y="21.0" font-size="14" fill="#0b0b0b" font-weight="600" text-anchor="start" dominant-baseline="middle">+3,93</text><rect x="170" y="32" width="2.8" height="19" rx="4" fill="#eb6834"/><text x="180.8" y="42.0" font-size="14" fill="#52514e" font-weight="400" text-anchor="start" dominant-baseline="middle">+0,030</text><text x="158.0" y="90.0" font-size="15" fill="#0b0b0b" font-weight="400" text-anchor="end" dominant-baseline="middle">A Jump model</text><rect x="170" y="71" width="329.7" height="19" rx="4" fill="#2a78d6"/><text x="507.7" y="81.0" font-size="14" fill="#0b0b0b" font-weight="400" text-anchor="start" dominant-baseline="middle">+3,47</text><rect x="170" y="92" width="2.1" height="19" rx="4" fill="#eb6834"/><text x="180.1" y="102.0" font-size="14" fill="#52514e" font-weight="400" text-anchor="start" dominant-baseline="middle">+0,022</text><text x="158.0" y="150.0" font-size="15" fill="#0b0b0b" font-weight="400" text-anchor="end" dominant-baseline="middle">B HMM filtré</text><rect x="170" y="131" width="214.7" height="19" rx="4" fill="#2a78d6"/><text x="392.7" y="141.0" font-size="14" fill="#0b0b0b" font-weight="400" text-anchor="start" dominant-baseline="middle">+2,26</text><rect x="170" y="152" width="2.0" height="19" rx="4" fill="#eb6834"/><text x="180.0" y="162.0" font-size="14" fill="#52514e" font-weight="400" text-anchor="start" dominant-baseline="middle">+0,007</text><text x="158.0" y="210.0" font-size="15" fill="#0b0b0b" font-weight="400" text-anchor="end" dominant-baseline="middle">C Gradient boosting</text><rect x="170" y="191" width="202.4" height="19" rx="4" fill="#2a78d6"/><text x="380.4" y="201.0" font-size="14" fill="#0b0b0b" font-weight="400" text-anchor="start" dominant-baseline="middle">+2,13</text><rect x="170" y="212" width="2.2" height="19" rx="4" fill="#eb6834"/><text x="180.2" y="222.0" font-size="14" fill="#52514e" font-weight="400" text-anchor="start" dominant-baseline="middle">+0,023</text><text x="158.0" y="270.0" font-size="15" fill="#0b0b0b" font-weight="400" text-anchor="end" dominant-baseline="middle">C′ HAR-RV</text><rect x="170" y="251" width="18.1" height="19" rx="4" fill="#2a78d6"/><text x="196.1" y="261.0" font-size="14" fill="#0b0b0b" font-weight="400" text-anchor="start" dominant-baseline="middle">+0,19</text><rect x="170" y="272" width="2.0" height="19" rx="4" fill="#eb6834"/><text x="180.0" y="282.0" font-size="14" fill="#52514e" font-weight="400" text-anchor="start" dominant-baseline="middle">+0,008</text><text x="158.0" y="330.0" font-size="15" fill="#0b0b0b" font-weight="400" text-anchor="end" dominant-baseline="middle">Témoin volatilité</text><rect x="170" y="311" width="2.0" height="19" rx="4" fill="#2a78d6"/><text x="180.0" y="321.0" font-size="14" fill="#0b0b0b" font-weight="400" text-anchor="start" dominant-baseline="middle">+0,004</text><rect x="170" y="332" width="2.0" height="19" rx="4" fill="#eb6834"/><text x="180.0" y="342.0" font-size="14" fill="#52514e" font-weight="400" text-anchor="start" dominant-baseline="middle">0,000</text></svg></div>
+          <div class="side">
+            <h3>Lecture</h3>
+            <p>Sur la <b>volatilité</b>, quatre modèles sur cinq ajoutent 2 à 4 points de R² au-delà
+            de ce que le témoin sait déjà (t de −3,4 à −6,3). HAR-RV n'ajoute presque rien, le
+            témoin rien du tout.</p>
+            <p>Sur les <b>rendements</b>, aucun modèle n'ajoute quoi que ce soit (t entre −0,3 et
+            0,5).</p>
+            <p class="callout">Le régime est un <b>thermomètre du risque</b>&nbsp;: il sert à
+            dimensionner une position, pas à décider d'acheter ou de vendre.</p>
+          </div></div></div>
+  <footer><div class="src">Source : docs/RESULTS_FINAL.md (couche 2)</div><div class="brand">Régimes de marché · Projet Big Data M2</div>
+  <div class="pn">10</div></footer>
+</section>
+<section class="slide ">
+  <div class="eyebrow">Résultat 3 — En portefeuille</div>
+  <h1>Moins de pertes en crise, mais aucun gain de Sharpe démontrable</h1>
+  <div class="body"><div class="two chart-left">
+          <div><div class="chart-title">Portefeuille 60/40 piloté par l'état, sans coût,
+          avril 2002 – septembre 2026</div>
+          <table class="compact"><thead><tr><th class="">Modèle</th><th class="num">Sharpe, tout ou rien</th><th class="num">Sharpe, taille</th><th class="num">Perte max., tout ou rien</th></tr></thead><tbody><tr><td class="">60/40 seul</td><td class="num">0,47</td><td class="num">—</td><td class="num">−35,6 %</td></tr><tr class="hl"><td class="">A′ Sparse Jump</td><td class="num">0,55</td><td class="num">0,49</td><td class="num">−22,3 %</td></tr><tr><td class="">A Jump model</td><td class="num">0,54</td><td class="num">0,50</td><td class="num">−22,3 %</td></tr><tr><td class="">B HMM filtré</td><td class="num">0,47</td><td class="num">0,50</td><td class="num">−13,7 %</td></tr><tr><td class="">C Gradient boosting</td><td class="num">0,48</td><td class="num">0,52</td><td class="num">−10,2 %</td></tr><tr><td class="">C′ HAR-RV</td><td class="num">0,57</td><td class="num">0,56</td><td class="num">−13,4 %</td></tr></tbody></table>
+          <div class="note small">Tout ou rien&nbsp;: investi en calme, en liquidités en stress.
+          Taille&nbsp;: exposition réduite en stress. À 2 pb aller-retour, les Sharpe baissent de
+          0 à 0,07&nbsp;; les conclusions ne changent pas.</div></div>
+          <div class="side">
+            <h3>Lecture</h3>
+            <p>Couper en stress <b>réduit la perte maximale</b> (−22&nbsp;% contre −36&nbsp;%),
+            surtout parce qu'on est moins investi.</p>
+            <p>Les écarts de Sharpe restent <b>sous le seuil détectable</b> sur cet échantillon
+            (0,27 à 0,40)&nbsp;: aucun n'est démontré.</p>
+            <p class="callout">La valeur vient du <b>ciblage de volatilité</b> (+0,44&nbsp;%/an),
+            pas du régime lui-même (−0,04&nbsp;%/an avec recul, −0,25&nbsp;% net de la latence).</p>
+          </div></div></div>
+  <footer><div class="src">Source : docs/RESULTS_FINAL.md (couche 3), docs/RESULTS_DECOMPOSITION.md</div><div class="brand">Régimes de marché · Projet Big Data M2</div>
+  <div class="pn">11</div></footer>
+</section>
+<section class="slide ">
+  <div class="eyebrow">Pourquoi le Sparse Jump Model</div>
+  <h1>Choisi avant de mesurer, confirmé par les mesures</h1>
+  <div class="body"><div class="two even">
+          <div class="card tall"><h3>Choisi avant de mesurer</h3>
+            <ul class="ticks">
+              <li>Désigné modèle principal dans le cadrage gelé, sur la base de la littérature
+              récente sur les régimes (Nystrup et al., Aydınhan et al.).</li>
+              <li><b>Persistance réglée explicitement</b> par λ&nbsp;: peu de changements, donc
+              peu de rotation et peu de coûts.</li>
+              <li><b>Sélection de variables intégrée</b>&nbsp;: modèle lisible, et même
+              sous-ensemble fourni aux autres modèles pour une comparaison loyale.</li>
+              <li>Pas d'hypothèse de loi explicite, contrairement au HMM gaussien.</li>
+            </ul></div>
+          <div class="card tall"><h3>Confirmé par les mesures</h3>
+            <ul class="ticks">
+              <li><b>Meilleur accord avec les récessions</b>&nbsp;: kappa 0,53, le plus élevé des
+              cinq&nbsp;; exactitude 93,2&nbsp;% (à égalité avec A).</li>
+              <li><b>Plus forte information sur le risque futur</b>&nbsp;: +3,93 points de R²,
+              t = −3,40.</li>
+              <li><b>Fiable en temps réel</b>&nbsp;: 0,6&nbsp;% d'étiquettes instables, 0 à 13
+              jours de latence.</li>
+              <li>Les modèles plus réactifs (C, C′) changent d'état 14 à 18 fois par an mais ne
+              reconnaissent les récessions qu'à 75-78&nbsp;%.</li>
+            </ul></div>
+        </div>
+        <div class="limit"><b>Sa limite, à assumer&nbsp;:</b> il ne prédit pas la direction du
+        marché, et sa lenteur (environ un changement tous les deux ans) en fait un thermomètre du
+        risque plutôt qu'un signal de trading. Le rendre plus réactif le fait ressembler à une
+        simple règle de volatilité.</div></div>
+  <footer><div class="src">Source : docs/CHARTER.html §03, docs/RESULTS_FINAL.md, docs/EXPLORATION_SJM_SPEED.md</div><div class="brand">Régimes de marché · Projet Big Data M2</div>
+  <div class="pn">12</div></footer>
+</section>
+<section class="slide ">
+  <div class="eyebrow">Application — Coupler le filtre à des stratégies réelles</div>
+  <h1>Couplé à 8 stratégies, le filtre n'en améliore aucune</h1>
+  <div class="body"><div class="two chart-left">
+          <div><div class="chart-title">Variation du Sharpe quand on coupe la stratégie en état de
+          stress, sans coût</div>
+          <div class="legend"><span><i style="background:#e34948"></i>pénalisée (t HAC &lt; −2)</span>
+          <span><i style="background:#c3c2b7"></i>pas utile ou neutre</span></div>
+          <svg viewBox="0 0 640 402" width="100%" role="img"><line x1="250.0" y1="4" x2="250.0" y2="374" stroke="#e1e0d9" stroke-width="1"/><text x="250.0" y="390.0" font-size="12" fill="#898781" font-weight="400" text-anchor="middle" dominant-baseline="middle">−0,3</text><line x1="342.5" y1="4" x2="342.5" y2="374" stroke="#e1e0d9" stroke-width="1"/><text x="342.5" y="390.0" font-size="12" fill="#898781" font-weight="400" text-anchor="middle" dominant-baseline="middle">−0,2</text><line x1="435.0" y1="4" x2="435.0" y2="374" stroke="#e1e0d9" stroke-width="1"/><text x="435.0" y="390.0" font-size="12" fill="#898781" font-weight="400" text-anchor="middle" dominant-baseline="middle">−0,1</text><line x1="527.5" y1="4" x2="527.5" y2="374" stroke="#c3c2b7" stroke-width="1.5"/><text x="527.5" y="390.0" font-size="12" fill="#898781" font-weight="400" text-anchor="middle" dominant-baseline="middle">0,0</text><line x1="620.0" y1="4" x2="620.0" y2="374" stroke="#e1e0d9" stroke-width="1"/><text x="620.0" y="390.0" font-size="12" fill="#898781" font-weight="400" text-anchor="middle" dominant-baseline="middle">+0,1</text><text x="238.0" y="25.0" font-size="15" fill="#0b0b0b" font-weight="400" text-anchor="end" dominant-baseline="middle">Rebond obligataire fin de mois</text><rect x="527.5" y="13.0" width="9.2" height="24" rx="4" fill="#c3c2b7"/><text x="544.8" y="25.0" font-size="14" fill="#0b0b0b" font-weight="400" text-anchor="start" dominant-baseline="middle">+0,01</text><text x="238.0" y="71.0" font-size="15" fill="#0b0b0b" font-weight="400" text-anchor="end" dominant-baseline="middle">Cassure d&#x27;ouverture (ORB) Nasdaq</text><rect x="527.5" y="59.0" width="2.0" height="24" rx="4" fill="#c3c2b7"/><text x="535.5" y="71.0" font-size="14" fill="#0b0b0b" font-weight="400" text-anchor="start" dominant-baseline="middle">0,00</text><text x="238.0" y="117.0" font-size="15" fill="#0b0b0b" font-weight="400" text-anchor="end" dominant-baseline="middle">Momentum USDJPY</text><rect x="518.2" y="105.0" width="9.2" height="24" rx="4" fill="#c3c2b7"/><text x="510.2" y="117.0" font-size="14" fill="#0b0b0b" font-weight="400" text-anchor="end" dominant-baseline="middle">−0,01</text><text x="238.0" y="163.0" font-size="15" fill="#0b0b0b" font-weight="400" text-anchor="end" dominant-baseline="middle">Tendance or</text><rect x="490.5" y="151.0" width="37.0" height="24" rx="4" fill="#c3c2b7"/><text x="482.5" y="163.0" font-size="14" fill="#0b0b0b" font-weight="400" text-anchor="end" dominant-baseline="middle">−0,04</text><text x="238.0" y="209.0" font-size="15" fill="#0b0b0b" font-weight="400" text-anchor="end" dominant-baseline="middle">Tendance or + argent</text><rect x="472.0" y="197.0" width="55.5" height="24" rx="4" fill="#c3c2b7"/><text x="464.0" y="209.0" font-size="14" fill="#0b0b0b" font-weight="400" text-anchor="end" dominant-baseline="middle">−0,06</text><text x="238.0" y="255.0" font-size="15" fill="#0b0b0b" font-weight="400" text-anchor="end" dominant-baseline="middle">Tendance énergie (long)</text><rect x="425.8" y="243.0" width="101.8" height="24" rx="4" fill="#c3c2b7"/><text x="417.8" y="255.0" font-size="14" fill="#0b0b0b" font-weight="400" text-anchor="end" dominant-baseline="middle">−0,11</text><text x="238.0" y="301.0" font-size="15" fill="#0b0b0b" font-weight="400" text-anchor="end" dominant-baseline="middle">Prime overnight Nasdaq</text><rect x="416.5" y="289.0" width="111.0" height="24" rx="4" fill="#e34948"/><text x="408.5" y="301.0" font-size="14" fill="#0b0b0b" font-weight="400" text-anchor="end" dominant-baseline="middle">−0,12</text><text x="238.0" y="347.0" font-size="15" fill="#0b0b0b" font-weight="400" text-anchor="end" dominant-baseline="middle">Tendance crypto</text><rect x="305.5" y="335.0" width="222.0" height="24" rx="4" fill="#e34948"/><text x="297.5" y="347.0" font-size="14" fill="#0b0b0b" font-weight="400" text-anchor="end" dominant-baseline="middle">−0,24</text></svg></div>
+          <div class="side">
+            <h3>Protocole</h3>
+            <p>Trois couplages testés par stratégie&nbsp;: arrêt, réduction de moitié, bascule vers
+            un livre de tendance. Critère écrit avant la lecture, placebo, témoin de volatilité.</p>
+            <h3>Résultat</h3>
+            <p><b>0 couplage utile sur 24.</b> Les deux stratégies pénalisées sont celles qui
+            <b>gagnent en période agitée</b>&nbsp;: la prime overnight (placebo&nbsp;: les 400
+            placements aléatoires font mieux) et la tendance crypto (marché haussier de fin 2020).</p>
+            <p class="callout">Le stress n'est pas un mauvais moment pour toutes les stratégies.</p>
+          </div></div></div>
+  <footer><div class="src">Source : docs/RESULTS_COUPLAGE_STRATEGIES.md, docs/RESULTS_B1_COUPLAGE.md</div><div class="brand">Régimes de marché · Projet Big Data M2</div>
+  <div class="pn">13</div></footer>
+</section>
+<section class="slide ">
+  <div class="eyebrow">Conclusion</div>
+  <h1>Ce qu'il faut retenir</h1>
+  <div class="body"><div class="concl">
+          <div class="cl"><div class="cn">1</div><div><h3>La classification de régimes
+          fonctionne.</h3><p>Le Sparse Jump Model reconnaît les crises en temps réel (93&nbsp;%
+          contre le NBER), avec des états stables et lisibles.</p></div></div>
+          <div class="cl"><div class="cn">2</div><div><h3>Elle mesure le risque, pas la
+          direction.</h3><p>+3,93 points d'information sur la volatilité future, rien sur les
+          rendements&nbsp;: c'est un outil de dimensionnement.</p></div></div>
+          <div class="cl"><div class="cn">3</div><div><h3>Comme filtre de trading, elle ne
+          paie pas.</h3><p>Aucune amélioration démontrée, ni sur un portefeuille 60/40 ni sur 8
+          stratégies réelles&nbsp;; une simple règle de volatilité fait aussi bien.</p></div></div>
+          <div class="cl"><div class="cn">→</div><div><h3>La suite&nbsp;: utiliser le régime là
+          où il a de l'information.</h3><p>Pour choisir <b>entre</b> plusieurs stratégies ou
+          construire le portefeuille (répartition du risque), plutôt que pour couper une
+          stratégie.</p></div></div>
+        </div>
+        <div class="banner">Le régime décrit le <b>risque</b>, pas la <b>direction</b>&nbsp;:
+        c'est un outil de dimensionnement, pas un signal d'entrée ou de sortie.</div></div>
+  <footer><div class="src">Source : synthèse des documents du dépôt regime-lab</div><div class="brand">Régimes de marché · Projet Big Data M2</div>
+  <div class="pn">14</div></footer>
+</section>
+<section class="slide appendix">
+  <div class="eyebrow">Annexe A — Les 50 variables</div>
+  <h1>Huit familles de variables, toutes calculées sur le passé seul</h1>
+  <div class="body"><table class="wide"><thead><tr><th class="">Famille</th><th class="num">Nb</th><th class="">Contenu</th></tr></thead><tbody><tr><td class="">Momentum</td><td class="num">7</td><td class="">rendement actions 21/63/252 j, accélération, pétrole, dollar, largeur 200 j</td></tr><tr><td class="">Volatilité</td><td class="num">9</td><td class="">volatilité réalisée 5/21/63 j, structure par terme, vol de vol, semi-variance, sauts, VIX, prime de variance</td></tr><tr><td class="">Asymétrie et mémoire</td><td class="num">6</td><td class="">skewness, kurtosis, drawdown 252 j, exposant de Hurst, ratios de variance</td></tr><tr><td class="">Transversal</td><td class="num">8</td><td class="">dispersion sectorielle et taille × valeur, corrélation moyenne, concentration factorielle, largeur, SMB, HML</td></tr><tr><td class="">Macroéconomie</td><td class="num">9</td><td class="">production industrielle, emploi, inflation, chômage (règle de Sahm), inscriptions au chômage</td></tr><tr><td class="">Crédit</td><td class="num">4</td><td class="">spread Baa, qualité Baa − Aaa, et leurs variations</td></tr><tr><td class="">Conditions financières</td><td class="num">2</td><td class="">indice NFCI et sa variation sur 13 semaines</td></tr><tr><td class="">Taux</td><td class="num">5</td><td class="">pentes 10 ans − 2 ans et 10 ans − 3 mois et leurs variations, variation du taux court sur 12 mois</td></tr></tbody></table></div>
+  <footer><div class="src">Source : data/cache/features.parquet, docs/FEATURE_NOTES.md</div><div class="brand">Régimes de marché · Projet Big Data M2</div>
+  <div class="pn">15</div></footer>
+</section>
+<section class="slide appendix">
+  <div class="eyebrow">Annexe B — Les 24 couplages</div>
+  <h1>Détail des couplages stratégie × filtre</h1>
+  <div class="body"><table class="wide"><thead><tr><th class="">Stratégie</th><th class="">Période</th><th class="num">Sharpe seule</th><th class="num">Δ arrêt</th><th class="num">Δ réduction</th><th class="num">Δ bascule</th><th class="">Verdict</th></tr></thead><tbody><tr><td class="">Rebond obligataire fin de mois</td><td class="">2004-2026</td><td class="num">0,85</td><td class="num">+0,01</td><td class="num">+0,02</td><td class="num">−0,04</td><td class="">neutre</td></tr><tr><td class="">Tendance or</td><td class="">2007-2026</td><td class="num">0,62</td><td class="num">−0,04</td><td class="num">−0,01</td><td class="num">−0,05</td><td class="">pas utile</td></tr><tr><td class="">Tendance or + argent</td><td class="">2004-2026</td><td class="num">0,58</td><td class="num">−0,06</td><td class="num">−0,02</td><td class="num">−0,07</td><td class="">pas utile</td></tr><tr><td class="">Momentum USDJPY</td><td class="">2009-2026</td><td class="num">0,50</td><td class="num">−0,01</td><td class="num">0,00</td><td class="num">+0,03</td><td class="">neutre</td></tr><tr><td class="">Tendance énergie (long)</td><td class="">2011-2026</td><td class="num">−0,17</td><td class="num">−0,11</td><td class="num">−0,06</td><td class="num">−0,02</td><td class="">pas utile</td></tr><tr><td class="">Tendance crypto</td><td class="">2014-2026</td><td class="num">1,13</td><td class="num">−0,24</td><td class="num">−0,11</td><td class="num">−0,21</td><td class="">pénalisée</td></tr><tr><td class="">Prime overnight Nasdaq</td><td class="">2010-2026</td><td class="num">1,10</td><td class="num">−0,12</td><td class="num">−0,03</td><td class="num">−0,11</td><td class="">pénalisée</td></tr><tr><td class="">Cassure d'ouverture (ORB) Nasdaq</td><td class="">2010-2026</td><td class="num">0,64</td><td class="num">0,00</td><td class="num">+0,01</td><td class="num">+0,03</td><td class="">neutre</td></tr></tbody></table><div class="note">Brut de coûts (hypothèse de simplicité du projet). «&nbsp;Utile&nbsp;»
+        exige quatre conditions écrites avant la lecture&nbsp;: gain au-delà de l'écart détectable
+        corrigé du nombre de tests, test HAC de même signe, au-dessus de 95&nbsp;% d'un placebo,
+        meilleur que la règle de volatilité. Aucun couplage ne les remplit.</div></div>
+  <footer><div class="src">Source : docs/RESULTS_COUPLAGE_STRATEGIES.md</div><div class="brand">Régimes de marché · Projet Big Data M2</div>
+  <div class="pn">16</div></footer>
+</section>
+<section class="slide appendix">
+  <div class="eyebrow">Annexe C — Limites</div>
+  <h1>Ce que ces résultats ne disent pas</h1>
+  <div class="body"><ul class="ticks big">
+          <li><b>Trois épisodes de stress seulement</b> en 24 ans (2002-03, 2007-09, 2020-21)&nbsp;:
+          la plupart des conclusions de portefeuille reposent sur très peu de crises.</li>
+          <li><b>Calme continu depuis avril 2021</b>&nbsp;: la baisse de 2022 n'a pas été signalée,
+          et les stratégies récentes ne voient qu'une crise, 2020.</li>
+          <li><b>Couplages bruts de coûts</b>&nbsp;: les Sharpe des stratégies sont optimistes.</li>
+          <li><b>Portée</b>&nbsp;: un classifieur à deux états, lent, utilisé pour couper ou
+          dimensionner. Rien n'est dit ici sur un régime plus rapide, ni sur un régime utilisé
+          pour <b>choisir entre</b> stratégies&nbsp;: c'est la suite du programme.</li>
+          <li><b>Validation NBER rétrospective</b>&nbsp;: les dates de récession sont publiées après
+          coup&nbsp;; seuls les états du modèle sont en temps réel.</li>
+        </ul></div>
+  <footer><div class="src">Source : docs/RESULTS_FINAL.md, AVANCEMENT.md</div><div class="brand">Régimes de marché · Projet Big Data M2</div>
+  <div class="pn">17</div></footer>
+</section>
+<section class="slide appendix">
+  <div class="eyebrow">Annexe D — Où trouver quoi</div>
+  <h1>Tout est reproductible depuis le dépôt regime-lab</h1>
+  <div class="body"><table class="wide"><thead><tr><th class="">Pour…</th><th class="">Fichier</th></tr></thead><tbody><tr><td class="">Vue d'ensemble et inventaire des données</td><td class="">AVANCEMENT.md, README.md</td></tr><tr><td class="">Résultats de classification (3 couches)</td><td class="">docs/RESULTS_FINAL.md</td></tr><tr><td class="">Protocole gelé et écarts</td><td class="">docs/CHARTER.html, docs/PROTOCOL_FREEZE.md</td></tr><tr><td class="">Couplage aux stratégies</td><td class="">docs/RESULTS_COUPLAGE_STRATEGIES.md, docs/RESULTS_B1_COUPLAGE.md</td></tr><tr><td class="">Tableau de synthèse (tableur)</td><td class="">docs/presentation/synthese_modeles_regimes.csv</td></tr><tr><td class="">États quotidiens des 5 modèles</td><td class="">data/cache/states.parquet</td></tr><tr><td class="">Code des modèles</td><td class="">regime_lab/models/</td></tr><tr><td class="">Ce document</td><td class="">scripts/build_presentation.py</td></tr></tbody></table><div class="note">Dépôt public&nbsp;: github.com/Guillaume-Beaudouin-Git/regime-lab.
+        Environnement&nbsp;: <code>uv sync --all-packages --extra dev</code>, puis
+        <code>.venv/bin/python -m pytest -q</code>.</div></div>
+  <footer><div class="src"></div><div class="brand">Régimes de marché · Projet Big Data M2</div>
+  <div class="pn">18</div></footer>
+</section></body></html>
