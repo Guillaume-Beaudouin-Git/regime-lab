@@ -1,4 +1,4 @@
-# Avancement du projet — état au 22 septembre 2026, pour la séance du 23
+# Avancement du projet — état au 23 septembre 2026
 
 Ce document sert à partir du même point : **ce qui est fait, où sont les données, ce qui
 reste et par quoi commencer.** Chaque chiffre renvoie à un document ou à un script du
@@ -26,16 +26,38 @@ pour tests multiples ?
 4. **Quatre hypothèses dérivées ont été falsifiées** : H1, H2, H3 et la prime de
    retournement.
 
-**⚠ Ce qui n'est écrit nulle part : l'objectif final.** Le dépôt dit que le mémoire est
-« terminé et défendable », mais aucun fichier ne donne le livrable attendu, sa date ni
-son format. **C'est la première chose à fixer demain**, parce que l'ordre de la
-section 4 en dépend.
+**Le livrable du cours.** C'est un projet de cours de M2, **pas un mémoire**. Il se
+conclut par une **présentation d'une dizaine de minutes** des résultats, au format d'une
+présentation en entreprise.
+
+**L'objectif de fond, au-delà du cours.** Construire des **stratégies de trading
+algorithmique dépendantes du régime**, une fois cette parenthèse macro refermée. On
+cherche un résultat intéressant et prometteur. L'ambition est un Sharpe **net, en excès
+du cash et hors échantillon, de l'ordre de 1 à 2**, à **coûts institutionnels**. Le seuil
+de recherche du programme ne bouge pas : RESEARCH_PASS, soit un Sharpe supérieur à 0,7,
+une perte maximale moins profonde que −25 % et plus de 50 % des plis de walk-forward
+positifs.
+
+**Où on en est par rapport à cet objectif.** Le meilleur livre mesuré ici fait +0,36 de
+Sharpe net en excès. C'est une tendance sur 46 instruments, déjà facturée à des coûts de
+futures institutionnels (environ 1 bp). Le régime n'y ajoute rien au-delà de la
+volatilité. Viser 1 à 2 demande donc un autre objet que les sept dispositifs testés. Les
+deux pistes qui n'ont pas encore été mesurées sont celles qui s'en approchent : un régime
+qui **arbitre entre plusieurs signaux** (plan Two Sigma, en cours) et un régime qui entre
+dans la **construction du portefeuille** (plan Bridgewater).
+
+**L'hypothèse de coûts pour la suite est institutionnelle.** Le barème de tête du
+programme, en aller-retour, est déjà de ce type : 1 bp pour les futures d'indices, de
+taux et de change, 1,5 bp pour les matières premières, 5 bp pour les actions US et 7,5 bp
+pour un ETF sans future équivalent. Les colonnes prudente (×2) et de stress (×4 à ×5)
+restent rapportées à côté, mais ne décident pas. Les barèmes déjà verrouillés dans les
+pré-enregistrements ne changent pas.
 
 ---
 
 ## 1. Ce qui est fait
 
-### L'étude principale (le mémoire) — racine du dépôt
+### L'étude principale — racine du dépôt
 
 | bloc | verdict | document |
 |---|---|---|
@@ -76,6 +98,23 @@ d'essais compte 84 configurations distinctes (`data/trials.parquet`).
 - **120 fichiers de mesure ont été sauvés de `/private/tmp`**, que le redémarrage du Mac
   aurait effacés : les scripts des cinq plans de recherche, ceux des quatre
   contre-expertises A4, les données SPF et l'historique Ken French depuis 1926.
+
+### Le 23 septembre
+
+- **Nature du projet précisée** : un projet de cours de M2 qui se termine par une
+  présentation de 10 minutes, pas un mémoire. L'objectif de fond est écrit en §0.
+- **La phase 1 du plan Two Sigma est faite** par une autre session (`22abbe0`,
+  `3b64ab2`, 262 tests). L'outillage est en place : 10 signaux sur les 49 secteurs US,
+  le classifieur de contexte K-means, un placebo apparié exact et le protocole de test.
+  **Aucun niveau de l'arbre n'a été lu et aucun essai n'a été dépensé.** Le verrou est
+  rédigé (`docs/PRESPEC_TWOSIGMA.md`) mais **pas encore commité** : Guillaume doit relire
+  les changements listés en §12.0.
+- **Remesurés à partir de code commité, plusieurs chiffres du brouillon étaient
+  optimistes.** L'horloge tourne à 12,6 transitions par an hors échantillon, et non 8,3.
+  Elle dépend davantage de la volatilité qu'annoncé : η² de 0,14, jusqu'à 0,6 sur un
+  pli, contre 0,05 dans le brouillon. Le plafond de levier mord sur 70 % des séances. Le
+  seuil de rentabilité en coûts tombe à 27-33 bp, au lieu de 93. Le test reste assez
+  fin : il détecte un écart d'environ 0,26 de Sharpe.
 
 ---
 
@@ -212,34 +251,31 @@ critère de fin.
 
 | # | tâche | effort | données | c'est fini quand |
 |---|---|---|---|---|
-| **0** | **Fixer l'objectif final** : livrable, format, date, répartition | 30 min | — | c'est écrit en tête de ce fichier |
-| **1** | **Rédaction du mémoire**. Ce qui manque n'est pas du résultat, c'est la mise en évidence (`PISTES.md`, piste 3) : **(a)** une figure « R² sur la volatilité contre R² sur les rendements », un point par famille ; **(b)** ouvrir sur les 13 transitions en 6 377 séances ; **(c)** remonter les neuf défaillances trouvées et corrigées, aujourd'hui en annexe ; **(d)** l'audit du véhicule de tendance | 2-4 j, P ≈ 90 % | `data/cache/*`, déjà calculé | les quatre points sont dans le mémoire |
-| **2** | **H3 n'a pas d'écrit pour un lecteur extérieur** : H1 et H2 en ont un (`NOTE_DISPERSION_FR.md`), H3 n'a que `RESULTS_H3.md` | ½-1 j | aucune | une note au format de `NOTE_DISPERSION_FR.md` |
-| **3** | **Intégrer le résultat de dispersion** (H2, zone euro, mars 1999) au mémoire | ½ j | aucune | une section du mémoire |
-| **4** | **AHL niveau C, puis fermeture de l'arbre.** En consolidation détectée, on joue le retour à la moyenne à 5 jours. La porte C0 n'est passée **qu'à la lettre** (+0,067 de Sharpe brut, t 0,22). ⚠ C1 est un test de **portefeuille**, que le §9 du pré-enregistrement déclare lui-même **sous-puissant d'avance** (seuil 0,331 de Sharpe). Le plus probable est donc : mesurer le MDE, le constater, puis écrire la fermeture (niveau D, dont le §14 donne le contenu). Même discipline : instrument, MDE, critère écrit, **puis** lecture | ½-1 j | `data/cache/trend_universe_m1.parquet` | `docs/RESULTS_AHL_LEVEL_C.md` et la note de fermeture ; l'arbre AHL est clos, ce qui est publiable même en cas d'échec |
-| **5** | **La lecture A1 qui reste due** : A1 a été lu sur la jambe (63,5), alors que le pré-enregistrement verrouillé donne (126,10) comme jambe principale. **À décider ensemble**, parce que c'est un essai | 2 h | idem | décision écrite dans `docs/PROTOCOL_FREEZE.md` |
-| **6** | **Nettoyer et commiter `pilotage/mesures_brutes/`** : retirer les chemins absolus et privés des scripts, puis les commiter. C'est le piège n°1 du programme | 1-2 h | — | scripts dans git, données dans `data/` |
-| 7 | Plans suivants (`pilotage/plans_de_recherche/ARBITRAGE.md`) : Two Sigma + AQR fusionnés (10 j), Bridgewater (8,5 j), porte G0 de Rentec (1,5 j, Guillaume seul) | plusieurs jours | §3.4 | — |
-| 8 | Archiver sur GitHub les anciens dépôts privés `macro-momentum` et `reversal-lab` (leur contenu est maintenant ici) | 5 min | — | Guillaume |
+| ~~0~~ | ~~Fixer l'objectif final~~ **FAIT le 23/09** : une présentation de 10 minutes ; objectif de fond, des stratégies dépendantes du régime (§0) | — | — | — |
+| **1** | **Construire la présentation de 10 minutes**, au format entreprise, en 8 à 10 diapositives. Le fil : la question → la méthode (données point-in-time, critère écrit avant le chiffre) → ce qui marche (classifieur à 93,2 %, qui prédit la variance et pas la direction) → ce que ça implique (un outil de dimensionnement, pas de timing ; 13 changements d'état en 25 ans) → ce qu'on a testé sans succès (7 dispositifs, 4 hypothèses) → la suite, vers des stratégies dépendantes du régime. Trois figures : **(a)** R² sur la volatilité contre R² sur les rendements, un point par famille ; **(b)** la frise des 13 transitions ; **(c)** les dispositifs face à la règle d'une ligne | 1-2 j | `data/cache/*` et `docs/RESULTS_*.md`, déjà calculés | les diapositives et un texte oral de 10 minutes, répétés une fois |
+| **2** | **Plan Two Sigma : verrouiller, puis descendre l'arbre A → B → C.** C'est la piste la plus proche de l'objectif de fond : le régime choisit entre dix signaux. Guillaume relit le §12.0 du verrou, qu'on commite ensuite. Puis, à chaque niveau : instrument, MDE, critère commité, puis lecture, qui compte comme un essai. Le verdict alimente la dernière diapositive | 1 h de relecture, puis ~5 j | `industry_49`, `factors_5`, `features` (§3.1) | verdicts écrits dans `docs/RESULTS_TWOSIGMA*.md` |
+| **3** | **Fermer l'arbre AHL** : le MDE de C1, que le pré-enregistrement déclare sous-puissant d'avance, la note de fermeture, et la décision sur la lecture A1 principale sur (126,10), qui reste due | ½-1 j | `trend_universe_m1.parquet` | `docs/RESULTS_AHL_LEVEL_C.md` et la fermeture |
+| **4** | **Nettoyer et commiter `pilotage/mesures_brutes/`** : retirer les chemins absolus et privés des scripts | 1-2 h | — | les scripts dans git, les données dans `data/` |
+| 5 | **Plan Bridgewater** : le régime dans la construction du portefeuille, l'autre axe jamais testé (8,5 j). Porte G0 de Rentec (1,5 j, Guillaume seul, données privées) | plusieurs jours | §3.4 | — |
+| 6 | Les notes écrites sur H3 et sur la dispersion **ne sont plus prioritaires** sans mémoire. Elles restent utiles comme diapositives de réserve | ½ j | aucune | — |
+| 7 | Archiver sur GitHub les anciens dépôts privés `macro-momentum` et `reversal-lab` | 5 min | — | Guillaume |
 
 ---
 
-## 5. Proposition pour les 7 heures
+## 5. Prochaine séance de travail, proposition
 
-Deux pistes en parallèle, parce que la rédaction et le calcul n'utilisent pas les mêmes
-ressources.
+Deux pistes en parallèle : la présentation ne demande aucun calcul, Two Sigma en demande.
 
-| heure | ensemble | piste A (calcul) | piste B (rédaction) |
+| durée | ensemble | piste A · Two Sigma | piste B · présentation |
 |---|---|---|---|
-| 0:00-0:30 | **tâche 0** : objectif final, répartition, lecture de ce document | | |
-| 0:30-1:00 | installation chez le collègue (§2) et copie des données (§3) | | |
-| 1:00-3:30 | | **tâche 4**, AHL C jusqu'au MDE et au critère écrit | **tâche 1a-1b** : la figure centrale, l'ouverture du mémoire |
-| 3:30-4:00 | point d'étape | | |
-| 4:00-6:00 | | **tâche 4**, lecture de C1 si décidable ; sinon **tâche 6** | **tâche 2** (note H3) ou **tâche 3** (dispersion) |
-| 6:00-7:00 | relecture croisée, commits, mise à jour de ce fichier et de `TACHES.md` | | |
+| 30 min | relire ensemble les changements du verrou Two Sigma (§12.0) et arrêter le fil de la présentation | | |
+| 2 h 30 | | commit du verrou, puis instrument et MDE du niveau A, critère commité | figures (a) et (b), diapositives 1 à 5 |
+| 30 min | point d'étape | | |
+| 2 h | | lecture du niveau A s'il est décidable, sinon niveau B | diapositives 6 à 10, texte oral |
+| 1 h | répétition chronométrée (10 min), commits, mise à jour de ce fichier | | |
 
-**Par quoi on commence : la tâche 0**, puis la piste B, qui a le meilleur rapport
-valeur/effort. Tout son matériau est déjà calculé et elle ne peut pas échouer.
+**Par quoi on commence : la relecture du verrou Two Sigma**, parce que tout le calcul en
+dépend. Ensuite la présentation, dont tout le matériau est déjà calculé.
 
 ---
 

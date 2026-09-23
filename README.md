@@ -5,6 +5,10 @@ Projet de Big Data appliqué à la finance. On y apprend à une machine à recon
 reconnaissance **rapporte quelque chose** une fois pris en compte les coûts, les données
 réellement disponibles à chaque date, et le nombre de tests effectués.
 
+C'est un projet de cours de M2, restitué par une présentation d'une dizaine de minutes.
+Son horizon, au-delà du cours : des stratégies de trading algorithmique dépendantes du
+régime (voir `AVANCEMENT.md` §0).
+
 *English summary at the bottom of this page.*
 
 ## Par où commencer
