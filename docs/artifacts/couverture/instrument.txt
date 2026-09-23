@@ -1,0 +1,75 @@
+==============================================================================
+WHICH HEDGE, NOT ONLY WHEN — THE STOCK-BOND CORRELATION REGIME — INSTRUMENT
+==============================================================================
+
+0.  INPUTS (SHA-256)
+
+   570bb4c9f31732e0  raw/prices/cross_asset.parquet
+   690046e548a434c2  raw/panels/factors_5.parquet
+   700f606051109195  cache/trend_universe_m1.parquet
+   87e2d3b7c7912a48  raw/macro/rate_cash_3m.parquet
+   0622c72fa75115cb  cache/states.parquet
+
+==============================================================================
+1.  THE LABEL — a property of the label, no return, no variance read
+
+   ^GSPC sessions 9,238; of which without a 10-year yield (bond holidays) 31
+   correlation defined on 9,113 sessions (1990-04-04 -> 2026-09-08); the advisor's align-then-roll construction kept 7,710
+   positive share: level 40.3%, label 40.5%
+   transitions per year: raw sign 3.46, label (hysteresis 21) 0.93
+   label share positive, by year:
+     1990:100% 1991:100% 1992:100% 1993:100% 1994:100% 1995:100% 1996:100% 1997:94% 1998:25% 1999:67%
+     2000:35% 2001:0% 2002:0% 2003:16% 2004:30% 2005:67% 2006:65% 2007:34% 2008:0% 2009:0%
+     2010:0% 2011:0% 2012:0% 2013:40% 2014:11% 2015:12% 2016:13% 2017:0% 2018:0% 2019:0%
+     2020:0% 2021:38% 2022:48% 2023:62% 2024:70% 2025:25% 2026:85%
+
+==============================================================================
+2.  THE OPPOSABLE RULE — the four axes, measured before any reading
+
+   axis 1, the latent (Spearman, 1990-2026, same session):
+     rho    with ^GSPC RV21 -0.27   with the VIX -0.23
+     label  with ^GSPC RV21 -0.23   with the VIX -0.23
+     A' state with ^GSPC RV21 -0.49   with the VIX -0.53   (2002-2026, 1 = calm)
+   agreement of the lagged label with each selector, Cohen's kappa on the hedge window (2002-10-28 -> 2026-07-31;
+   every label oriented 1 -> gold, 0 -> bonds; the sparse jump state 1 = calm):
+     median  kappa +0.08   share 1: 52.3%
+     80th    kappa +0.09   share 1: 79.5%
+     vix     kappa +0.09   share 1: 58.5%
+     state   kappa +0.10   share 1: 86.1%
+   axis 2, the clock: 0.93 transitions per year (not crossed: under ~2)
+   axis 3, the usage: P chooses between two hedges; W chooses inside a stress switch; V is a forecast input
+   axis 4, the object: participation ratio of EQ, TLT, GOLD (sized, unconditional) 2.82 of 3 (not crossed)
+
+   where the label can act (label only):
+     P: sessions on gold 24.3% of 5,977; label changes in the window 27
+     W: stress sessions 832; of which on gold 1 (0.1%)
+       stress run 2002-10-28 -> 2003-05-28   146 sessions, gold    0
+       stress run 2007-11-26 -> 2007-12-13    14 sessions, gold    0
+       stress run 2008-01-15 -> 2009-09-17   423 sessions, gold    0
+       stress run 2009-10-02 -> 2009-11-11    29 sessions, gold    0
+       stress run 2020-03-12 -> 2020-08-05   102 sessions, gold    0
+       stress run 2020-10-02 -> 2021-03-22   117 sessions, gold    0
+       stress run 2021-04-05 -> 2021-04-05     1 sessions, gold    1
+
+==============================================================================
+3.  QUESTION V — design and blinded detection threshold, alpha 0.05/5 = 0.0100, |t| >= 2.58
+
+   V1_6040        1991-01-29 -> 2026-08-07  n 8,945  label positive 39.3%  NaN 0
+                  detectable coefficient 0.170 log points, incremental R2 0.72 pt (80 % power); out of sample from 2001-01-19
+   V2_equal_risk  1991-01-29 -> 2026-08-07  n 8,945  label positive 39.3%  NaN 0
+                  detectable coefficient 0.176 log points, incremental R2 1.40 pt (80 % power); out of sample from 2001-01-19
+
+==============================================================================
+4.  QUESTION S — sample and blinded MDE, demeaned legs, alpha 0.05/5
+
+   2002-10-28 -> 2026-07-31, 5,977 sessions, not ready inside the window: 0
+   EQ    weight p50 0.74  p95 1.24  at cap 0.0%
+   TLT   weight p50 0.80  p95 1.31  at cap 0.0%
+   GOLD  weight p50 0.66  p95 1.02  at cap 0.0%
+   P_TLT   MDE 0.356 / 0.345 / 0.333  ->  threshold 0.356
+   P_GOLD  MDE 0.549 / 0.568 / 0.577  ->  threshold 0.577
+   P_MIX   MDE 0.359 / 0.361 / 0.356  ->  threshold 0.361
+
+==============================================================================
+NOT READ — re-run with --read, once.
+==============================================================================
