@@ -1,5 +1,20 @@
 # Calibration notes
 
+> **Correction, 2026-09-23.** The section below describes the calibration run of
+> 2026-09-08 (`6d37912`). The run that produced the current `data/cache/states.parquet`
+> is the one of 2026-09-09, after states were re-ordered by training volatility
+> (`3664cc1`), which changed what the calibration optimises. In that run the declared
+> grid did **not** sit at its floor: `data/trials.parquet` (family `A' sparse jump`,
+> rows logged 2026-09-09) shows λ = 10 selected on five of the ten windows scored, 3 on
+> two, 1 on two and 30 on one, with the last three windows (2022, 2024, 2026) falling
+> back because every λ gave the same ~0.19 switches a year in training. The claim below
+> that λ = 1 was selected "nine times" and that "even at the floor the model switches
+> only 1.3 to 2.2 times a year" is therefore not a description of the published
+> classifier. The exploration in `docs/EXPLORATION_SJM_SPEED.md` measured that a single
+> fit at λ = 10 already switches 1.57 times a year out of sample, against 0.59 for the
+> published series, whose slowness looks driven by its later refits rather than by λ
+> (not verified). Nothing published depends on this note.
+
 ## The jump penalty selects the floor of its own grid
 
 Over thirteen in-training calibrations, the declared grid
