@@ -296,6 +296,14 @@ automatiquement par toute session ouverte ici. Ce fichier-ci en est le détail.
     **Le verrou est commité le 23/09** après l'approbation de Guillaume, un second
     validateur et un audit avant commit. Aucun niveau n'a été lu.
 
+11b. ~~Stratégies de crise × régime~~ **FAIT le 23/09** (`7d5b95c` avant lecture,
+    `d3e7c48`, `892683c`) : vente de variance, futures VIX, momentum UMD, BXM, couplés
+    en arrêt et en moitié, plus un test de prédiction. **Aucun couplage utile** ; le VIX
+    contient déjà l'information du modèle (0,20 point de R² au-delà du VIX, contre 4,48
+    sans lui) ; le momentum passe de 0,52 à 0,69 (100ᵉ centile du placebo) mais sous le
+    MDE, et la règle du 80ᵉ centile fait autant. **Ouvert** : l'indicateur de panique de
+    Daniel et Moskowitz sur UMD 1926-2026, avec coûts. `docs/RESULTS_CRISE.md`.
+
 ### ⟶ 12. ENSUITE — voir `AVANCEMENT.md` §4 et §5
 
 Dans l'ordre proposé : la présentation de 10 minutes ; les instruments Two Sigma
