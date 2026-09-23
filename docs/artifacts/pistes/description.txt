@@ -1,0 +1,143 @@
+------------------------------------------------------------------------------
+1. A' stress episodes (label 0), S&P 500 and VIX around them
+------------------------------------------------------------------------------
+sample 2002-04-01 -> 2026-09-08, 6377 labels, 1013 stress, 0.532 transitions/yr
+
+2002-04-01 -> 2003-05-27: 302 stress labels
+  entry: S&P -12.7% from its 252-session high; VIX 18.7 (range over the 21 sessions before: 17.4-20.5)
+  S&P trough in the episode 2002-10-09 (-32.3% from entry); 165 stress labels on or after it (55%)
+  exit: S&P +22.5% above the trough; VIX 20.0; first close 20% above the trough 2002-11-21
+
+2007-11-22 -> 2009-11-10: 482 stress labels
+  entry: S&P -9.5% from its 252-session high; VIX 26.8 (range over the 21 sessions before: 18.5-31.1)
+  S&P trough in the episode 2009-03-09 (-52.2% from entry); 167 stress labels on or after it (35%)
+  exit: S&P +61.6% above the trough; VIX 22.8; first close 20% above the trough 2009-03-23
+
+2020-03-11 -> 2021-04-02: 229 stress labels
+  entry: S&P -19.0% from its 252-session high; VIX 53.9 (range over the 21 sessions before: 13.7-54.5)
+  S&P trough in the episode 2020-03-23 (-18.4% from entry); 221 stress labels on or after it (97%)
+  exit: S&P +79.7% above the trough; VIX 17.3; first close 20% above the trough 2020-04-08
+
+all episodes: 553 of 1013 stress labels (55%) fall on or after their episode's trough
+
+------------------------------------------------------------------------------
+2. VIX futures curve: front above second contract (inverted)
+------------------------------------------------------------------------------
+sample 2006-09-01 -> 2026-09-08, 5034 sessions; inverted 17.1%
+         inverted share  VIX mean  A' stress share
+2008-09            0.62     30.24             1.00
+2008-10            1.00     61.18             1.00
+2008-11            1.00     62.64             1.00
+2008-12            0.64     52.41             1.00
+2009-01            0.80     44.68             1.00
+2009-02            1.00     45.57             1.00
+2009-03            0.86     44.80             1.00
+2009-04            0.43     38.06             1.00
+2009-05            0.05     31.98             1.00
+2009-06            0.14     29.14             1.00
+2009-07            0.00     26.16             1.00
+2009-08            0.00     25.34             1.00
+2009-09            0.00     24.93             0.52
+2009-10            0.05     24.25             1.00
+2009-11            0.00     23.78             0.35
+2009-12            0.00     21.24             0.00 
+
+         inverted share  VIX mean  A' stress share
+2020-02            0.32     19.63             0.00
+2020-03            1.00     57.74             0.68
+2020-04            1.00     41.45             1.00
+2020-05            0.30     30.90             1.00
+2020-06            0.32     31.12             1.00
+2020-07            0.00     26.84             1.00
+2020-08            0.00     22.89             0.10
+2020-09            0.00     27.65             0.00
+2020-10            0.36     29.44             1.00
+2020-11            0.05     25.00             1.00
+2020-12            0.00     22.37             1.00
+2021-01            0.05     24.91             1.00
+2021-02            0.00     23.14             1.00
+2021-03            0.00     21.84             0.65
+2021-04            0.00     17.42             0.05
+2021-05            0.00     19.76             0.00 
+
+2011: 78 of 252 sessions inverted; A' stress labels 0
+2015: 52 of 252 sessions inverted; A' stress labels 0
+2018: 88 of 251 sessions inverted; A' stress labels 0
+2022: 62 of 251 sessions inverted; A' stress labels 0
+2025: 47 of 250 sessions inverted; A' stress labels 0
+
+------------------------------------------------------------------------------
+3. Candidate labels: structure only (0 = stress)
+------------------------------------------------------------------------------
+label                                                      from  tr/yr  stress  kappa vs vol80
+A' as published                                      2002-04-01   0.53   15.9%            0.50
+vol rule, 80th percentile                            2002-04-01   4.26   21.8%            1.00
+A' stress unless RV21<RV63 for 5 sessions            2002-04-01   1.64    8.7%            0.39
+A' stress unless RV21<RV63 for 10 sessions           2002-04-01   1.27    9.9%            0.41
+A' stress unless curve upright for 5 sessions        2006-09-01   1.40    6.7%            0.35
+A' stress unless curve upright for 10 sessions       2006-09-01   1.20    7.9%            0.40
+curve inverted, 5-session hysteresis                 2006-09-01   3.00   14.7%            0.53
+S&P below its level 504 sessions earlier             2002-04-01   2.99   19.0%            0.31
+  k=5: A' episode 2007-11-22 -> 2009-11-10, combined label first calm on 2007-12-06
+  k=5: A' episode 2020-03-11 -> 2021-04-02, combined label first calm on 2020-05-20
+  k=10: A' episode 2007-11-22 -> 2009-11-10, combined label first calm on 2007-12-13
+  k=10: A' episode 2020-03-11 -> 2021-04-02, combined label first calm on 2020-05-28
+
+------------------------------------------------------------------------------
+4. Stock-bond correlation (63 sessions), bond proxy = -d(10y yield)
+------------------------------------------------------------------------------
+sample 1990-04-17 -> 2026-09-08; positive 34.9%; sign changes/yr raw 3.30, with a 21-session hysteresis 0.93
+Spearman with RV21: correlation level -0.27, positive-sign indicator -0.25
+share of sessions with a positive correlation, by year:
+1990:100% 1991:100% 1992:100% 1993:100% 1994:100% 1995:100% 1996:100% 1997:100% 1998:38% 1999:81% 2000:26% 2001:9% 2002:0% 2003:17% 2004:40% 2005:70% 2006:80% 2007:19% 2008:0% 2009:0% 2010:0% 2011:0% 2012:0% 2013:28% 2014:0% 2015:11% 2016:15% 2017:0% 2018:0% 2019:0% 2020:0% 2021:38% 2022:53% 2023:62% 2024:65% 2025:38% 2026:91%
+
+------------------------------------------------------------------------------
+5. Effective dimension of the volatility panel, 46 instruments
+------------------------------------------------------------------------------
+46 instruments x 219 month-ends; participation ratio of log RV21: levels 4.14, monthly changes 6.42; first eigenvalue 21.7 / 46
+
+------------------------------------------------------------------------------
+6. MDE arithmetic for a momentum test on 1927-2026
+------------------------------------------------------------------------------
+1 test(s): 0.395 x 0.775 x sqrt(24.3/98.7) = 0.152
+3 test(s): 0.395 x 0.895 x sqrt(24.3/98.7) = 0.176
+assumes the paired standard error per year is the same before 2002; it is not (1930s momentum was far more volatile), so this is an order of magnitude only
+
+------------------------------------------------------------------------------
+7. NBER recessions (FRED USREC, monthly)
+------------------------------------------------------------------------------
+1926-07 -> 2026-09: 16 recessions, 201 recession months
+1937-01 -> 2026-09: 14 recessions, 145 recession months
+1990-01 -> 2026-09: 4 recessions, 36 recession months
+2002-04 -> 2026-09: 2 recessions, 20 recession months
+
+------------------------------------------------------------------------------
+8. Three-state sparse jump model: one fit 1992-2006, online after
+------------------------------------------------------------------------------
+training volatility of the base book by ranked state (0 = highest): 0: 0.00807, 1: 0.00797, 2: 0.00469
+shares {0.0: 0.092, 1.0: 0.093, 2.0: 0.815}; 1.63 transitions/yr (2007-2026)
+  state 1: 2008-01-14 -> 2008-08-06 (148 sessions)
+  state 1: 2008-08-19 -> 2009-09-15 (281 sessions)
+  state 0: 2011-08-23 -> 2011-09-12 (15 sessions)
+  state 1: 2011-09-13 -> 2011-10-11 (21 sessions)
+  state 0: 2011-10-12 -> 2011-11-11 (23 sessions)
+  state 0: 2016-02-05 -> 2016-03-04 (21 sessions)
+  state 0: 2020-03-06 -> 2020-08-24 (122 sessions)
+  state 0: 2020-09-07 -> 2020-10-12 (26 sessions)
+  state 0: 2020-11-10 -> 2020-12-08 (21 sessions)
+  state 0: 2021-01-29 -> 2021-04-06 (48 sessions)
+  state 0: 2022-02-17 -> 2022-04-13 (40 sessions)
+  state 0: 2022-04-28 -> 2022-08-24 (85 sessions)
+  state 1: 2022-10-07 -> 2022-11-03 (20 sessions)
+  state 0: 2022-11-04 -> 2022-12-08 (25 sessions)
+  state 0: 2025-04-04 -> 2025-05-08 (25 sessions)
+mean standardised feature by state, 2007-2026:
+     mom_eq_21  mom_eq_63  vol_rv_21  vol_vix  asy_drawdown_252  cre_baa
+0.0       0.06      -0.49       1.27     1.05             -0.55     0.32
+1.0      -0.50      -1.00       1.80     1.80             -2.46     2.70
+2.0       0.09       0.22      -0.27    -0.33              0.37    -0.07
+
+------------------------------------------------------------------------------
+9. Effective dimension of the six daily Fama-French factors
+------------------------------------------------------------------------------
+['ff_cma', 'ff_hml', 'ff_mkt-rf', 'ff_rmw', 'ff_smb', 'ff_umd'], 1990-01-02 -> 2026-07-31: participation ratio 4.71 of 6
