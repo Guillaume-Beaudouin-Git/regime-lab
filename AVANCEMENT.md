@@ -195,6 +195,15 @@ d'essais compte 84 configurations distinctes (`data/trials.parquet`).
   0,47 → 0,77**, t +2,68, placebo 100 %, mais sous le MDE (0,62), surtout dû à l'arrêt du
   momentum (0,70), et la règle médiane de volatilité fait autant (0,82). C'est le cas
   retenu pour la présentation.
+- **Pistes d'amélioration et fil de la partie 2** (`docs/presentation/PISTES_AMELIORATION.md`,
+  regard de conseiller : aucun rendement conditionné lu, aucun essai). Mesures
+  descriptives dans `scripts/describe_pistes.py`. **55 % des séances de stress de A′
+  tombent après le creux du S&P 500** ; la courbe des futures VIX s'était normalisée 4 à
+  9 mois avant la sortie de A′. Six idées classées, dont un SJM réduit sur 1926-2026
+  (14 récessions au lieu de 2, MDE du test UMD ≈ 0,15 au lieu de 0,395). Deux écarts
+  signalés, non corrigés : la diapositive 3 annonce 109 configurations, le registre en
+  compte 168 ; `RESULTS_REFUGE.md` annonce 12 bascules sous-puissantes, le registre en
+  a 8.
 
 ---
 
