@@ -112,6 +112,11 @@ d'essais compte 84 configurations distinctes (`data/trials.parquet`).
   fond, un auditeur avant le commit. Leurs corrections sont les lignes 28 à 36 du §12.0 :
   entre autres, un succès est rétrogradé s'il ne tient pas sans la série NFCI, qui est
   révisée. Les deux ont confirmé le texte final.
+- **Premier test « stratégie seule contre couplée au régime »** : le rebond obligataire de
+  fin de mois (`docs/RESULTS_B1_COUPLAGE.md`). Il est **insensible au régime** : Sharpe 0,79
+  seul, 0,82 avec réduction en stress (sous-puissant), 0,75 avec bascule vers la
+  tendance (pas utile). Il est positif en 2008, 2020 et 2022. Sa pire perte (2025-2026)
+  survient alors que le régime est calme depuis 2021.
 - **Remesurés à partir de code commité, plusieurs chiffres du brouillon étaient
   optimistes.** L'horloge tourne à 12,6 transitions par an hors échantillon, et non 8,3.
   Elle dépend davantage de la volatilité qu'annoncé : η² de 0,14, jusqu'à 0,6 sur un
