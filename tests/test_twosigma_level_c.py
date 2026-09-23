@@ -519,7 +519,10 @@ def test_the_instrument_prints_only_what_13_1_allows_and_never_builds_the_real_a
     assert calls == [False] * N_SMALL  # the placebo arms only, saving only
     assert set(out) == INSTRUMENT_KEYS
     assert set(out["twin"]) == {"h", "turnover", "mean_delta", "sigma", "missing"}
-    assert set(out["null"]) == {"q20", "q50", "q95", "q99", "q99-q50", "q99-q20", "non_finite"}
+    assert set(out["null"]) == {"q20", "q50", "q95", "q99", "q99-q50", "q99-q20", "non_finite",
+                                "below_zero", "at_zero", "above_zero", "atom_share"}
+    signs = (out["null"]["below_zero"], out["null"]["at_zero"], out["null"]["above_zero"])
+    assert sum(signs) == N_SMALL
     assert set(out["menu_turnover"]) == {str(h) for h in C.H_MENU}
     assert out["placebo"] == {"method": "uniform", "draws": N_SMALL, "seed": 0, "exact": True}
     assert out["cells"]["test_sessions"] == len(data.test_sessions)
@@ -542,7 +545,10 @@ def test_the_instrument_s_thresholds_are_the_lock_s_formulas(planted):
     sigma = T.realised_sd(setup.twin.net5)
     assert out["twin"]["sigma"] == sigma
     assert out["S_star"] == 0.05 * sigma * 10_000 / 5
-    assert out["powered"] == (out["MDE_C"] <= out["S_star"])
+    assert out["powered"] == (0 < out["MDE_C"] <= out["S_star"]
+                              and out["null"]["atom_share"] < C.ATOM_SHARE)
+    assert (out["null"]["below_zero"], out["null"]["at_zero"], out["null"]["above_zero"]) == (
+        int((inst.null < 0).sum()), int((inst.null == 0).sum()), int((inst.null > 0).sum()))
     assert out["twin"]["turnover"] == setup.space.twin_turnover
     assert out["twin"]["turnover"] == pytest.approx(
         protocol.annual_turnover(C.cadence_book(planted["target"], 5).held.loc[
@@ -601,8 +607,8 @@ def test_the_layout_refuses_a_path_that_is_not_a_fold_s_training_then_test(data,
 # ---------------------------------------------------------------- verdicts
 
 
-BASE = {"s_c": 5.0, "p": 0.001, "exact": True, "gate": True, "s_w": 1.0, "mde_c": 2.0,
-        "s_star": 7.0, "leg_missing": False}
+BASE = {"s_c": 8.0, "p": 0.001, "exact": True, "gate": True, "s_w": 1.0, "mde_c": 2.0,
+        "s_star": 7.0, "atom": 0.0, "leg_missing": False}
 
 
 @pytest.mark.parametrize("change, verdict", [
@@ -624,12 +630,58 @@ BASE = {"s_c": 5.0, "p": 0.001, "exact": True, "gate": True, "s_w": 1.0, "mde_c"
     ({"p": 0.009, "holm_rejected": True}, T.PASS),
     ({"p": 0.011, "holm_rejected": True}, T.FAIL),
     ({"p": 0.001, "holm_rejected": False, "mde_c": 9.0}, T.NOT_SHOWN),
-    ({"s_w": 5.0}, T.DOMINATED),
+    ({"s_w": 8.0}, T.DOMINATED),
     ({"s_w": 6.0, "p": 0.02, "mde_c": 9.0}, T.NOT_SHOWN),
     ({"s_c": -1.0, "p": 1.0}, T.FAIL),
+    ({"s_c": -1.0, "p": 1.0, "mde_c": 0.0}, T.NOT_SHOWN),
+    ({"s_c": 0.0, "p": 1.0, "mde_c": 0.0}, T.NOT_SHOWN),
+    ({"gate": False, "mde_c": 0.0}, T.FAIL),
+    # amendment of 2026-09-23: the lock holds only if S_C >= S*, and power is unmeasured
+    # when the null has an atom of 20% or more
+    ({"s_c": 7.0}, T.PASS),
+    ({"s_c": 5.0}, T.FAIL),
+    ({"s_c": 5.0, "atom": 0.5}, T.NOT_SHOWN),
+    ({"s_c": 1.5, "p": 0.001, "mde_c": 0.0}, T.NOT_SHOWN),
+    ({"s_c": 1.5, "p": 0.001, "mde_c": 0.0, "atom": 1.0}, T.NOT_SHOWN),
+    ({"p": 0.02, "atom": 0.2}, T.NOT_SHOWN),
+    ({"p": 0.02, "atom": 0.19}, T.FAIL),
+    ({"atom": np.nan}, T.UNDECIDABLE),
+    ({"s_c": 20.0, "s_w": 20.0}, T.DOMINATED),
 ])
 def test_the_c1_lines_apply_in_the_lock_s_order(change, verdict):
     assert C.c1_verdict(**{**BASE, **change}) == verdict
+
+
+def test_power_is_unmeasured_when_the_null_has_an_atom():
+    """Amendment of 2026-09-23: ``MDE_C = 0`` (q20 = q99) measures no power, and neither
+    does ``q99 − q20`` when one value holds 20% or more of the draws (§13.2)."""
+    assert C.powered(2.0, 7.0, 0.0) and C.powered(7.0, 7.0, 0.19)
+    assert not C.powered(0.0, 7.0, 0.0) and not C.powered(9.0, 7.0, 0.0)
+    assert not C.powered(2.0, 7.0, 0.2) and not C.powered(2.0, 7.0, 1.0)
+    assert not C.powered(np.nan, 7.0, 0.0) and not C.powered(2.0, np.nan, 0.0)
+    assert not C.powered(2.0, 7.0, np.nan)
+    atom = np.zeros(1000)
+    summary = T.null_summary(atom)
+    assert summary.q20 == summary.q99 == 0.0 and summary.mde_c == 0.0
+    assert C.atom_share(atom) == 1.0
+    assert not C.powered(summary.mde_c, 7.84, C.atom_share(atom))
+    mixed = np.r_[np.zeros(300), np.linspace(-5.0, 5.0, 700)]
+    assert C.atom_share(mixed) == pytest.approx(0.3)
+    assert C.atom_share(np.array([1.0, np.nan])) != C.atom_share(np.array([1.0, np.nan]))
+    assert C.atom_share(np.arange(10.0)) == pytest.approx(0.1)
+    assert C.null_signs(np.array([-1.0, 0.0, 0.0, 2.0, np.nan])) == {
+        "below_zero": 1, "at_zero": 2, "above_zero": 1}
+
+
+def test_content_free_labels_hold_the_twin_so_the_null_is_an_atom_at_zero(data, primary):
+    """The finding behind candidate amendment (a), on synthetic data: when the target's
+    drift does not depend on the state, every placebo draw's rule holds the twin in every
+    fold, ``S^(j) = 0`` exactly, ``MDE_C = 0``, and the instrument reports power as
+    unmeasured (it read ``MDE_C ≤ S*``, powered, before the candidate)."""
+    out = C.instrument(data, T.PRIMARY, N_SMALL, partition=primary)
+    assert out["null"]["q20"] == out["null"]["q99"] == 0.0 and out["MDE_C"] == 0.0
+    assert out["null"]["at_zero"] == N_SMALL and out["null"]["atom_share"] == 1.0
+    assert out["S_star"] > 0 and out["powered"] is False
 
 
 def test_pit_downgrades_only_a_pass_and_the_level_is_c1_s():
@@ -641,8 +693,8 @@ def test_pit_downgrades_only_a_pass_and_the_level_is_c1_s():
 
 def test_c2_is_a_bound_and_never_a_pass():
     assert C.c2_verdict(np.nan) == T.UNDECIDABLE
-    assert C.c2_verdict(0.0) == T.FAIL and C.c2_verdict(-0.01) == T.FAIL
-    assert C.c2_verdict(0.02) == T.UNDERPOWERED
+    assert C.c2_verdict(0.0) == T.BOUND and C.c2_verdict(-0.01) == T.BOUND
+    assert C.c2_verdict(0.02) == T.BOUND
 
 
 # ---------------------------------------------------------------- non-finite readings
@@ -711,7 +763,9 @@ def test_a_non_finite_placebo_draw_is_recorded_and_makes_c1_undecidable(data, pl
     inst = C._instrument(setup, T.PRIMARY, partition, T.placebo_draws(paths, n=9), 1)
     out = inst.printout
     assert out["null"]["non_finite"] == 1 and out["MDE_C"] == C.NON_FINITE
-    assert set(out["null"].values()) - {1} == {C.NON_FINITE}
+    signs = ("below_zero", "at_zero", "above_zero")
+    assert {v for k, v in out["null"].items() if k not in signs} - {1} == {C.NON_FINITE}
+    assert sum(out["null"][k] for k in signs) == 8  # the finite draws, counted by sign
     assert out["powered"] is False
     assert any("1 of 9 placebo draws" in r for r in out["undecidable"])
     json.dumps(T.encode_thresholds(out))
@@ -722,7 +776,30 @@ def test_a_non_finite_placebo_draw_is_recorded_and_makes_c1_undecidable(data, pl
 # ---------------------------------------------------------------- the reading
 
 
-def test_a_planted_effect_reads_pass_through_the_pit_rebuild(data, planted):
+#: The planted saving (about 10x/yr) sits below S* at the lock's 0.05 Sharpe on this
+#: synthetic twin; the tests that walk the PASS path lower S* to reach it, and
+#: test_a_planted_saving_below_s_star_is_not_shown checks the size rule itself.
+SMALL_S_STAR = 0.01
+
+
+def test_a_planted_saving_below_s_star_is_not_shown(data, planted):
+    """Amendment of 2026-09-23: p ≤ 0.01, the gate and the witness all hold, yet a saving
+    below S* does not make the lock hold; the power is unmeasured on an atom null, so the
+    verdict is NOT SHOWN, never FAIL."""
+    setup, paths = planted["setup"], planted["paths"]
+    partition = T.Partition(paths, None)
+    draws = T.placebo_draws(paths, n=149)
+    inst = C._instrument(setup, T.PRIMARY, partition, draws, 1)
+    reading = C._reading(data, setup, T.PRIMARY, partition, inst, pit=None, workers=1)
+    c1 = reading["C-1"]
+    assert c1["p"] == pytest.approx(1 / 150) and c1["gate"] is True
+    assert 0 < c1["S_C"] < inst.s_star and c1["S_W"] < c1["S_C"]
+    assert inst.printout["powered"] is False
+    assert reading["verdicts"]["C-1"] == T.NOT_SHOWN and reading["pit"] is None
+
+
+def test_a_planted_effect_reads_pass_through_the_pit_rebuild(data, planted, monkeypatch):
+    monkeypatch.setattr(C, "S_STAR_SHARPE", SMALL_S_STAR)
     setup, paths, unrelated = planted["setup"], planted["paths"], planted["unrelated"]
     partition = T.Partition(paths, None)
     draws = T.placebo_draws(paths, n=149)
@@ -732,7 +809,7 @@ def test_a_planted_effect_reads_pass_through_the_pit_rebuild(data, planted):
     c1 = kept["C-1"]
     assert c1["p"] == pytest.approx(1 / 150) and c1["gate"] is True
     assert c1["S_W"] < c1["S_C"] and c1["verdict_before_pit"] == T.PASS
-    assert kept["verdicts"] == {"C-1": T.PASS, "C-2": T.UNDERPOWERED, "C": T.PASS}
+    assert kept["verdicts"] == {"C-1": T.PASS, "C-2": T.BOUND, "C": T.PASS}
     assert kept["pit"]["verdict"] == T.PASS
     assert kept["holm_p"] == {"C-1": c1["p"], "C-2": 1.0}
     sigma = setup.twin.sigma
@@ -747,7 +824,7 @@ def test_a_planted_effect_reads_pass_through_the_pit_rebuild(data, planted):
     literal = C.cadence_book(planted["target"], _arm(setup.space, paths).h, excess=data.excess)
     assert rows["C-1"]["sharpe"] == pytest.approx(
         T.sharpe(literal.net.loc[data.test_sessions]), rel=1e-12)
-    assert rows["C-2"]["p"] == 1.0 and rows["C-2"]["verdict"] == T.UNDERPOWERED
+    assert rows["C-2"]["p"] == 1.0 and rows["C-2"]["verdict"] == T.BOUND
 
     downgraded = C._reading(
         data, setup, T.PRIMARY, partition, inst,
@@ -765,7 +842,8 @@ def test_a_planted_effect_reads_pass_through_the_pit_rebuild(data, planted):
 
 
 def test_the_final_holm_step_can_pass_a_lock_between_the_bars_through_its_rebuild(
-        data, planted):
+        data, planted, monkeypatch):
+    monkeypatch.setattr(C, "S_STAR_SHARPE", SMALL_S_STAR)
     setup, paths = planted["setup"], planted["paths"]
     partition = T.Partition(paths, None)
     draws = T.placebo_draws(paths, n=110)  # no draw at or above: p = 1/111, in (0.05/6, 0.01]

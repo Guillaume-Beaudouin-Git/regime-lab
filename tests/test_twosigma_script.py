@@ -90,14 +90,19 @@ def repo(tmp_path: Path) -> Path:
         (root / relative).parent.mkdir(parents=True, exist_ok=True)
         (root / relative).write_bytes(relative.encode() * 10)
     shutil.copy(ROOT / "uv.lock", root / "uv.lock")
+    (root / CODE).write_text("# stands for the code a reading runs\n")
     _git(root, "init", "-q")
-    _commit(root, "uv.lock")
+    _commit(root, "uv.lock", CODE)
     return root
+
+
+#: Stands for :data:`S.CODE_FILES` in the synthetic repository.
+CODE = "code.py"
 
 
 def _setup(repo: Path) -> S.Setup:
     return S.Setup(root=repo, inputs=INPUTS, draws=DRAWS, boot_draws=BOOT, workers=1,
-                   trials_path=repo.parent / "trials.parquet")
+                   trials_path=repo.parent / "trials.parquet", code_files=(CODE,))
 
 
 def _results(level: str) -> str:
@@ -212,6 +217,27 @@ def test_the_reading_refuses_unless_its_thresholds_verify(repo, data, sections):
         S.run_read("B", data, setup, emit=lambda _: None)
     assert not setup.trials_path.exists()
     assert not (repo / S.READING_FILE.format(level="A")).exists()
+
+
+def test_the_reading_refuses_uncommitted_code_and_a_logged_level(repo, data, sections):
+    """Amendment of 2026-09-23: every code file a reading runs must be committed and
+    unmodified, and a level already in the register is refused before any computation."""
+    setup = _setup(repo)
+    S.write_instruments(sections, setup)
+    _commit(repo, T.THRESHOLDS_FILE, *(_results(level) for level in S.LEVELS))
+    (repo / CODE).write_text("# an uncommitted edit\n")
+    with pytest.raises(T.ReadingRefused, match="differs from its committed version"):
+        S.run_read("A", data, setup, emit=lambda _: None)
+    _git(repo, "checkout", "-q", "--", CODE)
+
+    T.log_trial(test="A-1", variant=T.PRIMARY, sharpe=0.1, delta=0.1, threshold=0.338,
+                p=0.5, verdict=T.UNDERPOWERED, sessions=10, path=setup.trials_path)
+    with pytest.raises(T.ReadingRefused, match="already in the register"):
+        S.run_read("A", data, setup, emit=lambda _: None)
+    assert not (repo / S.READING_FILE.format(level="A")).exists()
+    setup.refuse_logged(("B-1", "B-2"), T.PRIMARY.name)  # another level is not refused
+    assert S.CODE_FILES and all((ROOT / f).exists() for f in S.CODE_FILES)
+    assert "scripts/run_twosigma_tree.py" in S.CODE_FILES
 
 
 def test_the_register_takes_rows_only_at_the_lock_constants():
