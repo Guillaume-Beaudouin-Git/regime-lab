@@ -1,0 +1,67 @@
+==============================================================================
+EQUITIES IN CALM, A CRISIS ASSET IN STRESS — INSTRUMENT
+==============================================================================
+
+0.  INPUTS (SHA-256)
+
+   690046e548a434c2  raw/panels/factors_5.parquet
+   700f606051109195  cache/trend_universe_m1.parquet
+   570bb4c9f31732e0  raw/prices/cross_asset.parquet
+   87e2d3b7c7912a48  raw/macro/rate_cash_3m.parquet
+   0622c72fa75115cb  cache/states.parquet
+
+1.  SAMPLE AND COVERAGE — no mean, no Sharpe
+
+   2002-10-28 -> 2026-07-31, 5,977 sessions, not ready inside the window: 0
+   state        stress share  13.9%
+   median rule  stress share  47.7%
+   80th rule    stress share  20.5%
+   EQ    NaN 0   weight p50 0.74  p95 1.24   at cap 0.0%
+   TLT   NaN 0   weight p50 0.80  p95 1.31   at cap 0.0%
+   GOLD  NaN 0   weight p50 0.66  p95 1.02   at cap 0.0%
+   LVOL  NaN 0   weight p50 0.08  p95 0.28   at cap 0.0%
+
+2.  MINIMUM DETECTABLE EFFECT — demeaned legs, alpha 0.05/3 = 0.0167
+
+   switch_TLT   MDE 0.364 / 0.428 / 0.433  ->  threshold 0.433
+   switch_GOLD  MDE 0.311 / 0.285 / 0.266  ->  threshold 0.311
+   switch_LVOL  MDE 0.616 / 0.734 / 0.708  ->  threshold 0.734
+
+==============================================================================
+==============================================================================
+READING  2002-10-28 -> 2026-07-31, zero cost, excess of cash
+(captured from the single `--read` run of 2026-09-23 at commit 5872d6b; not re-run, so
+the trials log holds each test once)
+
+   arm                    sharpeann_return  ann_vol   max_ddworst_month turnover      GFC    REB09    FEB18    COVID    REB20     2022
+   EQ alone                +0.64    +6.8%    10.7%   -24.9%    -9.5%      2.4   -22.9%   +20.3%   -10.0%   -17.0%   +19.2%   -13.3%
+   stop, cash (ref.)       +0.60    +5.9%     9.9%   -17.3%    -9.5%      2.5    -6.8%    -0.6%   -10.0%   -13.0%    +1.4%   -13.3%
+   TLT (state)             +0.57    +6.1%    10.7%   -24.7%    -9.5%      3.2    +0.1%    -6.3%   -10.0%   -11.3%    +1.4%   -13.3%
+   TLT (median rule)       +0.47    +4.9%    10.4%   -29.7%    -9.0%     13.3   +12.4%    -4.8%    -9.7%    +9.8%    +2.3%   -19.0%
+   TLT (80th rule)         +0.62    +6.6%    10.6%   -22.9%   -12.1%      7.7    -2.0%    +0.6%   -10.0%    -0.6%    +4.0%   -16.8%
+   GOLD (state)            +0.68    +7.3%    10.7%   -18.5%    -9.5%      3.1    -9.0%   +14.2%   -10.0%   -15.7%   +16.0%   -13.3%
+   GOLD (median rule)      +0.77    +8.1%    10.6%   -19.2%    -8.8%     11.9    +7.2%   +14.9%    -9.4%    -1.5%   +15.5%    -6.2%
+   GOLD (80th rule)        +0.67    +7.1%    10.7%   -22.0%   -12.0%      7.3   -14.3%   +10.1%   -10.0%   -11.1%    +6.1%    -9.5%
+   LVOL (state)            +0.39    +4.3%    11.0%   -28.5%    -9.5%      2.5   +14.8%   -22.3%   -10.0%    -3.2%   -14.4%   -13.3%
+   LVOL (median rule)      -0.41    -4.9%    12.1%   -74.2%   -10.4%      7.3   +16.3%   -25.4%    -8.7%   +50.6%   -13.2%    -3.9%
+   LVOL (80th rule)        +0.43    +4.9%    11.3%   -32.1%   -12.2%      4.4    +4.3%   -10.9%   -10.0%   +25.2%   -11.2%   -10.9%
+
+   each leg alone, by lagged state (descriptive):
+     EQ    stress Sharpe +0.62 (+6.4%/yr)   calm Sharpe +0.64 (+6.9%/yr)
+     TLT   stress Sharpe +0.10 (+1.1%/yr)   calm Sharpe +0.25 (+2.7%/yr)
+     GOLD  stress Sharpe +0.90 (+9.6%/yr)   calm Sharpe +0.63 (+6.8%/yr)
+     LVOL  stress Sharpe -0.91 (-11.7%/yr)   calm Sharpe -1.41 (-22.0%/yr)
+
+   decision:
+   switch_TLT   delta -0.073  MDE 0.433  t -0.64  placebo pct 50.2% (p5 -0.189, p95 +0.127)
+         vol rules: median -0.171, 80th -0.016   change in max DD +0.1%
+         => NOT USEFUL — the coupling does not raise the Sharpe
+   switch_GOLD  delta +0.038  MDE 0.311  t +0.41  placebo pct 70.5% (p5 -0.136, p95 +0.146)
+         vol rules: median +0.125, 80th +0.026   change in max DD +6.3%
+         => UNDERPOWERED — positive, below the MDE, never useful
+   switch_LVOL  delta -0.251  MDE 0.734  t -1.60  placebo pct 81.2% (p5 -0.667, p95 -0.106)
+         vol rules: median -1.048, 80th -0.207   change in max DD -3.6%
+         => NOT USEFUL — the coupling does not raise the Sharpe
+
+   logged to data/trials.parquet (121 distinct)
+==============================================================================
