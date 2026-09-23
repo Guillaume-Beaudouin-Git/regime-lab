@@ -1,0 +1,85 @@
+{
+ "final": {
+  "A": {
+   "A": "FAIL",
+   "A-1": "FAIL",
+   "A-2": "NOT SHOWN"
+  },
+  "B": {
+   "B": "UNDERPOWERED",
+   "B-1": "NOT SHOWN",
+   "B-2": "UNDERPOWERED"
+  },
+  "C": {
+   "C": "NOT SHOWN",
+   "C-1": "NOT SHOWN",
+   "C-2": "BOUND"
+  }
+ },
+ "levels": {
+  "A": "FAIL",
+  "B": "UNDERPOWERED",
+  "C": "NOT SHOWN"
+ },
+ "p_entered": {
+  "A-1": 1.0,
+  "A-2": 0.33966033966033965,
+  "B-1": 0.9150849150849151,
+  "B-2": 0.14409894977454585,
+  "C-1": 1.0,
+  "C-2": 1.0
+ },
+ "provisional": {
+  "A-1": "FAIL",
+  "A-2": "NOT SHOWN",
+  "B-1": "NOT SHOWN",
+  "B-2": "UNDERPOWERED",
+  "C-1": "NOT SHOWN",
+  "C-2": "BOUND"
+ },
+ "rejected": [],
+ "table": [
+  {
+   "bar": 0.008333333333333333,
+   "p": 0.14409894977454585,
+   "rank": 1,
+   "rejected": false,
+   "test": "B-2"
+  },
+  {
+   "bar": 0.01,
+   "p": 0.33966033966033965,
+   "rank": 2,
+   "rejected": false,
+   "test": "A-2"
+  },
+  {
+   "bar": 0.0125,
+   "p": 0.9150849150849151,
+   "rank": 3,
+   "rejected": false,
+   "test": "B-1"
+  },
+  {
+   "bar": 0.016666666666666666,
+   "p": 1.0,
+   "rank": 4,
+   "rejected": false,
+   "test": "A-1"
+  },
+  {
+   "bar": 0.025,
+   "p": 1.0,
+   "rank": 5,
+   "rejected": false,
+   "test": "C-1"
+  },
+  {
+   "bar": 0.05,
+   "p": 1.0,
+   "rank": 6,
+   "rejected": false,
+   "test": "C-2"
+  }
+ ]
+}
