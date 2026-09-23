@@ -254,30 +254,31 @@ def build_html() -> str:
   </div>
 </section>""")
 
-    kpis = [("93,2 %", "des récessions officielles reconnues", "exactitude équilibrée du Sparse "
-             "Jump Model contre le NBER, en temps réel"),
-            ("+3,93 pts", "d'information sur le risque futur", "R² incrémental sur la volatilité "
-             "à 21 jours, au-delà d'une règle de volatilité"),
+    kpis = [("93,2 %", "des récessions officielles reconnues", "exactitude équilibrée contre le "
+             "NBER, sans voir le futur ; 2 récessions dans la période (2008-09, 2020)"),
+            ("+3,93 pts", "d'information sur le risque futur", "au-delà d'une règle de volatilité "
+             "passée ; mais +0,20 seulement au-delà du VIX"),
             ("+0,03 pt", "d'information sur la direction", "R² incrémental sur les rendements "
              "futurs : statistiquement nul (t = 0,27)"),
-            ("0 / 24", "couplages utiles à des stratégies", "8 stratégies × 3 façons de coupler "
-             "le filtre : aucune amélioration démontrée")]
+            ("0 / 63", "usages du filtre utiles", "arrêt, réduction, bascule, valeurs refuges et "
+             "options, sur 13 stratégies : aucune amélioration démontrée")]
     tiles = "".join(f'<div class="kpi"><div class="kv">{v}</div><div class="kl">{lab}</div>'
                     f'<div class="kd">{d}</div></div>' for v, lab, d in kpis)
     s.append(slide(2, "Synthèse", "Le classifieur fonctionne&nbsp;; il prédit le risque, pas le sens",
         f"""<div class="kpis">{tiles}</div>
         <ol class="msgs">
-          <li><b>Il reconnaît les crises, et en temps réel.</b> Les états de stress coïncident avec
-          les récessions datées après coup par le NBER, avec 0 à 13 jours de latence.</li>
-          <li><b>Il informe sur la volatilité future, pas sur les rendements futurs.</b> C'est un
-          thermomètre du risque, pas un signal de direction.</li>
-          <li><b>Donc c'est un outil de dimensionnement, pas de coupure.</b> Utilisé comme filtre
-          «&nbsp;on coupe en stress&nbsp;», il n'améliore aucune des 8 stratégies testées.</li>
-        </ol>""", "docs/RESULTS_FINAL.md, docs/RESULTS_COUPLAGE_STRATEGIES.md"))
+          <li><b>Il reconnaît les crises sans voir le futur</b>, mais pas avant le marché&nbsp;: au
+          Covid, il bascule le 11 mars 2020, quand le VIX est déjà passé de 14 à 54.</li>
+          <li><b>Il informe sur la volatilité future, pas sur la direction</b>, et le VIX en savait
+          déjà presque autant. C'est un thermomètre du risque, pas un signal de trading.</li>
+          <li><b>Utilisé comme filtre, il n'améliore aucune stratégie de façon démontrable</b>&nbsp;:
+          63 usages testés, avec un critère écrit avant chaque lecture.</li>
+        </ol>""", "docs/RESULTS_FINAL.md, RESULTS_COUPLAGE_STRATEGIES, RESULTS_CRISE, RESULTS_REFUGE"))
 
+    n_configs = f"{pd.read_parquet(ROOT / 'data' / 'trials.parquet')['config_hash'].nunique():,}"
     s.append(slide(3, "La question et la démarche",
         "Une question précise, testée pour pouvoir répondre non",
-        """<div class="question">« Un modèle de régimes appris par machine apporte-t-il une
+        f"""<div class="question">« Un modèle de régimes appris par machine apporte-t-il une
         information exploitable au-delà de ce qu'une simple mesure de volatilité capte déjà&nbsp;? »</div>
         <div class="grid4">
           <div class="card"><h3>Pré-enregistré</h3><p>Modèles, règles et critères écrits et gelés
@@ -293,7 +294,7 @@ def build_html() -> str:
           <div><b>6 377</b><span>séances hors échantillon, avril 2002 – septembre 2026</span></div>
           <div><b>49</b><span>réestimations de chaque modèle, sur le passé seul</span></div>
           <div><b>5</b><span>modèles comparés sous un protocole identique</span></div>
-          <div><b>109</b><span>configurations testées dans le programme, toutes journalisées</span></div>
+          <div><b>{n_configs}</b><span>configurations testées dans le programme, toutes journalisées</span></div>
         </div>""", "docs/CHARTER.html, docs/PROTOCOL_FREEZE.md, data/trials.parquet"))
 
     data_rows = [
@@ -409,7 +410,11 @@ def build_html() -> str:
           {table(["Modèle", "Durée moy.", "Chgts / an", "Instabilité"], side_rows, num={1, 2, 3},
                  highlight=0, cls="compact")}
           <div class="note small">Instabilité&nbsp;: part des étiquettes qui changeraient si l'on
-          connaissait la suite du semestre. Latence de détection mesurée&nbsp;: 0 à 13 jours.</div>
+          connaissait la suite du semestre. Latence mesurée contre les pics NBER&nbsp;: 0 à 13
+          jours.</div>
+          <div class="note small"><b>À garder en tête&nbsp;:</b> la période de test ne contient que
+          <b>deux récessions</b> (2008-09 et 2020, 20 mois). «&nbsp;En temps réel&nbsp;» veut dire
+          sans voir le futur, pas avant le marché.</div>
           </div></div>""", "docs/RESULTS_FINAL.md (couche 1), data/cache/states.parquet"))
 
     s.append(slide(9, "Résultat 1 — Les régimes dans le temps",
@@ -436,9 +441,9 @@ def build_html() -> str:
             témoin rien du tout.</p>
             <p>Sur les <b>rendements</b>, aucun modèle n'ajoute quoi que ce soit (t entre −0,3 et
             0,5).</p>
-            <p class="callout">Le régime est un <b>thermomètre du risque</b>&nbsp;: il sert à
-            dimensionner une position, pas à décider d'acheter ou de vendre.</p>
-          </div></div>""", "docs/RESULTS_FINAL.md (couche 2)"))
+            <p class="callout"><b>Mais le VIX le savait déjà.</b> Une fois le VIX pris en compte,
+            le modèle n'ajoute que +0,20 point, non significatif.</p>
+          </div></div>""", "docs/RESULTS_FINAL.md (couche 2), docs/RESULTS_CRISE.md (test P)"))
 
     pf_rows = [["60/40 seul", "0,47", "—", "−35,6 %"],
                ["A′ Sparse Jump", "0,55", "0,49", "−22,3 %"],
@@ -483,8 +488,8 @@ def build_html() -> str:
             <ul class="ticks">
               <li><b>Meilleur accord avec les récessions</b>&nbsp;: kappa 0,53, le plus élevé des
               cinq&nbsp;; exactitude 93,2&nbsp;% (à égalité avec A).</li>
-              <li><b>Plus forte information sur le risque futur</b>&nbsp;: +3,93 points de R²,
-              t = −3,40.</li>
+              <li><b>Plus forte information sur le risque futur</b>&nbsp;: +3,93 points de R²
+              au-delà d'une règle de volatilité, t = −3,40 (mais +0,20 au-delà du VIX).</li>
               <li><b>Fiable en temps réel</b>&nbsp;: 0,6&nbsp;% d'étiquettes instables, 0 à 13
               jours de latence.</li>
               <li>Les modèles plus réactifs (C, C′) changent d'état 14 à 18 fois par an mais ne
@@ -522,15 +527,15 @@ def build_html() -> str:
           fonctionne.</h3><p>Le Sparse Jump Model reconnaît les crises en temps réel (93&nbsp;%
           contre le NBER), avec des états stables et lisibles.</p></div></div>
           <div class="cl"><div class="cn">2</div><div><h3>Elle mesure le risque, pas la
-          direction.</h3><p>+3,93 points d'information sur la volatilité future, rien sur les
-          rendements&nbsp;: c'est un outil de dimensionnement.</p></div></div>
+          direction.</h3><p>Il informe sur la volatilité future, pas sur les rendements, et le
+          VIX en savait déjà presque autant.</p></div></div>
           <div class="cl"><div class="cn">3</div><div><h3>Comme filtre de trading, elle ne
-          paie pas.</h3><p>Aucune amélioration démontrée, ni sur un portefeuille 60/40 ni sur 8
-          stratégies réelles&nbsp;; une simple règle de volatilité fait aussi bien.</p></div></div>
-          <div class="cl"><div class="cn">→</div><div><h3>La suite&nbsp;: utiliser le régime là
-          où il a de l'information.</h3><p>Pour choisir <b>entre</b> plusieurs stratégies ou
-          construire le portefeuille (répartition du risque), plutôt que pour couper une
-          stratégie.</p></div></div>
+          paie pas.</h3><p>Aucune amélioration démontrée sur 63 usages et 13 stratégies&nbsp;;
+          une simple règle de volatilité fait aussi bien. Le meilleur cas, momentum + or en
+          stress, reste sous le seuil de détection.</p></div></div>
+          <div class="cl"><div class="cn">→</div><div><h3>Les pistes ouvertes.</h3><p>Plus de
+          crises pour trancher (un historique depuis 1926), et le régime comme budget de risque
+          d'un portefeuille plutôt que comme interrupteur.</p></div></div>
         </div>
         <div class="banner">Le régime décrit le <b>risque</b>, pas la <b>direction</b>&nbsp;:
         c'est un outil de dimensionnement, pas un signal d'entrée ou de sortie.</div>""",
@@ -573,14 +578,16 @@ def build_html() -> str:
 
     s.append(slide(17, "Annexe C — Limites", "Ce que ces résultats ne disent pas",
         """<ul class="ticks big">
-          <li><b>Trois épisodes de stress seulement</b> en 24 ans (2002-03, 2007-09, 2020-21)&nbsp;:
-          la plupart des conclusions de portefeuille reposent sur très peu de crises.</li>
+          <li><b>Trois épisodes de stress et deux récessions seulement</b> en 24 ans&nbsp;: les
+          93&nbsp;% et la plupart des conclusions reposent sur très peu de crises.</li>
+          <li><b>Le VIX sait déjà</b>&nbsp;: au-delà du VIX, le modèle n'ajoute que +0,20 point
+          sur la volatilité future.</li>
           <li><b>Calme continu depuis avril 2021</b>&nbsp;: la baisse de 2022 n'a pas été signalée,
           et les stratégies récentes ne voient qu'une crise, 2020.</li>
           <li><b>Couplages bruts de coûts</b>&nbsp;: les Sharpe des stratégies sont optimistes.</li>
           <li><b>Portée</b>&nbsp;: un classifieur à deux états, lent, utilisé pour couper ou
-          dimensionner. Rien n'est dit ici sur un régime plus rapide, ni sur un régime utilisé
-          pour <b>choisir entre</b> stratégies&nbsp;: c'est la suite du programme.</li>
+          dimensionner. La sélection entre signaux a été testée à part (plan Two Sigma, avec
+          un autre classifieur) et ne marche pas mieux.</li>
           <li><b>Validation NBER rétrospective</b>&nbsp;: les dates de récession sont publiées après
           coup&nbsp;; seuls les états du modèle sont en temps réel.</li>
         </ul>""", "docs/RESULTS_FINAL.md, AVANCEMENT.md", cls="appendix"))
