@@ -304,6 +304,11 @@ automatiquement par toute session ouverte ici. Ce fichier-ci en est le détail.
     MDE, et la règle du 80ᵉ centile fait autant. **Ouvert** : l'indicateur de panique de
     Daniel et Moskowitz sur UMD 1926-2026, avec coûts. `docs/RESULTS_CRISE.md`.
 
+11c. ~~Bascule vers une valeur refuge~~ **FAIT le 23/09** (`5872d6b` avant lecture) :
+    actions en calme, TLT, or ou volatilité achetée en stress. **Aucune bascule utile** ;
+    l'or +0,04 (sous-puissant, et la règle médiane fait mieux). Les états de stress
+    contiennent les rebonds, où les actions gagnent. `docs/RESULTS_REFUGE.md`.
+
 ### ⟶ 12. ENSUITE — voir `AVANCEMENT.md` §4 et §5
 
 Dans l'ordre proposé : la présentation de 10 minutes ; les instruments Two Sigma

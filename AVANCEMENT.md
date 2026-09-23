@@ -151,6 +151,16 @@ d'essais compte 84 configurations distinctes (`data/trials.parquet`).
   4,48 points de R² sur la variance future (t −5,23) ; une fois le VIX dans la
   régression, 0,20 point (t −1,34, seuil 2,77). Données publiques (CBOE, CFE, Ken French)
   dans `data/raw/crisis/`, téléchargées par `scripts/fetch_crisis_data.py`.
+- **Actions en calme, valeur refuge en stress** (`docs/RESULTS_REFUGE.md`, protocole dans
+  `scripts/run_safe_haven_switch.py`, commité avant lecture en `5872d6b`, 3 essais
+  `safe_haven_switch`, coût nul). En stress, on bascule des actions vers les obligations
+  longues (TLT), l'or, ou de la volatilité achetée (un straddle synthétique). **Aucune
+  bascule n'est utile.** Sharpe 0,64 seul ; 0,57 avec TLT, 0,68 avec l'or (sous-puissant,
+  seuil 0,31 ; la règle médiane de volatilité fait 0,77), 0,39 avec la volatilité. La
+  raison est descriptive et utile pour l'oral : ciblées en volatilité, les actions
+  rapportent autant en stress qu'en calme (0,62 contre 0,64), parce que les états de
+  stress contiennent aussi les rebonds (2003, 2009, 2020). TLT sauve 2008 (+0,1 % au lieu
+  de −22,9 %) mais rate 2009 (−6,3 % au lieu de +20,3 %).
 
 ---
 
