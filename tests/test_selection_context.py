@@ -30,7 +30,9 @@ from regime_lab.selection.context import (
     load_log_realised_vol,
     log_realised_vol,
     placebo_groups,
+    qualifying_cells,
     session_paths,
+    trailing_mode,
     transitions_within,
     walk_forward_context,
 )
@@ -315,6 +317,73 @@ def test_eta_squared_uses_common_dates_only():
     labels = pd.Series([0, 0, 1, 1, 0, 1], index=index)
     values = pd.Series([1.0, 3.0, 5.0, 7.0], index=index[:4])
     assert eta_squared(labels, values) == pytest.approx(0.8)
+
+
+# ------------------------------------------------------ cells and smoothing
+
+
+def _paths(blocks: dict[tuple[int, str], list[float]]) -> pd.Series:
+    """A stamped path in :func:`session_paths` layout from per-block label lists."""
+    pieces, start = [], pd.Timestamp("2001-01-01")
+    for (fold, segment), labels in blocks.items():
+        dates = pd.bdate_range(start, periods=len(labels))
+        start = dates[-1] + pd.Timedelta(days=1)
+        index = pd.MultiIndex.from_arrays(
+            [np.full(len(labels), fold), np.full(len(labels), segment), dates],
+            names=["fold", "segment", "session"],
+        )
+        pieces.append(pd.Series(np.asarray(labels, dtype=float), index=index))
+    return pd.concat(pieces).rename("state")
+
+
+def test_a_cell_needs_both_the_sessions_and_the_episodes():
+    three_short = [0] * 20 + [1] * 5 + [0] * 20 + [1] * 5 + [0] * 23 + [1] * 5   # 63, 3
+    two_long = [0] * 40 + [1] * 5 + [0] * 40                                     # 80, 2
+    many_short = ([2] * 6 + [1] * 1) * 10                                        # 60, 10
+    cells = qualifying_cells(_paths({(1, "train"): three_short, (1, "test"): two_long,
+                                     (2, "train"): many_short, (2, "test"): [0] * 5}))
+    assert cells.loc[(1, "train", 0)].tolist() == [63, 3, True]
+    assert cells.loc[(1, "test", 0)].tolist() == [80, 2, False]
+    assert cells.loc[(2, "train", 2)].tolist() == [60, 10, False]
+    assert cells.loc[(2, "test", 1)].tolist() == [0, 0, False]
+    assert set(cells.index.get_level_values("state")) == {0, 1, 2}
+    loose = qualifying_cells(_paths({(1, "train"): many_short}), min_sessions=60)
+    assert bool(loose.loc[(1, "train", 2), "qualifies"])
+
+
+def test_an_unlabelled_session_belongs_to_no_cell_and_still_separates_episodes():
+    labels = [np.nan] * 3 + [0] * 30 + [np.nan] + [0] * 40
+    cells = qualifying_cells(_paths({(1, "train"): labels}))
+    assert cells.loc[(1, "train", 0)].tolist() == [70, 2, False]
+
+
+def test_the_trailing_mode_breaks_ties_low_and_does_not_back_fill():
+    path = _paths({(1, "train"): [2, 2, 1, 1, 0, 0, 0], (1, "test"): [1, 1, 1]})
+    smooth = trailing_mode(path, window=4).to_numpy()
+    assert np.isnan(smooth[:3]).all()
+    # windows [2,2,1,1] -> tie -> 1; [2,1,1,0] -> 1; [1,1,0,0] -> 0; [1,0,0,0] -> 0; ...
+    np.testing.assert_array_equal(smooth[3:], [1, 1, 0, 0, 0, 0, 1])
+
+
+def test_the_trailing_mode_reads_neither_the_future_nor_another_fold():
+    rng = np.random.default_rng(3)
+    first = rng.integers(0, 4, 300).tolist()
+    second = rng.integers(0, 4, 300).tolist()
+    base = _paths({(1, "train"): first[:200], (1, "test"): first[200:],
+                   (2, "train"): second[:200], (2, "test"): second[200:]})
+    smooth = trailing_mode(base)
+    for cut in (50, 199, 250):
+        changed = first[:cut] + [(v + 1) % 4 for v in first[cut:]]
+        moved = trailing_mode(_paths({(1, "train"): changed[:200], (1, "test"): changed[200:],
+                                      (2, "train"): second[:200], (2, "test"): second[200:]}))
+        fold1 = base.index.get_level_values("fold") == 1
+        before = np.flatnonzero(fold1)[:cut]
+        np.testing.assert_array_equal(moved.to_numpy()[before], smooth.to_numpy()[before])
+        np.testing.assert_array_equal(moved.to_numpy()[~fold1], smooth.to_numpy()[~fold1])
+    fold2 = smooth.xs(2, level="fold").to_numpy()
+    assert np.isnan(fold2[:20]).all() and np.isfinite(fold2[20:]).all()
+    with pytest.raises(ValueError):
+        trailing_mode(_paths({(1, "train"): [0, np.nan, 1]}))
 
 
 # ------------------------------------------------------------------ real data

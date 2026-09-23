@@ -14,6 +14,10 @@ apart:
         readings of where a context training window starts, the unorthogonalised
         variant, the other anchor and the declared sensitivities K in {3, 5, 6}.
     C   The labels on the 49-industry session calendar, and the one-session lag.
+    C2  THE CELLS of the lock's minimum-cell rule (§12.4), counted on the stamped
+        paths at K = 4 and at every K sensitivity, the test sessions that sit at the
+        abstaining row, and the 21-session smoothing sensitivity (§12.13): its clock,
+        its cells, and whether the uniform placebo is exact on it.
     D   PLACEBO FEASIBILITY on the declared object, per (fold, segment) block: the
         draft's swap repair against the proposed uniform construction.
     E   Runtime.
@@ -56,8 +60,11 @@ from regime_lab.analysis.placebo import (
 from regime_lab.config import RAW
 from regime_lab.selection.context import (
     LOG_RV,
+    MIN_CELL_EPISODES,
+    MIN_CELL_SESSIONS,
     N_STATES,
     SENSITIVITY_STATES,
+    SMOOTHING_WINDOW,
     WalkForwardContext,
     as_of,
     context_panel,
@@ -66,7 +73,9 @@ from regime_lab.selection.context import (
     load_context_features,
     load_log_realised_vol,
     placebo_groups,
+    qualifying_cells,
     session_paths,
+    trailing_mode,
     walk_forward_context,
 )
 from regime_lab.selection.folds import (
@@ -424,6 +433,106 @@ def session_mapping(wf: WalkForwardContext, folds: tuple[Fold, ...], paths: pd.S
     return {"lacking": lacking, "mismatched": mismatched, "own_first": own_first}
 
 
+# ------------------------------------------------------------------ C2. cells
+
+
+@dataclass(frozen=True)
+class Cells:
+    """The lock's cells on one stamped path: what qualifies and who abstains."""
+
+    label: str
+    k: int
+    train: int
+    test: int
+    both: int
+    per_fold: str
+    abstaining: int
+    test_sessions: int
+
+    @property
+    def floor(self) -> float:
+        """The UNDECIDABLE floor: 10 cells at K = 4, half of the 5K cells otherwise."""
+        return 10.0 if self.k == N_STATES else 5 * self.k / 2
+
+
+def count_cells(label: str, paths: pd.Series, k: int) -> Cells:
+    cells = qualifying_cells(paths)["qualifies"]
+    train = cells.xs("train", level="segment")
+    test = cells.xs("test", level="segment")
+    both = train & test.reindex(train.index, fill_value=False)
+    abstaining, test_sessions = 0, 0
+    for fold in paths.index.get_level_values("fold").unique():
+        path = paths.xs(fold, level="fold")
+        lagged = path.droplevel("segment").shift(1)
+        in_test = (path.index.get_level_values("segment") == "test")
+        held = lagged.to_numpy()[in_test]
+        allowed = set(train.xs(fold, level="fold").loc[lambda q: q].index)
+        abstaining += int(sum(not (np.isfinite(h) and int(h) in allowed) for h in held))
+        test_sessions += int(in_test.sum())
+    per_fold = "/".join(str(int(both.xs(f, level="fold").sum()))
+                        for f in paths.index.get_level_values("fold").unique())
+    return Cells(label, k, int(train.sum()), int(test.sum()), int(both.sum()), per_fold,
+                 abstaining, test_sessions)
+
+
+def cells_section(objects: dict, sessions: pd.DatetimeIndex, panel: pd.DataFrame,
+                  draws: int) -> list[Cells]:
+    print(f"\n{RULE}\nC2. THE CELLS — the lock's minimum-cell rule, stamped paths, start 1995\n")
+    print(f"   a state qualifies in a (fold, segment) block with at least {MIN_CELL_SESSIONS} "
+          f"sessions and {MIN_CELL_EPISODES} episodes;")
+    print("   an A-2 cell is a (fold, state) whose training AND test cells qualify; a test")
+    print("   session abstains when its lagged state (fold path, lag 1) has no qualifying")
+    print("   training cell. Counts only: no return is read.\n")
+    folds = objects["folds"]
+    smoothed = trailing_mode(objects[("1995", N_STATES)][1])
+    rows = [count_cells(f"K={k}", objects[("1995", k)][1], k)
+            for k in (N_STATES, *SENSITIVITY_STATES)]
+    rows.append(count_cells(f"K={N_STATES} smoothed {SMOOTHING_WINDOW}", smoothed, N_STATES))
+    print("   object              train cells  test cells  A-2 cells  per fold    floor  "
+          "abstaining test sessions")
+    for r in rows:
+        n = len(folds) * r.k
+        print(f"   {r.label:<19} {r.train:>5} of {n:<3}  {r.test:>4} of {n:<3} {r.both:>4} of "
+              f"{n:<3}  {r.per_fold:<10} {r.floor:5.1f}  {r.abstaining:>5} of {r.test_sessions:,}"
+              f" = {reading(r.abstaining / r.test_sessions):.1%}")
+
+    wf = objects[("1995", N_STATES)][0]
+    labelled = smoothed.dropna().astype(np.int64)
+    years = sum(f.test_years for f in folds)
+    print(f"\n   the smoothing sensitivity, K={N_STATES}: trailing {SMOOTHING_WINDOW}-session "
+          "mode of each fold's stamped path, smallest label on ties, before the lag;")
+    print(f"   the first {SMOOTHING_WINDOW - 1} sessions of each path have no label "
+          f"({int(smoothed.isna().sum())} rows) and hold the fallback. Industry sessions,")
+    print("   transitions inside each fold's segment; in-sample = mean of the five training")
+    print("   segments' rates; eta2 of the pooled OOS labels in fold 1's numbering.")
+    print("      path          OOS /yr  in-sample /yr  median ep.  mean ep.  eta2(log rv)")
+    for name, path in (("stamped", objects[("1995", N_STATES)][1]), ("smoothed", labelled)):
+        test = path.xs("test", level="segment")
+        train = path.xs("train", level="segment")
+        within = sum(transitions(test.xs(f.number, level="fold")) for f in folds)
+        lengths = np.concatenate([run_lengths(test.xs(f.number, level="fold").to_numpy())[0]
+                                  for f in folds])
+        in_sample = np.mean([transitions(train.xs(f.number, level="fold"))
+                             / span_years(train.xs(f.number, level="fold").index)
+                             for f in folds])
+        aligned = pd.concat([
+            pd.Series(wf.mappings[wf.numbers.index(f.number)][
+                test.xs(f.number, level="fold").to_numpy()],
+                index=test.xs(f.number, level="fold").index) for f in folds])
+        eta = eta_squared(aligned, as_of(panel[LOG_RV], aligned.index))
+        print(f"      {name:<12} {reading(within / years):8.2f}  {reading(in_sample):13.2f}  "
+              f"{reading(float(np.median(lengths))):10.0f}  {reading(float(lengths.mean())):8.1f}"
+              f"  {reading(eta):12.3f}")
+    groups = placebo_groups(labelled)
+    uniform = matched_placebos(labelled, draws, groups=groups, method="uniform")
+    check = check_placebos(labelled, uniform.draws, groups=groups)
+    reading(check.max_occupancy_deviation)
+    print(f"      uniform placebo, {draws:,} draws on (fold, segment) blocks: exact "
+          f"{check.exact}, transition sd {check.transitions_sd:.1f}, max occupancy deviation "
+          f"{check.max_occupancy_deviation:.4f}")
+    return rows
+
+
 # --------------------------------------------------------------- D. placebo
 
 
@@ -518,6 +627,7 @@ def main() -> int:
     mapping = session_mapping(wf, folds, paths, library, panel, "1995")
     wf_ctx, paths_ctx = objects[("ctx", N_STATES)]
     mapping_ctx = session_mapping(wf_ctx, folds, paths_ctx, library, panel, "ctx")
+    cells = cells_section(objects, library, panel, args.draws)
     timing = placebo_section(objects, starts, args.draws)
 
     print(f"\n{RULE}\nE.  RUNTIME\n")
@@ -543,6 +653,8 @@ def main() -> int:
     print(f"   declared object: industry sessions lacking a label {mapping['lacking']} / "
           f"{mapping_ctx['lacking']}; lag mismatches {mapping['mismatched']} / "
           f"{mapping_ctx['mismatched']}")
+    print("   cells (A-2 cells / floor; abstaining test sessions): " + ", ".join(
+        f"{c.label} {c.both}/{c.floor:g}; {c.abstaining}" for c in cells))
     print(f"   placebo: uniform construction exact on every object: {uniform_exact}; "
           f"swap repair, draws completed of {args.draws:,}: "
           + ", ".join(f"{s} K={k} {n}" for (s, k), n in swap_ok.items()))

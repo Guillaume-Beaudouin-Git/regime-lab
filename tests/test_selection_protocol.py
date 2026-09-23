@@ -33,6 +33,7 @@ from regime_lab.selection.protocol import (
     mde_z,
     net_of_costs,
     paired_hac_t,
+    placebo_p_value,
     placebo_percentile,
     realised_beta,
     risk_free,
@@ -379,10 +380,28 @@ def test_the_realised_beta_is_recovered():
 
 
 def test_the_placebo_percentile_counts_ties_as_half():
-    null = np.array([1.0, 2.0, 3.0, 4.0, np.nan])
+    null = np.array([1.0, 2.0, 3.0, 4.0])
     assert placebo_percentile(2.5, null) == pytest.approx(0.5)
     assert placebo_percentile(3.0, null) == pytest.approx(0.625)
     assert np.isnan(placebo_percentile(np.nan, null))
+
+
+def test_one_broken_placebo_draw_voids_the_percentile_and_the_p_value():
+    """No draw is dropped: a single NaN or inf makes the reading undecidable (§13.4)."""
+    for broken in (np.nan, np.inf):
+        null = np.array([1.0, 2.0, 3.0, broken])
+        assert np.isnan(placebo_percentile(2.5, null))
+        assert np.isnan(placebo_p_value(2.5, null))
+    assert np.isnan(placebo_p_value(np.nan, np.array([1.0, 2.0])))
+    assert np.isnan(placebo_p_value(1.0, np.array([])))
+
+
+def test_the_placebo_p_value_counts_ties_against_the_real_partition():
+    null = np.arange(1_000, dtype=float)
+    assert placebo_p_value(1_000.0, null) == pytest.approx(1 / 1_001)
+    assert placebo_p_value(999.0, null) == pytest.approx(2 / 1_001)
+    assert placebo_p_value(990.0, null) == pytest.approx(11 / 1_001)
+    assert placebo_p_value(-1.0, null) == pytest.approx(1.0)
 
 
 def _newey_west_t(x: np.ndarray, lags: int) -> float:

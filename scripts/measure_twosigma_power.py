@@ -19,6 +19,15 @@ a random tilt redrawn every 21 sessions, on the full sample, gross, in raw retur
     c  PRICE the declared object: held-weight turnover of both arms, the selector's
        increment, its cost in Sharpe, the breakeven, §5's kill turnover and the
        control's whole cost — the level-C ceiling — re-derived on the right blend.
+    e  THE KILL RULE ON CONTENT-FREE MAPS: on how many random maps each candidate
+       cost-kill rule of the lock would fire, map by map, from each map's own MDE and
+       its arm's realised sd. A rule that fires on maps carrying no content kills by
+       construction, whatever the fitted map holds.
+
+Two stand-ins for m are measured: the raw N(0, 1) draw, and the same draw given the
+shape the lock's estimator gives m (§12.5: centred across states for each signal, then
+across signals within each state, then scaled to unit root-mean-square; unweighted,
+since a stand-in has no training occupancy).
 
 THE BLINDNESS RULE. The pre-registration is not locked. Every leg entering a power
 calculation goes through `protocol.blinded_mde`, which removes both means before the
@@ -114,10 +123,13 @@ MIN_TABLES = 8
 #: The pre-lock scripts redrew the toy tilt, and the toy switch, every 21 sessions.
 TOY_REDRAW = 21
 TOY_BLOCK = 63
+#: The draft's count of declared evaluations; the lock declares DECLARED_EVALUATIONS.
+DRAFT_EVALUATIONS = 21
 ALPHAS: dict[str, float] = {
     "0.05": FAMILY_ALPHA,
     f"0.05/{PRIMARY_TESTS}": FAMILY_ALPHA / PRIMARY_TESTS,
     f"0.05/{DECLARED_EVALUATIONS}": FAMILY_ALPHA / DECLARED_EVALUATIONS,
+    f"0.05/{DRAFT_EVALUATIONS}": FAMILY_ALPHA / DRAFT_EVALUATIONS,
 }
 CORRECTED = f"0.05/{PRIMARY_TESTS}"
 #: The label of the declared pairing: §4's tilt at d = 0.50 against the control.
@@ -340,6 +352,19 @@ def random_m(seed: int) -> pd.DataFrame:
     return pd.DataFrame(rng.normal(size=(N_STATES, len(LIBRARY))), columns=list(LIBRARY))
 
 
+def shaped_m(seed: int) -> pd.DataFrame:
+    """`random_m` given the shape of the lock's estimator (§12.5), still content-free.
+
+    Centred across states for each signal, then across signals within each state, then
+    scaled to unit root-mean-square. Unweighted: the stand-in knows no training
+    occupancy. The whole root-mean-square then sits in the part that varies by state.
+    """
+    m = random_m(seed)
+    m = m - m.mean(axis=0)
+    m = m.sub(m.mean(axis=1), axis=0)
+    return m / float(np.sqrt((m.to_numpy() ** 2).mean()))
+
+
 @dataclass(frozen=True)
 class Arm:
     """One book on the declared object, restricted to the test folds where it matters."""
@@ -394,7 +419,10 @@ PAIRINGS: tuple[tuple[str, float | None, str, str], ...] = (
     ("switch", None, "hard switch", "control"),
     ("demeaned", TILT_D, "m demeaned", "control"),
     ("tilt", TILT_D, "vs static K=1", "static"),
+    ("shaped", TILT_D, "m shaped", "control"),
 )
+#: The pairing label of the §12.5-shaped stand-in.
+SHAPED = "m shaped"
 
 
 def static_mix(inputs: Declared, m: pd.DataFrame, d: float) -> pd.DataFrame:
@@ -420,6 +448,8 @@ def section_b(inputs: Declared, tables: int, workers: int) -> dict:
         arms[("demeaned", TILT_D, seed)] = build_arm(
             inputs, tilt_mix(inputs.states, m - m.mean(axis=0), d=TILT_D))[1]
         arms[("static", TILT_D, seed)] = build_arm(inputs, static_mix(inputs, m, TILT_D))[1]
+        arms[("shaped", TILT_D, seed)] = build_arm(
+            inputs, tilt_mix(inputs.states, shaped_m(seed), d=TILT_D))[1]
 
     jobs: list[Job] = []
     for kind, d, label, opponent in PAIRINGS:
@@ -450,14 +480,16 @@ def section_b(inputs: Declared, tables: int, workers: int) -> dict:
     for _, _, label, _ in PAIRINGS:
         if label == "m demeaned":
             print("   options for the static-tilt question, measured, not chosen:")
+        if label == SHAPED:
+            print("   the same draws given the lock's shape of m (§12.5), against the control:")
         for block in POWER_BLOCKS:
             cells = "   ".join(fmt3(mde[(label, block, k)]) for k in ALPHAS)
             print(f"   {label:<14} {block:>5}   {fmt3(mde[(label, block, 'se')])}   {cells}")
-    print("   (every arm against the equal-weight control except the last, which pairs the "
-          "conditional\n   tilt with the same m collapsed to one state)")
+    print("   (every arm against the equal-weight control except 'vs static K=1', which "
+          "pairs the\n   conditional tilt with the same m collapsed to one state)")
     print(f"\n   largest |observed| on the demeaned legs: {observed:.1e}")
     return {"control_book": control_book, "control": control, "arms": arms, "mde": mde,
-            "observed": observed}
+            "se": se, "observed": observed}
 
 
 def lo_section(years: float, full_years: float) -> dict:
@@ -526,6 +558,7 @@ def section_c(inputs: Declared, b: dict, tables: int, prelock: tuple) -> dict:
     rows["hard switch"] = arm_rows("switch", None)
     rows["m demeaned"] = arm_rows("demeaned", TILT_D)
     rows["static K=1"] = arm_rows("static", TILT_D)
+    rows[SHAPED] = arm_rows("shaped", TILT_D)
 
     print("   the control, the equal-weight blend of the ten:")
     print(f"      unscaled weights, full inferential sample   {control_unscaled_full:6.1f} x/yr")
@@ -601,6 +634,74 @@ def section_c(inputs: Declared, b: dict, tables: int, prelock: tuple) -> dict:
     }
 
 
+# ------------------------------------------------- e. the kill on content-free maps
+
+
+@dataclass(frozen=True)
+class KillRow:
+    """One content-free map against two readings of the cost-kill rule."""
+
+    increment: float
+    sd: float
+    mde: float
+    bar: float
+    derived: float
+    adopted: float
+
+    @property
+    def fires_derived(self) -> bool:
+        return self.increment > self.derived
+
+    @property
+    def fires_adopted(self) -> bool:
+        return self.increment > self.adopted
+
+
+def kill_budget(sharpe: float, sd: float) -> float:
+    """Increment at which 20 bp consumes ``sharpe`` on a book held at ``sd``, capped at 12."""
+    return min(DRAFT_KILL_TURNOVER, turnover_kill(sharpe, STRESS, vol_target=sd))
+
+
+def section_e(b: dict, c: dict, tables: int) -> dict:
+    print(f"\n{RULE}\ne.  THE COST-KILL RULE ON CONTENT-FREE MAPS — map by map\n")
+    print("   The increment is the arm's held turnover minus the control's, on the test folds;")
+    print("   sd is the arm's realised annualised sd there. Two readings of the kill:")
+    print(f"     derived: min({DRAFT_KILL_TURNOVER:.0f}, MDE(0.05, block {TOY_BLOCK}) x sd x "
+          f"10,000 / {STRESS:.0f}) — the proposed lock's re-derivation")
+    print(f"     adopted: min({DRAFT_KILL_TURNOVER:.0f}, T x sd x 10,000 / {STRESS:.0f}), "
+          f"T = max({DRAFT_CORRECTED_MDE}, the map's largest MDE(0.05/{PRIMARY_TESTS}) over "
+          f"blocks {'/'.join(map(str, POWER_BLOCKS))}) — anchored to the decision bar")
+    control = b["control"]
+    z05 = mde_z(FAMILY_ALPHA)
+    zc = mde_z(FAMILY_ALPHA / PRIMARY_TESTS)
+    median_kill = kill_budget(b["mde"][(PRIMARY, TOY_BLOCK, "0.05")][1], c["control_sd"])
+    out: dict[str, list[KillRow]] = {}
+    for kind, label in (("tilt", PRIMARY), ("shaped", SHAPED)):
+        rows = []
+        for seed in range(tables):
+            arm = b["arms"][(kind, TILT_D, seed)]
+            sd = leg_sd(arm.net)
+            mde = b["se"][(label, seed, TOY_BLOCK)] * z05
+            bar = max(DRAFT_CORRECTED_MDE,
+                      max(b["se"][(label, seed, blk)] for blk in POWER_BLOCKS) * zc)
+            rows.append(KillRow(arm.held_turnover - control.held_turnover, sd, mde, bar,
+                                kill_budget(mde, sd), kill_budget(bar, sd)))
+        out[label] = rows
+        print(f"\n   {label}:")
+        print("      map  increment      sd   MDE .05  derived  fires      T  adopted  fires")
+        for seed, r in enumerate(rows):
+            print(f"      {seed:>3}  {r.increment:9.2f}  {r.sd:6.2%}   {r.mde:6.3f}  "
+                  f"{r.derived:7.2f}  {'yes' if r.fires_derived else 'no':>5}  {r.bar:5.3f}  "
+                  f"{r.adopted:7.2f}  {'yes' if r.fires_adopted else 'no':>5}")
+        derived = sum(r.fires_derived for r in rows)
+        adopted = sum(r.fires_adopted for r in rows)
+        over_median = sum(r.increment > median_kill for r in rows)
+        print(f"      fires: derived {derived} of {tables}, adopted {adopted} of {tables}; "
+              f"{over_median} of {tables} exceed the median-based {median_kill:.2f} x/yr "
+              f"(median MDE, the control's sd)")
+    return {"rows": out, "median_kill": median_kill}
+
+
 # ---------------------------------------------------------------------- verdicts
 
 
@@ -656,8 +757,8 @@ def verdicts(a: dict, b: dict, c: dict, lo: dict, clock: dict) -> None:
         Check("§7  uncorrected, the figure 0.338 is scaled from", 0.272, 3, a["amtp"]["0.05"]),
         Check(f"P4  α = {CORRECTED}", 0.338, 3, a["amtp"][CORRECTED],
               "generator 0 (0.272) scaled, not the eight-draw median"),
-        Check(f"P4  α = 0.05/{DECLARED_EVALUATIONS}", 0.376, 3,
-              a["amtp"][f"0.05/{DECLARED_EVALUATIONS}"]),
+        Check(f"P4  α = 0.05/{DRAFT_EVALUATIONS}", 0.376, 3,
+              a["amtp"][f"0.05/{DRAFT_EVALUATIONS}"]),
         Check("measure_fix.py's 'earlier single-seed' figure", 0.238, 3, a["power2"][0.50],
               "quoted in the script's printout, not in the draft"),
         Check("P5  selector increment (x/yr)", 2.6, 1, tilt_pre - ctl_pre),
@@ -732,6 +833,7 @@ def main(argv: list[str] | None = None) -> None:
     lo = lo_section(clock["years"], full_years)
     prelock = timed("prelock", disclosed_increment, industries, market)
     c = timed("c", section_c, inputs, b, args.tables, prelock)
+    e = section_e(b, c, args.tables)
 
     readings = {
         "a": {k: v for k, v in a.items() if k != "observed"},
@@ -740,6 +842,9 @@ def main(argv: list[str] | None = None) -> None:
         "c rows": c["rows"],
         "lo": lo,
         "clock": clock,
+        "e": {"median_kill": e["median_kill"],
+              **{label: [[r.increment, r.sd, r.mde, r.bar, r.derived, r.adopted]
+                         for r in rows] for label, rows in e["rows"].items()}},
     }
     broken = finite({k: v for k, v in readings.items()})
     if broken or not (a["observed"] < 1e-9 and b["observed"] < 1e-9):

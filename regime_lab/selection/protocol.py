@@ -2,9 +2,10 @@
 
 Every rule here comes from `pilotage/plans_de_recherche/twosigma/PRESPEC_TWOSIGMA.md`
 §4 (the selector, the control, the inherited protocol), §5 (costs), §7 (multiple
-testing) and §8 control 3 (beta). That document is a DRAFT and is not locked; this
-module implements its text as written and names each place where the text left a
-choice open, rather than settling it silently.
+testing) and §8 control 3 (beta). That document is the DRAFT, kept unedited as the
+record; the text that settles what it left open is the lock, `docs/PRESPEC_TWOSIGMA.md`,
+whose §12-§13 decide. This module implements the draft's text as written and names
+each place where that text left a choice open, rather than settling it silently.
 
 **What this module does not know.** Nothing here is estimated from returns. The
 tilt's ``m_ik``, the per-state covariance matrices and the partition itself are
@@ -71,11 +72,13 @@ COST_BPS = {"realistic": 5.0, "conservative": 10.0, "stress": 20.0}
 HAC_LAGS = 6
 POWER_BLOCKS = (21, 63, 126)
 
-#: §7: six primary tests under Holm–Bonferroni, 21 declared evaluations in all.
+#: §7: six primary tests under Holm–Bonferroni. The draft declared 21 evaluations in
+#: all; the lock (§7, §12.13) declares 20: the 6 primaries, K in {3, 5, 6} x 3 levels,
+#: d in {0.25, 1.00} at A-1 only, and the 21-session smoothing x 3 levels.
 FAMILY_ALPHA = 0.05
 POWER = 0.80
 PRIMARY_TESTS = 6
-DECLARED_EVALUATIONS = 21
+DECLARED_EVALUATIONS = 20
 
 #: Ken French panels store percent; everything downstream is in decimal.
 PERCENT = 100.0
@@ -486,12 +489,28 @@ def realised_beta(book_returns: pd.Series, market: pd.Series) -> float:
 
 
 def placebo_percentile(value: float, null: np.ndarray) -> float:
-    """Share of finite placebo draws below ``value``, ties counted half."""
+    """Share of placebo draws below ``value``, ties counted half.
+
+    NaN when ``value`` or ANY draw is not finite: the lock (§13.4) makes such a lock
+    UNDECIDABLE, and no draw is dropped, replaced or redrawn. Dropping a broken draw
+    would condition the null on the draws that happen to work.
+    """
     draws = np.asarray(null, dtype=float)
-    draws = draws[np.isfinite(draws)]
-    if not np.isfinite(value) or draws.size == 0:
+    if not np.isfinite(value) or draws.size == 0 or not np.isfinite(draws).all():
         return float("nan")
     return float((draws < value).mean() + 0.5 * (draws == value).mean())
+
+
+def placebo_p_value(value: float, null: np.ndarray) -> float:
+    """One-sided placebo p-value, ``(1 + #{draws >= value}) / (1 + n)``.
+
+    Ties count against the real partition. NaN when ``value`` or any draw is not
+    finite, for the reason given in :func:`placebo_percentile`.
+    """
+    draws = np.asarray(null, dtype=float)
+    if not np.isfinite(value) or draws.size == 0 or not np.isfinite(draws).all():
+        return float("nan")
+    return float((1 + (draws >= value).sum()) / (1 + draws.size))
 
 
 def paired_hac_t(a: pd.Series, b: pd.Series, *, lags: int = HAC_LAGS) -> float:
