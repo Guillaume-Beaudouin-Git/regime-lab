@@ -88,3 +88,82 @@ Verbatim from `docs/PRESPEC_TWOSIGMA.md` (LOCKED, `30f7d69`). They were fixed be
 
 14 sensitivity rows logged; details in each level's results file.
 <!-- SENSITIVITIES:END -->
+
+---
+
+## Closure of the tree (§6, §13.6) — written after the sensitivities
+
+No level passes, so the closure statement of §6 is written, with each level in the
+wording §13.6 gives its status and with the applied numbers:
+
+> A context partition refitted walk-forward on twenty macro-financial and
+> cross-sectional features, orthogonalised on log realised volatility (pooled
+> out-of-sample η² 0.14 against it) and switching about 12.5 times a year out of sample,
+> **does not transfer** out of sample as a selector over a ten-signal US industry
+> library on the first moment: the state-tilted book earns 0.110 Sharpe *less* than the
+> equal-weight blend it tilts (−0.370 against −0.260, net of 5 bp, in excess), and the
+> training-fold state profiles do not carry to the test fold (R 0.047, p 0.34). On the
+> second moment it **is not shown to transfer**: risk parity on its state-conditional
+> second moments gains +0.064 over the pooled matrix, against a decision bar of 0.338
+> after correction for six primary tests (the fitted pair itself resolves 0.15 at
+> α 0.05/6, so the bar is the lock's floor), and its state-conditional matrices
+> forecast the ten legs *worse* than a single pooled one (QLIKE gain −3.36, 8.5th percentile of the matched placebo). Nor **is it
+> shown** to let the equal-weight book trade less than a state-blind weekly cadence at
+> the same tracking distance: the pooled-budget rule keeps the weekly interval in every
+> state of every fold, on the real partition as on all 1,000 content-free ones
+> (S_C = 0; power unmeasured). All over 20.0 years of paired out-of-sample sessions,
+> August 2006 to July 2026. The book's entire cost at 5 bp, 0.233 Sharpe, is below the
+> 0.338 bar, so no Sharpe gain from cost alone is decidable on this sample.
+
+**What this is not.** It is not "regimes do not monetise". It is one partition (K-means
+on a volatility-orthogonalised context), one use (selection among signals), one library
+(ten US industry signals), 20 years. It says nothing of the classifier's established
+content, which is variance (`AVANCEMENT.md` §0).
+
+**Robustness (§12.13, never deciding).** The 14 sensitivity rows agree with the
+primaries. Level A reads FAIL at K = 3 (Δ −0.147), K = 5 (−0.094), the 21-session
+smoothing (−0.128) and d = 0.25 (−0.049), and FAIL (cost) at d = 1.00 (−0.212; its kill
+was known to fire before the reading). **One sign reversal, written here as §12.13
+requires:** at K = 6, Δ_A1 = **+0.009**, positive at 5 bp and not at 10 bp, so
+UNDECIDED. It is 3% of the bar. Level B is UNDERPOWERED at every variant (Δ_B2 +0.030
+to +0.080). Level C reads S_C = 0 at every variant.
+
+**What the volatility witnesses show (diagnostics, no trial, deciding nothing).** On
+every channel, the one-line volatility partition does at least as well as the context
+orthogonal to it: Δ_W +0.201 at A-1, R_W 0.283 at A-2, both witnesses beat the context
+on the B-1 loss, Δ_W,B2 +0.145 at B-2. This agrees with what the programme had already
+measured: the regime classifier's content is volatility. The witnesses were not tested
+against a placebo here, so these figures are an indication and not a finding.
+
+**The book, for scale.** The equal-weight control of the ten industry signals nets a
+Sharpe of −0.26 at 5 bp over the test years. The weekly twin, which is state-blind, nets
+−0.12. The logged `sharpe` values are those of near-zero-net long-short industry books
+with no borrow cost. None measures progress toward the programme's ambition of a net
+Sharpe of 1 to 2 (§13.5).
+
+**The record.**
+
+| step | commit |
+|---|---|
+| lock | `30f7d69` |
+| build | `22abbe0`, `3b64ab2`, `540a778`, `9905eb7` |
+| C-1 amendment, before any reading: the atom null, S_C ≥ S*, C-2 BOUND, the guards | `42011e9` |
+| instruments and thresholds committed before any reading | `d29de38` |
+| reading A: computed at `d29de38`, rows logged at `2d1315f` after the register incident, nothing recomputed | `27d2cae` |
+| readings B and C | `1fc44fe`, `90938fe` |
+| Holm, then the sensitivities | `0ba0775`, `74dae25` |
+
+The register holds 20 `twosigma` rows, the 20 declared evaluations of §7, out of 890
+rows and 168 distinct configurations in total.
+
+**What stays learned whatever the verdict (§10).**
+- The library's dimension: 7.97 effective dimensions of 10 on the industry panel,
+  against 3.86 of 11 on the 46-instrument universe, which cannot host a selection
+  study.
+- An exact matched placebo for walk-forward partitions, construction 4. It is uniform
+  over join-free orders, and it is the construction that works where the swap repair
+  completes 4 draws in 1,000.
+- The cost geometry of a selection overlay on this book: breakeven 27 to 33 bp, and the
+  book's whole cost 0.23 Sharpe at 5 bp.
+- A cadence rule that finds nothing to save on this book, on real and content-free
+  partitions alike.
