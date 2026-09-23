@@ -106,9 +106,12 @@ d'essais compte 84 configurations distinctes (`data/trials.parquet`).
 - **La phase 1 du plan Two Sigma est faite** par une autre session (`22abbe0`,
   `3b64ab2`, 262 tests). L'outillage est en place : 10 signaux sur les 49 secteurs US,
   le classifieur de contexte K-means, un placebo apparié exact et le protocole de test.
-  **Aucun niveau de l'arbre n'a été lu et aucun essai n'a été dépensé.** Le verrou est
-  rédigé (`docs/PRESPEC_TWOSIGMA.md`) mais **pas encore commité** : Guillaume doit relire
-  les changements listés en §12.0.
+  **Aucun niveau de l'arbre n'a été lu et aucun essai n'a été dépensé.**
+- **Le verrou Two Sigma est commité** (`docs/PRESPEC_TWOSIGMA.md`). Guillaume l'a approuvé
+  le 23/09, puis deux relecteurs indépendants l'ont examiné : un second validateur sur le
+  fond, un auditeur avant le commit. Leurs corrections sont les lignes 28 à 36 du §12.0 :
+  entre autres, un succès est rétrogradé s'il ne tient pas sans la série NFCI, qui est
+  révisée. Les deux ont confirmé le texte final.
 - **Remesurés à partir de code commité, plusieurs chiffres du brouillon étaient
   optimistes.** L'horloge tourne à 12,6 transitions par an hors échantillon, et non 8,3.
   Elle dépend davantage de la volatilité qu'annoncé : η² de 0,14, jusqu'à 0,6 sur un
@@ -253,7 +256,7 @@ critère de fin.
 |---|---|---|---|---|
 | ~~0~~ | ~~Fixer l'objectif final~~ **FAIT le 23/09** : une présentation de 10 minutes ; objectif de fond, des stratégies dépendantes du régime (§0) | — | — | — |
 | **1** | **Construire la présentation de 10 minutes**, au format entreprise, en 8 à 10 diapositives. Le fil : la question → la méthode (données point-in-time, critère écrit avant le chiffre) → ce qui marche (classifieur à 93,2 %, qui prédit la variance et pas la direction) → ce que ça implique (un outil de dimensionnement, pas de timing ; 13 changements d'état en 25 ans) → ce qu'on a testé sans succès (7 dispositifs, 4 hypothèses) → la suite, vers des stratégies dépendantes du régime. Trois figures : **(a)** R² sur la volatilité contre R² sur les rendements, un point par famille ; **(b)** la frise des 13 transitions ; **(c)** les dispositifs face à la règle d'une ligne | 1-2 j | `data/cache/*` et `docs/RESULTS_*.md`, déjà calculés | les diapositives et un texte oral de 10 minutes, répétés une fois |
-| **2** | **Plan Two Sigma : verrouiller, puis descendre l'arbre A → B → C.** C'est la piste la plus proche de l'objectif de fond : le régime choisit entre dix signaux. Guillaume relit le §12.0 du verrou, qu'on commite ensuite. Puis, à chaque niveau : instrument, MDE, critère commité, puis lecture, qui compte comme un essai. Le verdict alimente la dernière diapositive | 1 h de relecture, puis ~5 j | `industry_49`, `factors_5`, `features` (§3.1) | verdicts écrits dans `docs/RESULTS_TWOSIGMA*.md` |
+| **2** | **Plan Two Sigma : descendre l'arbre A → B → C** (le verrou est commité). C'est la piste la plus proche de l'objectif de fond : le régime choisit entre dix signaux. Le verrou impose d'abord d'écrire et de commiter **les trois instruments** (A, B, C), leurs seuils et les empreintes des données (§13.1). Ensuite viennent les lectures dans l'ordre A, B, C, **quel que soit le résultat de chacune** ; chaque lecture compte comme un essai. Le verdict alimente la dernière diapositive | ~2 j pour les instruments, puis quelques heures par lecture | `industry_49`, `factors_5`, `features` (§3.1) | verdicts écrits dans `docs/RESULTS_TWOSIGMA*.md` |
 | **3** | **Fermer l'arbre AHL** : le MDE de C1, que le pré-enregistrement déclare sous-puissant d'avance, la note de fermeture, et la décision sur la lecture A1 principale sur (126,10), qui reste due | ½-1 j | `trend_universe_m1.parquet` | `docs/RESULTS_AHL_LEVEL_C.md` et la fermeture |
 | **4** | **Nettoyer et commiter `pilotage/mesures_brutes/`** : retirer les chemins absolus et privés des scripts | 1-2 h | — | les scripts dans git, les données dans `data/` |
 | 5 | **Plan Bridgewater** : le régime dans la construction du portefeuille, l'autre axe jamais testé (8,5 j). Porte G0 de Rentec (1,5 j, Guillaume seul, données privées) | plusieurs jours | §3.4 | — |
@@ -268,14 +271,15 @@ Deux pistes en parallèle : la présentation ne demande aucun calcul, Two Sigma 
 
 | durée | ensemble | piste A · Two Sigma | piste B · présentation |
 |---|---|---|---|
-| 30 min | relire ensemble les changements du verrou Two Sigma (§12.0) et arrêter le fil de la présentation | | |
-| 2 h 30 | | commit du verrou, puis instrument et MDE du niveau A, critère commité | figures (a) et (b), diapositives 1 à 5 |
+| 30 min | arrêter le fil de la présentation et le choix des stratégies à comparer | | |
+| 2 h 30 | | instruments A, B et C, avec tests et seuils commités | figures (a) et (b), diapositives 1 à 5 |
 | 30 min | point d'étape | | |
-| 2 h | | lecture du niveau A s'il est décidable, sinon niveau B | diapositives 6 à 10, texte oral |
+| 2 h | | lecture du niveau A, puis B et C | diapositives 6 à 10, texte oral |
 | 1 h | répétition chronométrée (10 min), commits, mise à jour de ce fichier | | |
 
-**Par quoi on commence : la relecture du verrou Two Sigma**, parce que tout le calcul en
-dépend. Ensuite la présentation, dont tout le matériau est déjà calculé.
+**Par quoi on commence : la construction des trois instruments Two Sigma**, parce que
+toute lecture en dépend. La présentation avance en parallèle : tout son matériau est déjà
+calculé.
 
 ---
 
