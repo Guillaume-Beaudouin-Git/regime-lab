@@ -63,7 +63,7 @@ from scipy.optimize import linear_sum_assignment
 from sklearn.cluster import KMeans
 from threadpoolctl import threadpool_limits
 
-from regime_lab.analysis.placebo import transitions
+from regime_lab.analysis.placebo import run_lengths, transitions
 from regime_lab.config import CACHE, RAW
 from regime_lab.selection.folds import Fold
 
@@ -88,6 +88,13 @@ SENSITIVITY_STATES = (3, 5, 6)
 LOG_RV = "log_rv"
 #: The two segments of a fold's label path, in calendar order.
 SEGMENTS = ("train", "test")
+#: The lock's minimum-cell rule (§12.4): a state qualifies in a (fold, segment) block
+#: when it holds at least this many sessions and this many episodes there.
+MIN_CELL_SESSIONS = 63
+MIN_CELL_EPISODES = 3
+#: The lock's smoothing sensitivity (§12.13, from PLAN.md §f.4): a trailing mode over
+#: this many sessions of a fold's stamped path.
+SMOOTHING_WINDOW = 21
 
 
 def load_context_features(path: Path | None = None) -> pd.DataFrame:
@@ -416,6 +423,70 @@ def placebo_groups(paths: pd.Series) -> pd.Series:
     fold = paths.index.get_level_values("fold").astype(str)
     segment = paths.index.get_level_values("segment").astype(str)
     return pd.Series(fold + ":" + segment, index=paths.index, name="block")
+
+
+def qualifying_cells(
+    paths: pd.Series,
+    *,
+    min_sessions: int = MIN_CELL_SESSIONS,
+    min_episodes: int = MIN_CELL_EPISODES,
+) -> pd.DataFrame:
+    """Sessions and episodes of each state in each (fold, segment) block; does it qualify.
+
+    ``paths`` is :func:`session_paths` output, or a copy of it such as
+    :func:`trailing_mode`'s. Counts are taken on the **stamped** path of each block, so
+    a placebo that keeps every block's per-state sessions and episodes qualifies
+    exactly the same cells. A session with no label belongs to no state, and it still
+    separates the episodes on either side of it. Indexed by ``(fold, segment, state)``
+    for every state seen anywhere in ``paths``; a state absent from a block has zero
+    sessions and does not qualify.
+    """
+    labels = paths.dropna()
+    states = np.sort(labels.unique()).astype(np.int64)
+    rows = []
+    for (fold, segment), block in paths.groupby(level=["fold", "segment"], sort=False):
+        values = block.to_numpy(dtype=float)
+        coded = np.where(np.isfinite(values), values, -1.0).astype(np.int64)
+        _, run_states = run_lengths(coded)
+        for state in states:
+            sessions = int((coded == state).sum())
+            episodes_ = int((run_states == state).sum())
+            rows.append((fold, segment, int(state), sessions, episodes_))
+    table = pd.DataFrame(rows, columns=["fold", "segment", "state", "sessions", "episodes"])
+    table["qualifies"] = (table["sessions"] >= min_sessions) & (table["episodes"] >= min_episodes)
+    return table.set_index(["fold", "segment", "state"])
+
+
+def trailing_mode(paths: pd.Series, window: int = SMOOTHING_WINDOW) -> pd.Series:
+    """The lock's smoothing sensitivity: a trailing mode of each fold's stamped path.
+
+    Per fold, over its whole path (training sessions then test sessions, in the fold's
+    own numbering), session *t* takes the label seen most often on the ``window``
+    sessions ending at *t*, itself included; a tie goes to the smallest label. It is
+    applied to stamped labels, before any lag, so it reads nothing after *t*. The first
+    ``window - 1`` sessions of each path have no full window and read NaN, which a
+    consumer holds as its fallback; nothing is back-filled, and no window reaches into
+    another fold's path.
+    """
+    if window < 1:
+        raise ValueError("window must be at least one session")
+    if paths.isna().any():
+        raise ValueError("the stamped path must be fully labelled")
+    out = pd.Series(np.nan, index=paths.index, name=paths.name)
+    n_states = int(paths.max()) + 1
+    for fold in paths.index.get_level_values("fold").unique():
+        mask = paths.index.get_level_values("fold") == fold
+        values = paths.to_numpy()[mask].astype(np.int64)
+        one_hot = np.zeros((len(values) + 1, n_states), dtype=np.int64)
+        one_hot[np.arange(1, len(values) + 1), values] = 1
+        cumulative = one_hot.cumsum(axis=0)
+        if len(values) < window:
+            continue
+        counts = cumulative[window:] - cumulative[:-window]
+        mode = np.full(len(values), np.nan)
+        mode[window - 1:] = counts.argmax(axis=1)
+        out.iloc[np.flatnonzero(mask)] = mode
+    return out
 
 
 def eta_squared(labels: pd.Series, values: pd.Series) -> float:
