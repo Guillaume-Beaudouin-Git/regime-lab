@@ -31,6 +31,8 @@ volatilité d'une ligne, et confronté à 400 rotations aléatoires du régime (
 | **Stratégie seule** | **0,79** | +7,5 % | 9,4 % | −18,3 % | −7,0 % | +8,7 % | +5,8 % | +5,4 % |
 | (b) Réduction en stress | 0,82 | +7,2 % | 8,8 % | −18,3 % | −7,0 % | +7,1 % | +5,8 % | +5,4 % |
 | (c) Bascule vers la tendance | 0,75 | +7,0 % | 9,4 % | −18,3 % | −7,0 % | **+17,6 %** | +2,7 % | +5,4 % |
+| (a) Arrêt en stress *(ajouté après lecture)* | 0,81 | +7,0 % | 8,6 % | −18,3 % | −7,0 % | +5,2 % | +5,8 % | +5,4 % |
+| (a) avec la règle de volatilité | 0,53 | +3,5 % | 6,7 % | −10,8 % | −7,0 % | 0,0 % | 0,0 % | 0,0 % |
 | (b) avec la règle de volatilité | 0,74 | +5,5 % | 7,5 % | −14,4 % | −7,0 % | +4,5 % | +2,9 % | +2,7 % |
 | (c) avec la règle de volatilité | 0,40 | +3,9 % | 9,8 % | −19,2 % | −6,6 % | +15,6 % | −13,8 % | +27,5 % |
 | Livre de tendance seul | 0,41 | +4,3 % | 10,6 % | −29,6 % | −8,9 % | +18,1 % | −13,8 % | +27,5 % |
@@ -47,6 +49,15 @@ du 09/10/2007 au 09/03/2009, le Covid du 19/02 au 23/03/2020, et 2022 du 03/01 a
   bien (−0,058).
 - **Bascule : PAS UTILE.** Le Sharpe perd 0,047 (et 0,056 à 2 bp). Le résultat se situe
   au 56e percentile du placebo.
+- **Arrêt en stress : SOUS-PUISSANT, donc pas utile.** Ce couplage a été ajouté à la
+  demande de Guillaume **après** la lecture des deux premiers. Il est déclaré comme tel
+  (`f2a017a`), et son seuil est corrigé pour trois couplages, soit 0,05/3. Le Sharpe
+  gagne +0,013, alors que l'écart détectable est de 0,229. Le test HAC est de signe
+  opposé (t −0,70), le résultat se situe au 85e percentile du placebo, et la perte
+  maximale ne change pas. S'arrêter en 2008 **coûte** 3,5 points (+5,2 % contre +8,7 %),
+  parce que la stratégie y gagnait de l'argent. La même coupure avec la règle de
+  volatilité réduit la perte maximale (−10,8 %), mais divise presque le Sharpe par deux
+  (0,53), car elle coupe la stratégie la moitié du temps.
 
 ## Pourquoi : le mécanisme, mesuré
 
