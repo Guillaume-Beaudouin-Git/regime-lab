@@ -46,6 +46,7 @@ every window, a table missing a signal) raise instead.
 
 from __future__ import annotations
 
+import dataclasses
 import hashlib
 import itertools
 import json
@@ -166,6 +167,10 @@ PINNED_PACKAGES: tuple[str, ...] = (
 )
 THRESHOLDS_FILE = "docs/artifacts/twosigma/thresholds.json"
 THRESHOLDS_PATH = ROOT / THRESHOLDS_FILE
+#: How an instrument printout, and so the threshold file, writes a value that is not
+#: finite or not determined (§13.4): as this string, never as a number. The three levels
+#: share it, so that a lock UNDECIDABLE before its reading is recorded the same way.
+NON_FINITE = "non-finite"
 
 #: §13.5: the trial family and the fixed configuration fields.
 TRIAL_FAMILY = "twosigma"
@@ -422,6 +427,34 @@ if len(DECLARED_ROWS) != protocol.DECLARED_EVALUATIONS:  # pragma: no cover - im
     raise ImportError("the declared rows do not number the §7 count")
 
 
+def section_name(level: str, variant: Variant) -> str:
+    """The threshold file's section of one level's instrument at one variant (§13.1 step 3).
+
+    ``A``, ``B`` or ``C`` for the primary; ``<level>:<variant>`` for a §12.13 sensitivity
+    (``A:K=3``, ``B:smooth21``, ``A:d=0.25``). The PIT rebuild has none: its thresholds are
+    computed at the reading and never committed (§8 control 5).
+    """
+    if level not in LEVEL_LOCKS:
+        raise ValueError(f"not a level of the tree: {level!r}")
+    if variant.role == "control":
+        raise ValueError("the PIT rebuild's thresholds are not committed (§8 control 5)")
+    return level if variant.role == "primary" else f"{level}:{variant.name}"
+
+
+def pit_variant(variant: Variant) -> Variant:
+    """The §8 control-5 rebuild of ``variant``: the 18 features without ``fin_nfci`` and
+    ``fin_nfci_chg13w``, the same K, smoothing and d (``n_init``, seed, folds and training
+    start are fixed in :func:`partition_paths`). :data:`PIT18` for the primary. A
+    sensitivity's would-be PASS is rebuilt at its own K, smoothing and d, since §12.13
+    reruns "each level's full evaluation" there; the rebuild only downgrades."""
+    if variant.role == "control":
+        raise ValueError(f"{variant.name} is already the PIT rebuild (§8 control 5)")
+    if (variant.partition_key, variant.d) == (PRIMARY.partition_key, PRIMARY.d):
+        return PIT18
+    return dataclasses.replace(variant, name=f"{PIT18.name}[{variant.name}]",
+                               features=PIT_FEATURES, role="control")
+
+
 # ---------------------------------------------------------------------------------------
 # paths — §12.2, §12.4, §12.8, §12.13
 # ---------------------------------------------------------------------------------------
@@ -640,7 +673,10 @@ class PlaceboDraws:
     paths' index) and -1 where the real path is unlabelled (the smoothed paths' first
     20 sessions per fold, left out of every block, §12.11, §12.13). ``check`` is
     ``analysis.placebo.check_placebos`` on the labelled rows; ``exact`` must hold or every
-    lock using the placebo is UNDECIDABLE (§12.11).
+    lock using the placebo is UNDECIDABLE (§12.11). ``source`` is
+    :func:`paths_fingerprint` of the stamped path the draws were made on: two partitions
+    over the same sessions share one index, so the index alone cannot tell which path a
+    set of draws belongs to (:meth:`drawn_on`, :func:`check_draws`).
     """
 
     index: pd.MultiIndex
@@ -648,6 +684,7 @@ class PlaceboDraws:
     check: PlaceboCheck
     seed: int
     method: str = PLACEBO_METHOD
+    source: str = ""
 
     @property
     def n(self) -> int:
@@ -656,6 +693,10 @@ class PlaceboDraws:
     @property
     def exact(self) -> bool:
         return self.check.exact
+
+    def drawn_on(self, paths: pd.Series) -> bool:
+        """Were these draws made on ``paths`` (same index, same stamped labels)?"""
+        return bool(self.index.equals(paths.index) and self.source == paths_fingerprint(paths))
 
     def draw(self, j: int) -> pd.Series:
         """Draw ``j`` as a paths Series in the real paths' format (same index, NaN where
@@ -669,6 +710,27 @@ class PlaceboDraws:
     def __repr__(self) -> str:
         return (f"PlaceboDraws({self.n} draws, method={self.method!r}, seed={self.seed}, "
                 f"exact={self.exact})")
+
+
+def paths_fingerprint(paths: pd.Series) -> str:
+    """SHA-256 of a stamped path's labels in row order (unlabelled rows as -1); with the
+    index, it fixes the path a set of placebo draws was made on."""
+    values = paths.to_numpy(float)
+    codes = np.where(np.isfinite(values), values, -1.0).astype(np.int64)
+    return hashlib.sha256(np.ascontiguousarray(codes).tobytes()).hexdigest()
+
+
+def check_draws(draws: PlaceboDraws, paths: pd.Series) -> PlaceboDraws:
+    """Refuse draws that are not §12.11's on ``paths``: made on another path, not
+    ``method="uniform"``, or not at seed 0. Returns ``draws``."""
+    if not isinstance(draws, PlaceboDraws):
+        raise TypeError("draws must be a PlaceboDraws")
+    if not draws.drawn_on(paths):
+        raise ValueError("the placebo draws were not drawn on these paths")
+    if draws.method != PLACEBO_METHOD or draws.seed != PLACEBO_SEED:
+        raise ValueError(f"the placebo must be {PLACEBO_METHOD!r} at seed {PLACEBO_SEED} "
+                         "(§12.11)")
+    return draws
 
 
 def placebo_draws(paths: pd.Series, n: int = N_DRAWS, seed: int = PLACEBO_SEED) -> PlaceboDraws:
@@ -700,7 +762,8 @@ def placebo_draws(paths: pd.Series, n: int = N_DRAWS, seed: int = PLACEBO_SEED) 
     check = check_placebos(real, drawn.draws, groups=groups)
     codes = np.full((len(paths), n), -1, dtype=np.int8)
     codes[labelled.to_numpy()] = drawn.draws.to_numpy().astype(np.int8)
-    return PlaceboDraws(index=paths.index, codes=codes, check=check, seed=seed)
+    return PlaceboDraws(index=paths.index, codes=codes, check=check, seed=seed,
+                        source=paths_fingerprint(paths))
 
 
 # ---------------------------------------------------------------------------------------
@@ -1533,7 +1596,84 @@ def git_head(root: Path = ROOT) -> str:
     return result.stdout.strip()
 
 
+def is_tracked(path: Path, root: Path = ROOT) -> bool:
+    """Is ``path`` tracked by git at ``root`` (``git ls-files --error-unmatch``)? The
+    instrument refuses to rewrite a threshold file that is (§13.1 step 1)."""
+    relative = Path(path).resolve().relative_to(Path(root).resolve()).as_posix()
+    return _git(Path(root), "ls-files", "--error-unmatch", "--", relative).returncode == 0
+
+
+def require_committed(path: Path, root: Path = ROOT, *, what: str = "the file") -> str:
+    """Refuse (:class:`ReadingRefused`) unless ``path`` exists, is tracked by git
+    (``git ls-files --error-unmatch``) and is identical to its HEAD version
+    (``git diff --quiet HEAD``, staged or not). Returns its path relative to ``root``."""
+    root, path = Path(root), Path(path)
+    if not path.exists():
+        raise ReadingRefused(f"no file at {path.name}: {what} come first")
+    relative = path.resolve().relative_to(root.resolve()).as_posix()
+    if not is_tracked(path, root):
+        raise ReadingRefused(f"{relative} is not tracked by git: commit {what} first")
+    if _git(root, "diff", "--quiet", "HEAD", "--", relative).returncode != 0:
+        raise ReadingRefused(f"{relative} differs from its committed version at HEAD")
+    return relative
+
+
 _FLOAT_KEY = "float.hex"
+
+
+def printable(value: Any) -> Any:
+    """An instrument printout as plain JSON types that :func:`encode_thresholds` accepts.
+
+    A float that is not finite, and an undetermined value (``None``, e.g. a kill whose
+    inputs are not finite), become :data:`NON_FINITE`: the file records that the lock is
+    UNDECIDABLE before its reading, never a number (§13.4). numpy scalars become Python
+    ones and mapping keys strings. Shared by the three levels.
+    """
+    if value is None:
+        return NON_FINITE
+    if isinstance(value, bool | np.bool_):
+        return bool(value)
+    if isinstance(value, int | np.integer):
+        return int(value)
+    if isinstance(value, float | np.floating):
+        x = float(value)
+        return x if math.isfinite(x) else NON_FINITE
+    if isinstance(value, str):
+        return value
+    if isinstance(value, Mapping):
+        return {str(k): printable(v) for k, v in value.items()}
+    if isinstance(value, list | tuple):
+        return [printable(v) for v in value]
+    raise TypeError(f"cannot print {type(value).__name__}")
+
+
+def plain(value: Any) -> Any:
+    """A reading as plain JSON types, for the reading artifact the Holm step reads back.
+
+    numpy scalars become Python ones (a numpy bool never becomes a string), arrays and
+    tuples lists, mapping keys strings, dataclass instances dicts. A float that is not
+    finite **stays** a float: ``json`` writes it ``NaN`` and reads it back as NaN, so a
+    verdict recomputed from the artifact is UNDECIDABLE exactly where the reading's was.
+    ``repr``-exact floats make the round trip bitwise.
+    """
+    if value is None or isinstance(value, str):
+        return value
+    if isinstance(value, bool | np.bool_):
+        return bool(value)
+    if isinstance(value, int | np.integer):
+        return int(value)
+    if isinstance(value, float | np.floating):
+        return float(value)
+    if dataclasses.is_dataclass(value) and not isinstance(value, type):
+        return {f.name: plain(getattr(value, f.name)) for f in dataclasses.fields(value)}
+    if isinstance(value, Mapping):
+        return {str(k): plain(v) for k, v in value.items()}
+    if isinstance(value, np.ndarray):
+        return [plain(v) for v in value.tolist()]
+    if isinstance(value, list | tuple | frozenset | set):
+        items = sorted(value) if isinstance(value, frozenset | set) else value
+        return [plain(v) for v in items]
+    raise TypeError(f"cannot store {type(value).__name__} in a reading artifact")
 
 
 def encode_thresholds(value: Any, where: str = "") -> Any:
@@ -1661,11 +1801,7 @@ def verify_for_reading(
     root, path = Path(root), Path(path)
     if not path.exists():
         raise ReadingRefused(f"no threshold file at {path.name}: the instruments come first")
-    relative = path.resolve().relative_to(root.resolve()).as_posix()
-    if _git(root, "ls-files", "--error-unmatch", "--", relative).returncode != 0:
-        raise ReadingRefused(f"{relative} is not tracked by git: commit the thresholds first")
-    if _git(root, "diff", "--quiet", "HEAD", "--", relative).returncode != 0:
-        raise ReadingRefused(f"{relative} differs from its committed version at HEAD")
+    require_committed(path, root, what="the thresholds")
     stored = json.loads(path.read_text())
     hashes = input_hashes(root, inputs)
     if stored.get("inputs") != hashes:
