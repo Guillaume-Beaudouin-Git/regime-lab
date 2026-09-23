@@ -86,6 +86,9 @@ from regime_lab.selection.tree import (
 Emit = Callable[[str], None]
 
 LEVELS: tuple[str, ...] = ("A", "B", "C")
+#: The primary rows each level's reading logs (§13.5).
+LEVEL_TESTS: dict[str, tuple[str, ...]] = {"A": ("A-1", "A-2"), "B": ("B-1", "B-2"),
+                                           "C": ("C-1", "C-2")}
 MODULES: dict[str, Any] = {"A": level_a, "B": level_b, "C": level_c}
 TITLES = {
     "A": "level A — the first-moment channel (§6, §12.5-§12.7)",
@@ -318,6 +321,36 @@ r"""- **At every level:**
 # ---------------------------------------------------------------------------------------
 
 
+#: Every committed file a reading executes or depends on. Amendment of 2026-09-23
+#: (``docs/PROTOCOL_FREEZE.md``): two Claude sessions share this working tree, and the
+#: bitwise check of §13.1 step 4 covers the instrument's outputs only, so an uncommitted
+#: edit to reading-only code (verdict lines, Holm, rows) would otherwise pass unseen. A
+#: reading refuses unless each of these is tracked and identical to HEAD.
+CODE_FILES: tuple[str, ...] = (
+    "pyproject.toml",
+    "uv.lock",
+    "regime_lab/config.py",
+    "regime_lab/data/pit.py",
+    "regime_lab/data/sources/kenfrench.py",
+    "regime_lab/analysis/bootstrap.py",
+    "regime_lab/analysis/placebo.py",
+    "regime_lab/analysis/power.py",
+    "regime_lab/analysis/trials.py",
+    "regime_lab/extensions/trend.py",
+    "regime_lab/extensions/vehicle.py",
+    "regime_lab/selection/__init__.py",
+    "regime_lab/selection/context.py",
+    "regime_lab/selection/folds.py",
+    "regime_lab/selection/library.py",
+    "regime_lab/selection/protocol.py",
+    "regime_lab/selection/tree.py",
+    "regime_lab/selection/level_a.py",
+    "regime_lab/selection/level_b.py",
+    "regime_lab/selection/level_c.py",
+    "scripts/run_twosigma_tree.py",
+)
+
+
 @dataclass(frozen=True)
 class Setup:
     """Where the tree reads and writes, and the constants it runs at.
@@ -333,6 +366,7 @@ class Setup:
     boot_draws: int = BOOT_DRAWS
     workers: int | None = None
     trials_path: Path = field(default=trials.TRIALS)
+    code_files: tuple[str, ...] = CODE_FILES
 
     @property
     def thresholds(self) -> Path:
@@ -344,6 +378,28 @@ class Setup:
     @property
     def lock_constants(self) -> bool:
         return (self.draws, self.boot_draws) == (N_DRAWS, BOOT_DRAWS)
+
+    def require_code(self) -> str:
+        """Refuse unless every :data:`CODE_FILES` entry is tracked and identical to HEAD;
+        return HEAD, which the reading artifact records (amendment of 2026-09-23)."""
+        for relative in self.code_files:
+            tree.require_committed(self.path(relative), self.root,
+                                   what="the code a reading runs (amendment of 2026-09-23)")
+        return tree.git_head(self.root)
+
+    def refuse_logged(self, tests: Sequence[str], variant: str) -> None:
+        """Refuse up front, before anything is computed, if the register already holds a
+        ``twosigma`` row for one of ``tests`` at ``variant``: a second reading is a
+        protocol breach (§13.5; amendment of 2026-09-23 — ``tree.log_trial`` checks the
+        same thing, but only after the statistics are computed)."""
+        frame = trials.read(self.trials_path)
+        if frame.empty or "family" not in frame:
+            return
+        for raw in frame.loc[frame["family"] == tree.TRIAL_FAMILY, "config"]:
+            row = json.loads(raw)
+            if row.get("test") in tests and row.get("variant") == variant:
+                raise ReadingRefused(f"({row.get('test')}, {variant}) is already in the "
+                                     "register: a second reading is a protocol breach")
 
     def check_register(self) -> None:
         """Refuse to log to the real register at anything but the lock's constants."""
@@ -737,7 +793,9 @@ def instrument_markdown_c(printouts: Mapping[str, Mapping[str, Any]]) -> str:
         nulls.append((f"`{section}`", fmt(null["q20"], 3), fmt(null["q50"], 3),
                       fmt(null["q95"], 3), fmt(null["q99"], 3), f"**{fmt(p['MDE_C'], 3)}**",
                       f"**{fmt(p['S_star'], 3)}**", fmt(p["powered"]),
-                      fmt(null["non_finite"])))
+                      " / ".join(fmt(null[k]) for k in ("below_zero", "at_zero",
+                                                        "above_zero")),
+                      fmt(null["atom_share"], 3), fmt(null["non_finite"])))
     first = next(iter(printouts.values()))
     draws, _, _ = _run_sizes(printouts)
     return "\n".join([
@@ -770,11 +828,17 @@ def instrument_markdown_c(printouts: Mapping[str, Mapping[str, Any]]) -> str:
         "",
         "### C-1: the null, MDE_C and S* (§12.10 \"Resolution and power\")",
         "",
-        "`MDE_C = q99 − q20`; `S* = 0.05 × σ_twin × 10,000 / 5`. If `MDE_C ≤ S*` "
-        "(\"powered\"), a C-1 that does not hold reads FAIL; otherwise NOT SHOWN.",
+        "`MDE_C = q99 − q20`; `S* = 0.05 × σ_twin × 10,000 / 5`. **Amendment of "
+        "2026-09-23** (`docs/PROTOCOL_FREEZE.md`, before any reading): the power claim "
+        "holds (\"powered\") only if `0 < MDE_C ≤ S*` **and** no single value takes 20% "
+        "or more of the draws (\"atom share\"); a C-1 that does not hold then reads "
+        "FAIL, otherwise NOT SHOWN. An atom makes `q99 − q20` measure no shift. C-1 holds "
+        "only if `p ≤ 0.01`, Holm rejects, the gate holds **and** `S_C ≥ S*`: with an atom "
+        "null the placebo bar alone would let any positive saving through. The draws "
+        "column counts the finite `S^(j)` below, at and above zero.",
         "",
         table(("section", "q20", "q50", "q95", "q99", "MDE_C", "S*", "powered",
-               "non-finite draws"), nulls),
+               "draws < 0 / = 0 / > 0", "atom share", "non-finite draws"), nulls),
     ])
 
 
@@ -913,11 +977,13 @@ def run_read(level: str, data: TreeData, setup: Setup, *, emit: Emit = print) ->
     if previous is not None:
         tree.require_committed(setup.path(READING_FILE.format(level=previous)), setup.root,
                                what=f"the reading of level {previous}")
+    head = setup.require_code()
+    setup.refuse_logged(LEVEL_TESTS[level], PRIMARY.name)
     setup.check_register()
-    emit(f"packages pinned by uv.lock: {tree.locked_versions(setup.root)}")
+    emit(f"code at HEAD {head}; packages pinned by uv.lock: {tree.locked_versions(setup.root)}")
     reading = read_level(level, data, PRIMARY, setup)
     rows = reading["trial_rows"]
-    stored = {"reading": tree.plain(reading), "rows_logged": False}
+    stored = {"reading": tree.plain(reading), "rows_logged": False, "git_head": head}
     _write_json(artifact, stored)
     _log_rows(rows, PRIMARY, setup)
     stored["rows_logged"] = True
@@ -1144,6 +1210,7 @@ def run_holm(setup: Setup, *, emit: Emit = print) -> dict[str, Any]:
     (p := 1 where §13.3 sets it), then each level's final verdicts through its module's
     ``lock_verdicts`` with the rejected set (§13.2). Writes ``holm.json`` and
     ``docs/RESULTS_TWOSIGMA.md``; logs nothing (§13.5)."""
+    setup.require_code()
     readings = {}
     for level in LEVELS:
         stored = _load_committed(setup.path(READING_FILE.format(level=level)), setup.root,
@@ -1241,6 +1308,7 @@ def run_sensitivities(
     labels. Resumable: sections already in ``sensitivities.json`` are not read again."""
     holm = _load_committed(setup.path(HOLM_FILE), setup.root, "the Holm step")
     primary_levels: dict[str, str] = holm["levels"]
+    head = setup.require_code()
     setup.check_register()
     artifact = setup.path(SENSITIVITY_FILE)
     done: dict[str, Any] = json.loads(artifact.read_text()) if artifact.exists() else {}
@@ -1252,12 +1320,14 @@ def run_sensitivities(
             if section in done:
                 raise ReadingRefused(f"{section} was read but its rows were not all logged: "
                                      "resolve by hand before going on")
+            setup.refuse_logged(("A-1",) if variant.levels == ("A-1",) else (level,),
+                                variant.name)
             reading = read_level(level, data, variant, setup)
             rows = MODULES[level].trial_rows(reading, variant,
                                              primary_level=primary_levels[level])
             done[section] = {"variant": variant.name, "level": level,
                              "reading": tree.plain(reading), "rows": tree.plain(rows),
-                             "rows_logged": False}
+                             "rows_logged": False, "git_head": head}
             _write_json(artifact, done)
             _log_rows(rows, variant, setup)
             done[section]["rows_logged"] = True

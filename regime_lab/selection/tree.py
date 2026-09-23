@@ -1215,12 +1215,16 @@ DOWNGRADED_PIT = "DOWNGRADED (PIT)"
 DOMINATED = "DOMINATED"
 DOMINATED_VOLATILITY = "DOMINATED (volatility)"
 PASS_NOT_ROBUST = "PASS (not robust)"
+#: C-2's row label (amendment of 2026-09-23, ``docs/PROTOCOL_FREEZE.md``): C-2 is a bound
+#: "reported as a bound and never as a PASS", with ``p := 1`` (§6, §12.10, §13.3); it is
+#: not a test, so it logs neither FAIL nor UNDERPOWERED. It enters no level verdict.
+BOUND = "BOUND"
 #: Every lock verdict the lock writes (§12.6 lines 1-10 use "DOMINATED (volatility)",
-#: §12.7, §12.8 and §12.10 "DOMINATED").
+#: §12.7, §12.8 and §12.10 "DOMINATED"), and C-2's BOUND.
 LOCK_VERDICTS: frozenset[str] = frozenset({
     PASS, FAIL, FAIL_COST, UNDECIDABLE, UNDECIDED, UNDERPOWERED, NOT_SHOWN,
     DOWNGRADED_BETA, DOWNGRADED_NOT_CONDITIONAL, DOWNGRADED_PIT, DOMINATED,
-    DOMINATED_VOLATILITY,
+    DOMINATED_VOLATILITY, BOUND,
 })
 #: §13.2: a level that does not pass takes the first of these among its locks.
 LEVEL_PRECEDENCE: tuple[str, ...] = (
@@ -1328,6 +1332,7 @@ def placebo_verdict(
     gate_failed: bool | None = False,
     powered: bool = False,
     other_undecidable: bool = False,
+    minimum: float | None = None,
 ) -> str:
     """The verdict of a placebo lock — A-2 (§12.7), B-1 (§12.8), C-1 (§12.10) — before PIT.
 
@@ -1335,19 +1340,25 @@ def placebo_verdict(
     placebo check is not exact, ``dominated`` or ``gate_failed`` is unknown, or
     ``other_undecidable`` (cells below the floor, a pooled matrix not positive definite, a
     leg missing). Then FAIL if C-1's gate failed. The lock holds if p ≤ 0.01 and Holm
-    rejects (default: the provisional p ≤ 0.05/6); if it does not hold, FAIL when the
-    instrument measured power before the reading (C-1 with MDE_C ≤ S*: ``powered``),
-    NOT SHOWN otherwise. A lock that holds is DOMINATED when ``dominated`` (A-2:
-    R_W ≥ R; B-1: not both witnesses beaten at 0.05; C-1: S_W ≥ S_C), else PASS, to be
-    passed through :func:`apply_pit`.
+    rejects (default: the provisional p ≤ 0.05/6) and, when ``minimum`` is given, the
+    statistic is at least ``minimum`` (C-1: ``S_C ≥ S*``, amendment of 2026-09-23 in
+    ``docs/PROTOCOL_FREEZE.md``: the C-1 null is an atom at zero, so the placebo bar alone
+    would let any positive saving through, however small). If it does not hold, FAIL when
+    the instrument measured power before the reading (``powered``), NOT SHOWN otherwise.
+    A lock that holds is DOMINATED when ``dominated`` (A-2: R_W ≥ R; B-1: not both
+    witnesses beaten at 0.05; C-1: S_W ≥ S_C), else PASS, to be passed through
+    :func:`apply_pit`.
     """
     if (other_undecidable or not exact or dominated is None or gate_failed is None
             or not _finite(statistic, p)):
         return UNDECIDABLE
+    if minimum is not None and not _finite(minimum):
+        return UNDECIDABLE
     if gate_failed:
         return FAIL
     rejected = p <= BONFERRONI if holm_rejected is None else holm_rejected
-    if not (p <= PLACEBO_P_BAR and rejected):
+    large_enough = minimum is None or statistic >= minimum
+    if not (p <= PLACEBO_P_BAR and rejected and large_enough):
         return FAIL if powered else NOT_SHOWN
     if dominated:
         return DOMINATED

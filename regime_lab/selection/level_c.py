@@ -35,7 +35,8 @@ Agreement between the two implementations is asserted at every instrument and re
 the state-blind books (the twin and the menu) and the conditional arms of the placebo
 draws; it reads the real partition's labels only to count cells. It returns the twin's
 held turnover, mean δ and σ, the menu's turnover, the control's cap share, the counts,
-the null's percentiles, ``MDE_C`` and ``S*``, and nothing else. It never builds the
+the null's percentiles and the counts of its draws below, at and above zero, ``MDE_C``
+and ``S*``, and nothing else. It never builds the
 conditional arm on the real partition and never computes ``h_fk``, ``S_C`` or the gate.
 :func:`read` computes those, and refuses to run unless :func:`tree.verify_for_reading`
 passes (thresholds committed and unmodified at HEAD, input SHA-256 and package versions
@@ -72,9 +73,9 @@ from regime_lab.config import ROOT
 from regime_lab.selection import protocol, tree
 from regime_lab.selection.tree import (
     BONFERRONI,
+    BOUND,
     COST_COLUMNS,
     DECIDING_BPS,
-    FAIL,
     INPUT_FILES,
     N_DRAWS,
     PASS,
@@ -82,7 +83,6 @@ from regime_lab.selection.tree import (
     PRIMARY,
     THRESHOLDS_PATH,
     UNDECIDABLE,
-    UNDERPOWERED,
     BookResult,
     Cells,
     NullSummary,
@@ -119,6 +119,11 @@ MAX_H = max(H_MENU)
 BISECTION_STEPS = 100
 #: §12.10 "Resolution and power": the saving worth 0.05 Sharpe at 5 bp.
 S_STAR_SHARPE = 0.05
+#: Amendment of 2026-09-23 (``docs/PROTOCOL_FREEZE.md``), made before any reading: the
+#: location-shift power claim ``MDE_C = q99 − q20 ≤ S*`` is valid only when no single
+#: value holds this share of the null's draws. At or above it the null is (largely) an
+#: atom, ``q99 − q20`` measures no shift, and power is declared unmeasured.
+ATOM_SHARE = 0.20
 #: §12.10 "Level C's verdict is C-1's"; C-2 is a bound, entering Holm with p := 1.
 LEVEL = "C"
 C2_P = 1.0
@@ -800,6 +805,43 @@ def s_star(sigma_twin: float) -> float:
     return S_STAR_SHARPE * sigma_twin * 10_000.0 / DECIDING_BPS if _finite(sigma_twin) else NAN
 
 
+def atom_share(null: np.ndarray) -> float:
+    """The largest share of the null's draws taken by one single value; NaN if a draw is
+    not finite or there is none. An atom is what makes ``q99 − q20`` meaningless."""
+    values = np.asarray(null, dtype=float)
+    if values.size == 0 or not np.isfinite(values).all():
+        return NAN
+    _, counts = np.unique(values, return_counts=True)
+    return float(counts.max() / values.size)
+
+
+def powered(mde_c: float, s_star: float, atom: float) -> bool:
+    """Whether C-1's instrument measured a power of at least 0.80 against ``S*`` before
+    the reading (§12.10 "Resolution and power", §13.2).
+
+    The lock's test is ``MDE_C ≤ S*``, ``MDE_C = q99 − q20`` being the location shift of
+    the null that puts 80% of it above its 99th percentile. **Amendment of 2026-09-23**
+    (``docs/PROTOCOL_FREEZE.md``, made before any reading): that model describes a null
+    without an atom. On content-free labels the λ rule and its training check hold the
+    twin in every fold, so every ``S^(j)`` is exactly 0 and ``MDE_C = 0``: the model then
+    measures nothing. ``powered`` therefore requires ``0 < MDE_C ≤ S*`` **and**
+    ``atom < ATOM_SHARE`` (no single value holds 20% of the draws). Otherwise power is
+    unmeasured, and a C-1 that does not hold reads NOT SHOWN, never FAIL. False on a
+    non-finite value."""
+    return bool(_finite(mde_c, s_star, atom) and 0.0 < mde_c <= s_star and atom < ATOM_SHARE)
+
+
+def null_signs(null: np.ndarray) -> dict[str, int]:
+    """The count of finite placebo draws ``S^(j)`` below, at and above zero. Amendment of
+    2026-09-23 (``docs/PROTOCOL_FREEZE.md``): printed beside the percentiles of §13.1
+    step 2 so that the committed record shows an atom of the null; it describes the null
+    only (content-free partitions) and reads nothing of the real partition."""
+    values = np.asarray(null, dtype=float)
+    finite = values[np.isfinite(values)]
+    return {"below_zero": int((finite < 0).sum()), "at_zero": int((finite == 0).sum()),
+            "above_zero": int((finite > 0).sum())}
+
+
 def c2_bound(saving: float, sigma_twin: float, bps: float) -> float:
     """C-2: ``S_C × bps / 10,000 / σ_twin``, a Sharpe bound, never a PASS (§12.10)."""
     if not _finite(saving, sigma_twin) or not sigma_twin > 0:
@@ -816,6 +858,7 @@ def c1_verdict(
     s_w: float,
     mde_c: float,
     s_star: float,
+    atom: float,
     leg_missing: bool,
     holm_rejected: bool | None = None,
 ) -> str:
@@ -825,13 +868,15 @@ def c1_verdict(
       check not exact, a leg missing on a test session, or a non-finite instrument or
       real reading (``MDE_C``, ``S*``, a mean δ of the gate, ``S_W``) (§13.4);
     - FAIL: the gate fails (the conditional arm's mean test δ exceeds the twin's);
-    - the lock holds if ``p ≤ 0.01`` and Holm rejects (default: the provisional
-      ``p ≤ 0.05/6`` of §13.3); if not, FAIL when ``MDE_C ≤ S*``, else NOT SHOWN;
+    - the lock holds if ``p ≤ 0.01``, Holm rejects (default: the provisional
+      ``p ≤ 0.05/6`` of §13.3) **and** ``S_C ≥ S*`` (amendment of 2026-09-23: with an
+      atom null the placebo bar alone tests no size); if not, FAIL when :func:`powered`,
+      else NOT SHOWN;
     - DOMINATED: the lock holds and ``S_W ≥ S_C``;
     - PASS otherwise, to be passed through ``tree.apply_pit`` (the lock rebuilt on the
       18-feature partition must hold with its own witness and gate).
     """
-    instrument_finite = _finite(mde_c, s_star)
+    instrument_finite = _finite(mde_c, s_star, atom)
     return placebo_verdict(
         statistic=s_c,
         p=p,
@@ -839,21 +884,22 @@ def c1_verdict(
         dominated=bool(s_w >= s_c) if _finite(s_w, s_c) else None,
         holm_rejected=holm_rejected,
         gate_failed=None if gate is None else not gate,
-        powered=bool(instrument_finite and mde_c <= s_star),
+        powered=powered(mde_c, s_star, atom),
         other_undecidable=bool(leg_missing or not instrument_finite),
+        minimum=s_star,
     )
 
 
 def c2_verdict(bound5: float) -> str:
-    """The C-2 row's verdict. The lock gives C-2 no verdict line, only "reported as a bound
-    and never as a PASS" with ``p_C2 := 1`` (§6, §12.10, §13.3); this is its plainest
-    reading: UNDECIDABLE on a non-finite bound, FAIL when the saving is not positive (as
-    §12.6 line 3 reads Δ ≤ 0), UNDERPOWERED otherwise — a positive Sharpe bound that §6
-    declared below any decidable bar (the control's whole cost, 0.18 to 0.23, is below
-    0.338). It enters no level verdict (§12.10 "Level C's verdict is C-1's")."""
+    """The C-2 row's label. The lock gives C-2 no verdict line, only "reported as a bound
+    and never as a PASS" with ``p_C2 := 1`` (§6, §12.10, §13.3). Amendment of 2026-09-23
+    (``docs/PROTOCOL_FREEZE.md``): C-2 is not a test, so its row logs ``BOUND`` whatever
+    the sign of the bound (the bound itself is the row's ``delta``), and UNDECIDABLE only
+    on a non-finite bound. It enters no level verdict (§12.10 "Level C's verdict is
+    C-1's")."""
     if not _finite(bound5):
         return UNDECIDABLE
-    return FAIL if bound5 <= 0 else UNDERPOWERED
+    return BOUND
 
 
 def pit_variant(variant: Variant) -> Variant:
@@ -956,7 +1002,8 @@ def _instrument(
     summary = null_summary(null)
     sigma_twin = twin.sigma
     star = s_star(sigma_twin)
-    powered = bool(_finite(summary.mde_c, star) and summary.mde_c <= star)
+    atom = atom_share(null)
+    is_powered = powered(summary.mde_c, star, atom)
     non_finite = int((~np.isfinite(null)).sum())
     reasons = []
     if not draws.exact:
@@ -991,10 +1038,11 @@ def _instrument(
         "menu_turnover": {str(h): space.turnover(space.menu_tau[i])
                           for i, h in enumerate(H_MENU)},
         "control_cap_share": setup.control.cap_share,
-        "null": {**summary.as_dict(), "non_finite": non_finite},
+        "null": {**summary.as_dict(), "non_finite": non_finite, **null_signs(null),
+                 "atom_share": atom},
         "MDE_C": summary.mde_c,
         "S_star": star,
-        "powered": powered,
+        "powered": is_powered,
         "undecidable": reasons,
     }
     return _Instrument(variant, _clean(printout), null, summary, sigma_twin, star,
@@ -1023,10 +1071,14 @@ def instrument(
       sd of its 5 bp net daily excess returns there) and its test sessions without one;
     - ``menu_turnover``: the held turnover of each state-blind book, test sessions;
     - ``control_cap_share``: the share of test sessions on which the control's cap binds;
-    - ``null``: q20, q50, q95, q99, ``q99 − q50`` and ``q99 − q20`` of ``S^(·)``, and the
-      count of non-finite draws;
+    - ``null``: q20, q50, q95, q99, ``q99 − q50`` and ``q99 − q20`` of ``S^(·)``, the
+      count of non-finite draws, the counts of finite draws below, at and above zero
+      (:func:`null_signs`) and the largest share of draws at one value
+      (:func:`atom_share`) — both added by the amendment of 2026-09-23;
     - ``MDE_C = q99 − q20``, ``S_star = 0.05 × σ_twin × 10,000 / 5`` and ``powered``
-      (``MDE_C ≤ S*``: a C-1 that does not hold then reads FAIL, otherwise NOT SHOWN);
+      (:func:`powered`: ``0 < MDE_C ≤ S*`` and no atom of 20% or more; a C-1 that does
+      not hold then reads FAIL, otherwise NOT SHOWN). ``S*`` is also the size C-1's
+      saving must reach for the lock to hold (amendment of 2026-09-23);
     - ``undecidable``: why C-1 is UNDECIDABLE before its reading (§13.4), if it is.
 
     A non-finite value is written ``non-finite``, never as a number. It computes no
@@ -1120,7 +1172,8 @@ def _c1_reading(
     if leg_missing:
         causes.append("a leg is missing on a test session")
     inputs = {"s_c": arm.saving, "p": p, "exact": inst.exact, "gate": gate, "s_w": s_w,
-              "mde_c": inst.summary.mde_c, "s_star": inst.s_star, "leg_missing": leg_missing}
+              "mde_c": inst.summary.mde_c, "s_star": inst.s_star,
+              "atom": atom_share(inst.null), "leg_missing": leg_missing}
     return {
         "read": True,
         "S_C": arm.saving,
