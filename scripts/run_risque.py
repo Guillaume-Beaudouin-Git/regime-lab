@@ -486,6 +486,9 @@ def read(p: dict, inst: dict) -> None:
           f"{ev.max():%Y-%m-%d}\n")
     print("   rotation placebo: 400 draws, every forecast refitted on each ...", flush=True)
     null = rotation_draws(p)
+    # Trials are logged together at the end, so that a failure mid-reading cannot leave
+    # a partial set of rows that a second run would then duplicate.
+    pending: list[tuple[dict, dict]] = []
 
     # ---------------- forecast panels ----------------
     print(f"\n{RULE}\nA.  THE FORECAST PANELS — mean QLIKE per market-session\n")
@@ -531,8 +534,7 @@ def read(p: dict, inst: dict) -> None:
         print(f"        => {v}")
         verdicts[code] = v
         base_q = rows[code][base]
-        trials.log(
-            FAMILY,
+        pending.append((
             {"test": code, "panel": panel, "markets": len(members), "base": base,
              "addition": "A' sparse jump stress dummy, filtered, known at t",
              "target": "log forward 21-session realised variance", "loss": "QLIKE",
@@ -543,7 +545,7 @@ def read(p: dict, inst: dict) -> None:
              "t_hac": t, "t_nonoverlap_hac6": t6, "placebo_pct": pct,
              "delta_median_rule": d_med, "delta_tail_rule": d_tail,
              "folds_positive": positive, "sessions": int(len(d)), "verdict": v},
-        )
+        ))
 
     # ---------------- per market ----------------
     print(f"\n{RULE}\nC.  PER MARKET — DM t (HAC 21) of QLIKE(base) - QLIKE(base+state), Holm "
@@ -572,15 +574,14 @@ def read(p: dict, inst: dict) -> None:
               f"{int(table['worse'].sum())}, positive delta {int(table['positive'].sum())}/46")
         print("   " + summary.to_string().replace("\n", "\n   "))
         print()
-        trials.log(
-            FAMILY,
+        pending.append((
             {"test": f"per_market_{base}", "markets": 46, "base": base,
              "correction": f"Holm {HOLM_ALPHA} over 46", "hac": FORECAST_LAGS,
              "sample": [str(ev.min().date()), str(ev.max().date())]},
             {"better_holm": int(table["better"].sum()), "worse_holm": int(table["worse"].sum()),
              "positive_delta": int(table["positive"].sum()), "sessions": int(len(ev)),
              "verdict": "count only, no verdict"},
-        )
+        ))
     for base in BASES:
         t = per_market[base]
         print(f"   beyond {base}, every market (delta x 1e4, t):")
@@ -644,8 +645,8 @@ def read(p: dict, inst: dict) -> None:
     q = float(L["har"][list(US_EQUITY)].loc[ev].mean(axis=1).mean())
     print(f"   US equities beyond HAR alone (the known result, descriptive): delta "
           f"{d.mean():+.5f} ({d.mean() / q:+.2%}), t {risque.hac_mean_t(d, lags=21):+.2f}")
-    trials.log(FAMILY, {"test": "sensitivities", "declared": "PRESPEC_RISQUE section 8"},
-               {**sens, "verdict": "sensitivities, never deciding"})
+    pending.append(({"test": "sensitivities", "declared": "PRESPEC_RISQUE section 8"},
+                    {**sens, "verdict": "sensitivities, never deciding"}))
 
     # ---------------- the books ----------------
     window = p["book_window"]
@@ -693,8 +694,7 @@ def read(p: dict, inst: dict) -> None:
         print(f"   folds {' '.join(f'{f:+.3f}' for f in folds)}  ({positive}/5 positive)")
         print(f"   => {v}\n")
         verdicts[code] = v
-        trials.log(
-            FAMILY,
+        pending.append((
             {"test": code, "book": book, "sizing": "HAR+state forecast vs HAR forecast",
              "portfolio_target": "M3, 10%, sigma63 of the unscaled book, cap 3",
              "cost": "zero", "excess": "cash on signed funded exposure",
@@ -703,12 +703,15 @@ def read(p: dict, inst: dict) -> None:
              "threshold": mdes[code], "t_hac": t, "placebo_pct": pct,
              **{f"delta_{k.replace('+', '_')}": v_ for k, v_ in controls.items()},
              "folds_positive": positive, "sessions": int(len(window)), "verdict": v},
-        )
+        ))
 
     print(f"{RULE}\nSUMMARY\n")
     for code, v in verdicts.items():
         print(f"   {code:<4} {v}")
-    print(f"\n   logged to data/trials.parquet ({trials.summary()['n_distinct']} distinct)")
+    for config, metrics in pending:
+        trials.log(FAMILY, config, metrics)
+    print(f"\n   logged {len(pending)} rows to data/trials.parquet "
+          f"({trials.summary()['n_distinct']} distinct)")
     print(RULE)
 
 
