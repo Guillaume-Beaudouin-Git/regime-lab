@@ -84,9 +84,20 @@ Discipline, as in `scripts/run_ahl_level_b.py`: run plain, the script measures t
 instrument and prints no return. `--read` prints the results and logs two trial rows
 (family `b1_regime_coupling`) to `data/trials.parquet`; run it once.
 
+AMENDMENT, 2026-09-23, after REDUCE and SWITCH were read (`df75119`). Guillaume asked
+for a third coupling, added AFTER the first two readings and declared as such:
+    (a) STOP     B1 is flat on sessions whose lagged state is stress (REDUCE at 0)
+It is run by `--stop` with the same decision rules, and the family then counts three
+couplings. Its MDE is therefore read at alpha 0.05 / 3, and the Bonferroni step of the
+two earlier verdicts would tighten to 0.05 / 3 too. Neither of those verdicts can
+change: REDUCE was already below its MDE, and SWITCH was negative. The default run is
+left exactly as committed, so that its readings reproduce.
+
 Usage:
     .venv/bin/python scripts/run_b1_regime_coupling.py           # instrument only
     .venv/bin/python scripts/run_b1_regime_coupling.py --read    # the reading, a trial
+    .venv/bin/python scripts/run_b1_regime_coupling.py --stop    # STOP instrument
+    .venv/bin/python scripts/run_b1_regime_coupling.py --stop --read   # STOP reading
 """
 
 from __future__ import annotations
@@ -115,6 +126,7 @@ CAP = 3.0
 REDUCE = 0.5
 PURGE = 63
 ALPHA = 0.05 / 2
+ALPHA_STOP = 0.05 / 3
 BLOCKS = (21, 63, 126)
 ROTATIONS = 400
 MIN_SHIFT = 252
@@ -186,6 +198,8 @@ def coupled(base: pd.DataFrame, stress: pd.Series, mode: str, trend: pd.DataFram
     is_stress = stress.eq(STRESS).reindex(base.index).fillna(False).to_numpy()[:, None]
     if mode == "reduce":
         return base * np.where(is_stress, REDUCE, 1.0)
+    if mode == "stop":
+        return base * np.where(is_stress, 0.0, 1.0)
     if mode == "switch":
         return pd.DataFrame(
             np.where(is_stress, trend.to_numpy(), base.to_numpy()),
@@ -248,9 +262,10 @@ def build() -> dict:
     }
 
 
-def arms(p: dict, state: pd.Series, column: str = "headline") -> dict[str, pd.Series]:
+def arms(p: dict, state: pd.Series, column: str = "headline",
+         modes: tuple[str, ...] = ("reduce", "switch")) -> dict[str, pd.Series]:
     out = {"B1": p["base"]}
-    for mode in ("reduce", "switch"):
+    for mode in modes:
         out[mode] = coupled(p["base"], state, mode, p["trend"])
     return {
         name: arm_returns(w, p["returns"], p["rate"], column).reindex(p["index"])
@@ -260,6 +275,9 @@ def arms(p: dict, state: pd.Series, column: str = "headline") -> dict[str, pd.Se
 
 def main() -> None:
     read_the_answer = "--read" in sys.argv
+    if "--stop" in sys.argv:
+        run_stop(read_the_answer)
+        return
     p = build()
     idx = p["index"]
     stress_share = float(p["state"].reindex(idx).eq(STRESS).mean())
@@ -371,6 +389,95 @@ def read(p: dict, legs: dict[str, pd.Series], mdes: dict[str, float]) -> None:
              "delta_max_dd": ddelta, "sessions": int(len(idx)), "verdict": verdict},
         )
     print(f"   logged to data/trials.parquet ({trials.summary()['n_distinct']} distinct)")
+    print(RULE)
+
+
+def run_stop(read_the_answer: bool) -> None:
+    """The amendment: STOP, flat in stress, with the same rules at alpha 0.05 / 3."""
+    p = build()
+    idx = p["index"]
+    modes = ("reduce", "switch", "stop")
+    legs = arms(p, p["state"], modes=modes)
+    print(RULE)
+    print("AMENDMENT — STOP: B1 FLAT IN STRESS (added after REDUCE and SWITCH were read)")
+    print(RULE)
+    values = []
+    for block in BLOCKS:
+        res = blinded_mde(legs["stop"].to_numpy(), legs["B1"].to_numpy(),
+                          mean_block=block, draws=2000, seed=0)
+        values.append(mde_at(res, ALPHA_STOP))
+    mde = max(values)
+    joined = " / ".join(f"{v:.3f}" for v in values)
+    print(f"\n   stop    MDE {joined} at blocks 21/63/126, alpha {ALPHA_STOP:.4f}  ->  "
+          f"threshold {mde:.3f}")
+    if not np.isfinite(mde):
+        print("\n   A READING IS NOT FINITE. No verdict.")
+        return
+    if not read_the_answer:
+        print(f"\n   NOT READ — re-run with --stop --read, once.\n{RULE}")
+        return
+
+    cons = arms(p, p["state"], "conservative", modes=modes)
+    vol_legs = arms(p, p["vol_state"], modes=modes)
+    rows = {name: describe(x) for name, x in legs.items()}
+    rows["vol rule stop"] = describe(vol_legs["stop"])
+    table = pd.DataFrame(rows).T
+    fmt = {"sharpe": "{:+.2f}", "ann_return": "{:+.2%}", "ann_vol": "{:.2%}",
+           "max_dd": "{:.1%}", "worst_month": "{:+.1%}",
+           **{c: "{:+.1%}" for c in CRISES}}
+    print(f"\n   {'arm':<18}" + "".join(f"{c:>12}" for c in table.columns))
+    for name, r in table.iterrows():
+        print(f"   {name:<18}" + "".join(f"{fmt[c].format(r[c]):>12}" for c in table.columns))
+
+    delta = sharpe(legs["stop"]) - sharpe(legs["B1"])
+    delta_cons = sharpe(cons["stop"]) - sharpe(cons["B1"])
+    t = paired_hac_t(legs["stop"], legs["B1"])
+    delta_vol = sharpe(vol_legs["stop"]) - sharpe(vol_legs["B1"])
+    rng = np.random.default_rng(20260923)
+    shifts = rng.integers(MIN_SHIFT, len(idx) - MIN_SHIFT, size=ROTATIONS)
+    state_values = p["state"].reindex(idx)
+    null, null_dd = [], []
+    for s in shifts:
+        rotated = pd.Series(np.roll(state_values.to_numpy(), s), index=idx)
+        rleg = arm_returns(coupled(p["base"], rotated, "stop", p["trend"]),
+                           p["returns"], p["rate"]).reindex(idx)
+        null.append(sharpe(rleg) - sharpe(legs["B1"]))
+        null_dd.append(max_drawdown(rleg) - max_drawdown(legs["B1"]))
+    null, null_dd = np.array(null), np.array(null_dd)
+    pct = float((null < delta).mean())
+    ddelta = max_drawdown(legs["stop"]) - max_drawdown(legs["B1"])
+    pct_dd = float((null_dd < ddelta).mean())
+    if not all(np.isfinite([delta, t, delta_vol, pct])) or not np.isfinite(null).all():
+        verdict = "NOT FINITE — no verdict"
+    elif np.sign(delta) != np.sign(delta_cons):
+        verdict = "UNDECIDED — the sign changes between 1 and 2 bp"
+    elif delta <= 0:
+        verdict = "NOT USEFUL — the coupling lowers the Sharpe"
+    elif delta < mde:
+        verdict = "UNDERPOWERED — positive but below the MDE, never useful"
+    elif np.sign(t) != np.sign(delta) or pct < 0.95 or delta <= delta_vol:
+        verdict = "NOT SHOWN — above the MDE but fails the t, the placebo or the vol rule"
+    else:
+        verdict = "USEFUL — all four conditions hold"
+    print("\n   STOP")
+    print(f"     delta Sharpe      {delta:+.3f}   (2 bp: {delta_cons:+.3f})   MDE {mde:.3f}")
+    print(f"     HAC-6 t           {t:+.2f}")
+    print(f"     placebo pct       {pct:.1%}  (rotation null: median {np.median(null):+.3f},"
+          f" p95 {np.quantile(null, 0.95):+.3f})")
+    print(f"     vol rule delta    {delta_vol:+.3f}")
+    print(f"     change in max DD  {ddelta:+.1%}  (placebo pct {pct_dd:.1%})")
+    print(f"     => {verdict}")
+    trials.log(
+        "b1_regime_coupling",
+        {"test": "stop", "strategy": "month-end Treasury, TLT, last 3 US days",
+         "state": "A' sparse jump filtered, lag 1", "added_after_reading": ["reduce", "switch"],
+         "alpha": "0.05/3", "cost_bps": "schedule headline (1 bp)",
+         "sample": [str(idx.min().date()), str(idx.max().date())]},
+        {"sharpe": sharpe(legs["stop"]), "delta": delta, "threshold": mde, "t_hac": t,
+         "placebo_pct": pct, "delta_vol_rule": delta_vol, "delta_max_dd": ddelta,
+         "sessions": int(len(idx)), "verdict": verdict},
+    )
+    print(f"\n   logged to data/trials.parquet ({trials.summary()['n_distinct']} distinct)")
     print(RULE)
 
 
