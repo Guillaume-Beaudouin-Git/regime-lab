@@ -136,6 +136,21 @@ d'essais compte 84 configurations distinctes (`data/trials.parquet`).
   pli, contre 0,05 dans le brouillon. Le plafond de levier mord sur 70 % des séances. Le
   seuil de rentabilité en coûts tombe à 27-33 bp, au lieu de 93. Le test reste assez
   fin : il détecte un écart d'environ 0,26 de Sharpe.
+- **Des stratégies de crise, seules et couplées au régime** (`docs/RESULTS_CRISE.md`,
+  pré-enregistrement `docs/PRESPEC_CRISE.md` commité avant lecture en `7d5b95c`, une
+  lecture, 9 essais `crise_coupling`, coût nul). Quatre objets dont le gain dépend de la
+  volatilité ou des crises : vente de variance synthétique sur le S&P 500, vente de
+  futures VIX à 1 mois, momentum UMD, indice BXM ; deux couplages (arrêt, moitié) ; plus
+  un test de prédiction. **Aucun couplage n'est utile.** Le filtre **change la forme du
+  risque sans changer le Sharpe** : la vente de variance évite 2008 (−20,4 % → +1,0 %)
+  mais rate le rebond de 2009 (+36,6 % → +7,4 %), Sharpe 1,30 dans les deux cas ; février
+  2018 et 2022 lui échappent (état calme). **Le momentum est le seul cas où il aide
+  nettement** : 0,52 → 0,69, au 100ᵉ centile du placebo, mais sous le MDE (0,395), et la
+  règle de volatilité au 80ᵉ centile fait autant (+0,163 contre +0,166). **Pourquoi : le
+  VIX sait déjà ce que sait le modèle.** Au-delà d'un rang de volatilité, l'état ajoute
+  4,48 points de R² sur la variance future (t −5,23) ; une fois le VIX dans la
+  régression, 0,20 point (t −1,34, seuil 2,77). Données publiques (CBOE, CFE, Ken French)
+  dans `data/raw/crisis/`, téléchargées par `scripts/fetch_crisis_data.py`.
 
 ---
 
@@ -205,6 +220,9 @@ Toutes les données macro sont stockées en **point-in-time** : chaque ligne por
 | `panels/industry_49.parquet` | 49 portefeuilles sectoriels, quotidien | Ken French | 1990-01-02 → 2026-07-31 | 451 388 |
 | `panels/size_bm_25.parquet` | 25 portefeuilles taille × valeur | Ken French | 1990-01-02 → 2026-07-31 | 230 300 |
 | `references/ref_nber.parquet` | récessions NBER (`USREC`), **validation seulement** | FRED | 1990-01 → 2026-08 | 440 |
+| `crisis/vix_futures.parquet` | règlements quotidiens de 274 contrats mensuels VIX, ramenés à une seule échelle | CBOE Futures Exchange (`scripts/fetch_crisis_data.py`) | 2004-03-26 → 2026-09-22 | 47 238 |
+| `crisis/french_umd.parquet` | facteur momentum UMD quotidien | Ken French | 1926-11-03 → 2026-07-31 | 26 195 |
+| `crisis/cboe_indices.parquet` | indices BXM (depuis 2002-03-22) et PUT (depuis 2007-01-03) | CBOE | → 2026-09-22 | 11 123 |
 
 **Dérivé** (`data/cache/`)
 
