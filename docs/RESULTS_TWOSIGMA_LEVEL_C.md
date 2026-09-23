@@ -147,7 +147,47 @@ Verbatim from `docs/PRESPEC_TWOSIGMA.md` (LOCKED, `30f7d69`). They were fixed be
 <!-- READING:BEGIN -->
 ## Reading (§13.1 step 4)
 
-Not read. The reading of this level runs only after the instruments of A, B and C and their thresholds are committed, in the order A, B, C (§13.1).
+| lock | provisional verdict (Bonferroni 0.05/6) | p entering Holm |
+|---|---|---|
+| C-1 | **NOT SHOWN** | 1.0000 |
+| C-2 | **BOUND** | 1.0000 |
+
+Level C, provisional: **NOT SHOWN** (C-1's, §12.10). The final verdict follows the Holm step (`docs/RESULTS_TWOSIGMA.md`).
+
+### C-1 (§12.10)
+
+- **S_C 0.000 ×/yr**: twin 17.95, conditional 17.95; **p_C1 1.0000**, percentile 0.5000, null q99 0.000.
+- Gate: mean δ conditional 0.1890 against twin 0.1890: holds yes.
+- MDE_C 0.000 against S* 7.843; witness W1: S_W 0.000.
+- Conditional arm: σ 7.84%, 5 bp net Sharpe -0.1165; fallback test sessions 0, test sessions of folds holding the twin 5,031.
+
+| fold | states | h_fk | λ | holds the twin | reason |
+|---|---|---|---|---|---|
+| 1 | [0; 2; 3] | {"0": 5, "2": 5, "3": 5} | 0.2273 | yes | every interval at the twin's |
+| 2 | [0; 1; 2; 3] | {"0": 5, "1": 5, "2": 5, "3": 5} | 0.2172 | yes | every interval at the twin's |
+| 3 | [0; 1; 2; 3] | {"0": 5, "1": 5, "2": 5, "3": 5} | 0.2025 | yes | every interval at the twin's |
+| 4 | [0; 1; 2; 3] | {"0": 5, "1": 5, "2": 5, "3": 5} | 0.1936 | yes | every interval at the twin's |
+| 5 | [0; 1; 2; 3] | {"0": 5, "1": 5, "2": 5, "3": 5} | 0.2036 | yes | every interval at the twin's |
+
+### C-2 (§12.10)
+
+|  | 5 bp | 10 bp | 20 bp |
+|---|---|---|---|
+| bound S_C × bps / 10,000 / σ_twin | 0.0000 | 0.0000 | 0.0000 |
+| the control's whole cost (Sharpe) | 0.2326 | 0.4651 | 0.9303 |
+
+C-2 is a bound, never a PASS; `p_C2 := 1` in Holm.
+
+§8 control 5 was not due: no lock would otherwise PASS, at the provisional bar or under a Holm rejection.
+
+### Trial rows (§13.5)
+
+| test | sharpe | delta | threshold | p | placebo_pct | verdict | note |
+|---|---|---|---|---|---|---|---|
+| C-1 | -0.1165 | 0.0000 | 0.0000 | 1.0000 | 0.5000 | NOT SHOWN | delta = S_C (x/yr), threshold = the null's q99, p = p_C1 (§12.10) |
+| C-2 | n/a | 0.0000 | n/a | 1.0000 | n/a | BOUND | bound S_C x bps / 10,000 / sigma_twin, never a PASS, p := 1 (§12.10): 5.0 bp 0.0, 10.0 bp 0.0, 20.0 bp 0.0 |
+
+The logged `sharpe` is that of a near-zero-net long-short book of industry portfolios with no borrow cost. It is not a measure of progress toward the programme's ambition of a net Sharpe of 1 to 2 (§13.5).
 <!-- READING:END -->
 
 <!-- SENSITIVITIES:BEGIN -->

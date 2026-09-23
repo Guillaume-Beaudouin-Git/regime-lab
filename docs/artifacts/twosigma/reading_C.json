@@ -1,0 +1,232 @@
+{
+ "git_head": "1fc44fe9d1016437f2ed170ad5bc0026db6c94c0",
+ "reading": {
+  "C-1": {
+   "MDE_C": 0.0,
+   "S_C": 0.0,
+   "S_W": 0.0,
+   "S_star": 7.8434486928036025,
+   "fallback_sessions": 0,
+   "gate": true,
+   "leg_missing": false,
+   "mean_delta": {
+    "conditional": 0.18896375814091285,
+    "twin": 0.18896375814091285
+   },
+   "p": 1.0,
+   "placebo_pct": 0.5,
+   "q99": 0.0,
+   "read": true,
+   "rules": {
+    "1": {
+     "h": {
+      "0": 5,
+      "2": 5,
+      "3": 5
+     },
+     "holds_twin": true,
+     "lambda": 0.22725762407402408,
+     "reason": "every interval at the twin's",
+     "states": [
+      0,
+      2,
+      3
+     ]
+    },
+    "2": {
+     "h": {
+      "0": 5,
+      "1": 5,
+      "2": 5,
+      "3": 5
+     },
+     "holds_twin": true,
+     "lambda": 0.21722151218475186,
+     "reason": "every interval at the twin's",
+     "states": [
+      0,
+      1,
+      2,
+      3
+     ]
+    },
+    "3": {
+     "h": {
+      "0": 5,
+      "1": 5,
+      "2": 5,
+      "3": 5
+     },
+     "holds_twin": true,
+     "lambda": 0.20254581649254672,
+     "reason": "every interval at the twin's",
+     "states": [
+      0,
+      1,
+      2,
+      3
+     ]
+    },
+    "4": {
+     "h": {
+      "0": 5,
+      "1": 5,
+      "2": 5,
+      "3": 5
+     },
+     "holds_twin": true,
+     "lambda": 0.193554594286117,
+     "reason": "every interval at the twin's",
+     "states": [
+      0,
+      1,
+      2,
+      3
+     ]
+    },
+    "5": {
+     "h": {
+      "0": 5,
+      "1": 5,
+      "2": 5,
+      "3": 5
+     },
+     "holds_twin": true,
+     "lambda": 0.20360968578399752,
+     "reason": "every interval at the twin's",
+     "states": [
+      0,
+      1,
+      2,
+      3
+     ]
+    }
+   },
+   "sharpe": -0.11650578012685786,
+   "sigma": {
+    "conditional": 0.07843448692803602,
+    "twin": 0.07843448692803602
+   },
+   "turnover": {
+    "conditional": 17.94542591125864,
+    "twin": 17.94542591125864
+   },
+   "twin_sessions": 5031,
+   "undecidable": [],
+   "verdict_before_pit": "NOT SHOWN",
+   "verdict_inputs": {
+    "atom": 1.0,
+    "exact": true,
+    "gate": true,
+    "leg_missing": false,
+    "mde_c": 0.0,
+    "p": 1.0,
+    "s_c": 0.0,
+    "s_star": 7.8434486928036025,
+    "s_w": 0.0
+   }
+  },
+  "C-2": {
+   "bound": {
+    "10.0": 0.0,
+    "20.0": 0.0,
+    "5.0": 0.0
+   },
+   "control_cost": {
+    "10.0": 0.465141846784019,
+    "20.0": 0.930283693568038,
+    "5.0": 0.2325709233920095
+   },
+   "p": 1.0,
+   "read": true
+  },
+  "bonferroni": 0.008333333333333333,
+  "holm_p": {
+   "C-1": 1.0,
+   "C-2": 1.0
+  },
+  "instrument": {
+   "K": 4,
+   "MDE_C": 0.0,
+   "S_star": 7.8434486928036025,
+   "cells": {
+    "abstaining": 372,
+    "test_sessions": 5031,
+    "train": 19,
+    "train_per_fold": "3/4/4/4/4"
+   },
+   "control_cap_share": 0.7054263565891473,
+   "menu_turnover": {
+    "1": 36.66279813520282,
+    "13": 11.474527050792227,
+    "2": 27.03567066645995,
+    "21": 9.236048793743397,
+    "3": 22.57171064408719,
+    "5": 17.94542591125864,
+    "8": 14.49065889217083
+   },
+   "null": {
+    "above_zero": 0,
+    "at_zero": 1000,
+    "atom_share": 1.0,
+    "below_zero": 0,
+    "non_finite": 0,
+    "q20": 0.0,
+    "q50": 0.0,
+    "q95": 0.0,
+    "q99": 0.0,
+    "q99-q20": 0.0,
+    "q99-q50": 0.0
+   },
+   "placebo": {
+    "draws": 1000,
+    "exact": true,
+    "method": "uniform",
+    "seed": 0
+   },
+   "powered": false,
+   "twin": {
+    "h": 5,
+    "mean_delta": 0.18896375814091285,
+    "missing": 0,
+    "sigma": 0.07843448692803602,
+    "turnover": 17.94542591125864
+   },
+   "undecidable": [],
+   "variant": "primary"
+  },
+  "level": "C",
+  "pit": null,
+  "role": "primary",
+  "test_sessions": 5031,
+  "trial_rows": {
+   "C-1": {
+    "delta": 0.0,
+    "note": "delta = S_C (x/yr), threshold = the null's q99, p = p_C1 (§12.10)",
+    "p": 1.0,
+    "placebo_pct": 0.5,
+    "sessions": 5031,
+    "sharpe": -0.11650578012685786,
+    "threshold": 0.0,
+    "verdict": "NOT SHOWN"
+   },
+   "C-2": {
+    "delta": 0.0,
+    "note": "bound S_C x bps / 10,000 / sigma_twin, never a PASS, p := 1 (§12.10): 5.0 bp 0.0, 10.0 bp 0.0, 20.0 bp 0.0",
+    "p": 1.0,
+    "placebo_pct": NaN,
+    "sessions": 5031,
+    "sharpe": NaN,
+    "threshold": NaN,
+    "verdict": "BOUND"
+   }
+  },
+  "variant": "primary",
+  "verdicts": {
+   "C": "NOT SHOWN",
+   "C-1": "NOT SHOWN",
+   "C-2": "BOUND"
+  }
+ },
+ "rows_logged": true
+}
