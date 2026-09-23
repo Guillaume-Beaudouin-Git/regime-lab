@@ -22,18 +22,41 @@ voisin »). C'est la règle appliquée le 21/09 puis le 22/09.
 
 ---
 
+## Nature du projet — précisée par Guillaume le 23/09
+
+- **Ce n'est pas un mémoire.** C'est un projet de cours de M2, restitué par une
+  **présentation d'une dizaine de minutes** au format entreprise. Tout ce qui ne sert pas
+  cette présentation ou l'objectif de fond passe après.
+- **L'objectif de fond**, une fois la parenthèse macro refermée, est de construire des
+  **stratégies de trading algorithmique dépendantes du régime**. On cherche un résultat
+  intéressant et prometteur, dont l'ambition est un Sharpe **net, en excess, hors
+  échantillon, de 1 à 2**. Les règles dures ne changent pas pour autant, et un écart
+  sous le MDE reste « sous-puissant ».
+- **Hypothèse de coûts : institutionnels.** Le barème de tête du programme l'est déjà :
+  futures 1 bp, matières premières 1,5 bp, actions US 5 bp, ETF sans future 7,5 bp. Les
+  colonnes prudente et de stress restent rapportées à côté. Les barèmes déjà verrouillés
+  ne changent pas.
+
+---
+
 ## PROCHAINE ACTION
 
-**La priorité du 23/09 est fixée par Guillaume et son collègue**, en ouverture de séance
-(`AVANCEMENT.md` §4 tâche 0, et §5 pour le plan des 7 heures). Ne choisis pas à leur
-place. Deux choses sont prêtes à être prises.
+**Les priorités sont dans `AVANCEMENT.md` §4 et §5, et c'est Guillaume qui les fixe.**
+Ne choisis pas à sa place. Trois chantiers sont prêts.
 
-**Rédaction** (meilleur rapport valeur/effort, rien à calculer) :
-`pilotage/feuille_de_route/PISTES.md` piste 3, la figure « variance contre moyenne » et
-les 13 transitions en ouverture ; la note H3 pour un lecteur extérieur ; l'intégration de
-la dispersion.
+**1. La présentation de 10 minutes** (rien à calculer) : le fil et les trois figures
+sont décrits dans `AVANCEMENT.md` §4, tâche 1.
 
-**Calcul — AHL niveau C, puis fermeture de l'arbre.** Le pré-enregistrement verrouillé
+**2. Le plan Two Sigma** : c'est la piste la plus proche de l'objectif de fond, puisque
+le régime y choisit entre dix signaux. La phase 1 est faite (`22abbe0`, `3b64ab2`).
+Le verrou `docs/PRESPEC_TWOSIGMA.md` est rédigé mais **pas commité** : il attend que
+Guillaume relise son §12.0. Ne le commite pas sans cette relecture. Ensuite, on descend
+l'arbre A → B → C, avec à chaque niveau : instrument, MDE, critère commité, puis lecture,
+qui est un essai.
+
+**3. Fermer l'arbre AHL** (priorité plus basse) :
+
+**AHL niveau C, puis fermeture de l'arbre.** Le pré-enregistrement verrouillé
 est `docs/PRESPEC_AHL.md` (commit `92e4e9e`). Ne le modifie pas.
 - A est réfuté sur le signe (`docs/RESULTS_AHL_LEVEL_A.md`). B1 est indécidable
   (`docs/RESULTS_AHL_LEVEL_B.md`) : le MDE vaut 49,6 % de l'erreur moyenne contre une

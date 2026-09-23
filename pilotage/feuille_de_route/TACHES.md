@@ -182,17 +182,22 @@ cette machine.
 
 ---
 
-## C. Rédaction
+## C. Rédaction et présentation
 
-**C1. Le mémoire.** Terminé et défendable. Ce qui manque n'est pas du résultat, c'est
-de la mise en évidence — voir `PISTES.md`, piste 3, P ≈ 90 %.
+> **Précisé le 23/09 : ce n'est pas un mémoire.** Le projet se conclut par une
+> présentation d'une dizaine de minutes au format entreprise. C1 devient la
+> construction de cette présentation ; C2 et C3 ne servent plus que de diapositives de
+> réserve. Voir `AVANCEMENT.md` §0 et §4.
+
+**C1. La présentation de 10 minutes.** Le matériau est complet. Ce qui manque n'est pas
+du résultat, c'est de la mise en évidence — voir `PISTES.md`, piste 3, P ≈ 90 %.
 
 **C2. H3 n'a pas son écrit.** H1 et H2 ont `RESULT_DISPERSION.md` et
 `NOTE_DISPERSION_FR.md`. H3 — les surprises macro, la construction de Dedale — n'a
 que `RESULTS_H3.md`. Le programme compte quatre falsifications ; trois seulement
 sont rédigées pour un lecteur extérieur.
 
-**C3. Le résultat de dispersion est écrit mais pas intégré au mémoire.**
+**C3. Le résultat de dispersion est écrit mais pas intégré à la présentation.**
 
 ---
 
@@ -280,11 +285,17 @@ automatiquement par toute session ouverte ici. Ce fichier-ci en est le détail.
 9. ~~Un seul dépôt~~ **FAIT le 22/09 au soir** : fusion avec historique, venv unique,
    `pilotage/` expurgé et versionné, 120 fichiers de mesure sauvés de `/private/tmp`.
 
-### ⟶ 10. ENSUITE — voir `AVANCEMENT.md` §4 et §5
+10. ~~L'objectif final~~ **FIXÉ le 23/09** : une présentation de 10 minutes ;
+    l'objectif de fond est de construire des stratégies dépendantes du régime, avec
+    l'ambition d'un Sharpe net de 1 à 2 à coûts institutionnels (`AVANCEMENT.md` §0).
+11. **Plan Two Sigma, phase 1 FAITE le 23/09** (`22abbe0`, `3b64ab2`) par une autre
+    session : l'outillage est construit, les chiffres du brouillon sont remesurés, le
+    verrou est rédigé mais pas commité. Aucun niveau n'a été lu.
 
-Dans l'ordre proposé : fixer l'objectif final ; la rédaction (piste 3, note H3,
-dispersion) ; AHL niveau C, dont C1 est déclaré sous-puissant d'avance par le §9, donc
-très probablement le MDE puis la fermeture de l'arbre ; la lecture A1 principale sur
-(126,10), qui reste due et doit être décidée ensemble ; le nettoyage et le commit de
-`pilotage/mesures_brutes/` ; puis les plans suivants. La porte G0 de Rentec reste la
+### ⟶ 12. ENSUITE — voir `AVANCEMENT.md` §4 et §5
+
+Dans l'ordre proposé : la présentation de 10 minutes ; la relecture et le commit du
+verrou Two Sigma, puis ses niveaux A, B et C ; la fermeture de l'arbre AHL (le MDE de C1,
+et la décision sur la lecture A1 principale sur (126,10)) ; le nettoyage et le commit de
+`pilotage/mesures_brutes/` ; puis le plan Bridgewater. La porte G0 de Rentec reste la
 moins chère (1,5 j), mais ses données sont dans le dépôt privé voisin : Guillaume seul.
