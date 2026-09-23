@@ -171,7 +171,38 @@ Verbatim from `docs/PRESPEC_TWOSIGMA.md` (LOCKED, `30f7d69`). They were fixed be
 <!-- READING:BEGIN -->
 ## Reading (§13.1 step 4)
 
-Not read. The reading of this level runs only after the instruments of A, B and C and their thresholds are committed, in the order A, B, C (§13.1).
+| lock | provisional verdict (Bonferroni 0.05/6) | p entering Holm |
+|---|---|---|
+| B-1 | **NOT SHOWN** | 0.9151 |
+| B-2 | **UNDERPOWERED** | 0.1441 |
+
+Level B, provisional: **UNDERPOWERED**. The final verdict follows the Holm step, after C (`docs/RESULTS_TWOSIGMA.md`).
+
+### B-1 (§12.8)
+
+- G -3.3603 (diagonal diagnostic G_diag -2.3740); **p_B1 0.9151**, percentile 0.0850, null q99 -0.7260.
+- Witness W1: mean d -3.7105, p_W1 1.0000; witness W2: mean d -4.4261, p_W2 1.0000.
+
+### B-2 (§12.9)
+
+|  | 5 bp | 10 bp | 20 bp |
+|---|---|---|---|
+| Δ_B2 | 0.0641 | 0.0553 | 0.0373 |
+
+- SR state -0.4918, SR pooled -0.5560 (5 bp); T_B2 0.3380; HAC-6 t 1.4607; p_boot 0.1326, p_HAC 0.1441, **p_B2 0.1441**.
+- β state -0.1216; beta percentile 0.8140, difference percentile 0.8040; witness W1: Δ_W,B2 0.1450.
+- Kill: ΔT 1.63 against K_kill 12.00, fires no.
+
+§8 control 5 was not due: no lock would otherwise PASS, at the provisional bar or under a Holm rejection.
+
+### Trial rows (§13.5)
+
+| test | sharpe | delta | threshold | p | placebo_pct | verdict | note |
+|---|---|---|---|---|---|---|---|
+| B-1 | n/a | -3.3603 | -0.7260 | 0.9151 | 0.0850 | NOT SHOWN | delta = G, threshold = the null's q99, p = p_B1 (§12.8) |
+| B-2 | -0.4918 | 0.0641 | 0.3380 | 0.1441 | 0.8040 | UNDERPOWERED |  |
+
+The logged `sharpe` is that of a near-zero-net long-short book of industry portfolios with no borrow cost. It is not a measure of progress toward the programme's ambition of a net Sharpe of 1 to 2 (§13.5).
 <!-- READING:END -->
 
 <!-- SENSITIVITIES:BEGIN -->
