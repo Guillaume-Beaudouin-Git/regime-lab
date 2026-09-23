@@ -1,0 +1,6 @@
+common sessions 2,165  2018-01-26 -> 2026-09-08
+daily correlation   0.9321
+weekly correlation  0.9865
+annualised vol      rebuilt 82.3%   VXX 73.1%
+annualised return   rebuilt -43.5%   VXX -41.4%  (VXX carries a 0.89% annual fee)
+2018-02-05          rebuilt +97.4%   VXX +33.5%
