@@ -202,7 +202,43 @@ Verbatim from `docs/PRESPEC_TWOSIGMA.md` (LOCKED, `30f7d69`). They were fixed be
 <!-- READING:BEGIN -->
 ## Reading (§13.1 step 4)
 
-Not read. The reading of this level runs only after the instruments of A, B and C and their thresholds are committed, in the order A, B, C (§13.1).
+| lock | provisional verdict (Bonferroni 0.05/6) | p entering Holm |
+|---|---|---|
+| A-1 | **FAIL** | 1.0000 |
+| A-2 | **NOT SHOWN** | 0.3397 |
+
+Level A, provisional: **FAIL**. The final verdict follows the Holm step, after C (`docs/RESULTS_TWOSIGMA.md`).
+
+### A-1 (§12.6)
+
+|  | 5 bp | 10 bp | 20 bp |
+|---|---|---|---|
+| SR selector | -0.3699 | -0.6394 | -1.1772 |
+| SR control | -0.2597 | -0.4922 | -0.9566 |
+| Δ_A1 | -0.1102 | -0.1472 | -0.2205 |
+
+- T_A1 0.3380, SE* 0.0654 (block 21); HAC-6 t -1.6326; p_boot 0.0922, p_HAC 0.1026, **p_A1 1.0000**.
+- β selector -0.1930 (control -0.1924); beta percentile 0.2660, difference percentile 0.2170 among 1,000 placebo arms.
+- Volatility witness W1: Δ_W 0.2008.
+- ΔT 7.14 ×/yr against K_kill 12.00: kill no; fallback 7.4% of the test sessions.
+- Per-fold components of Δ_A1 (diagnostic, §12.14): fold 1 -0.1602, fold 2 -0.2454, fold 3 -0.2226, fold 4 0.0410, fold 5 0.0097.
+
+### A-2 (§12.7)
+
+- R 0.0468 over 14 cells; **p_A2 0.3397**, percentile 0.6610; null q50 0.0030, q95 0.1862, q99 0.2624.
+- Volatility witness W1: R_W 0.2829.
+- Per-fold means (diagnostic, §12.14): fold 1 -0.0485, fold 2 0.3414, fold 3 0.0333, fold 4 -0.1879, fold 5 0.0788.
+
+§8 control 5 was not due: no lock would otherwise PASS, at the provisional bar or under a Holm rejection.
+
+### Trial rows (§13.5)
+
+| test | sharpe | delta | threshold | p | placebo_pct | verdict | note |
+|---|---|---|---|---|---|---|---|
+| A-1 | -0.3699 | -0.1102 | 0.3380 | 1.0000 | 0.2170 | FAIL |  |
+| A-2 | n/a | 0.0468 | 0.2624 | 0.3397 | 0.6610 | NOT SHOWN |  |
+
+The logged `sharpe` is that of a near-zero-net long-short book of industry portfolios with no borrow cost. It is not a measure of progress toward the programme's ambition of a net Sharpe of 1 to 2 (§13.5).
 <!-- READING:END -->
 
 <!-- SENSITIVITIES:BEGIN -->
