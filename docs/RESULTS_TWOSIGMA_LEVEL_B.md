@@ -208,5 +208,16 @@ The logged `sharpe` is that of a near-zero-net long-short book of industry portf
 <!-- SENSITIVITIES:BEGIN -->
 ## Sensitivities (§12.13)
 
-Not read. They are read after the six primaries and the Holm step.
+They never found a PASS and never revoke one; a sign reversal is written here.
+
+| section | test | sharpe | delta | threshold | p | p2 | verdict | note |
+|---|---|---|---|---|---|---|---|---|
+| `B:K=3` | B | -0.5263 | 0.0296 | 0.3380 | 0.5083 | 0.4805 | UNDERPOWERED |  |
+| `B:K=5` | B | -0.4762 | 0.0797 | 0.3380 | 0.1599 | 0.6014 | UNDERPOWERED |  |
+| `B:K=6` | B | -0.5103 | 0.0457 | 0.3380 | 0.3910 | 0.3966 | UNDERPOWERED |  |
+| `B:smooth21` | B | -0.5215 | 0.0347 | 0.3380 | 0.4495 | 0.8821 | UNDERPOWERED |  |
+
+Level B label (§12.13): **UNDERPOWERED**.
+
+The logged `sharpe` is that of a near-zero-net long-short book of industry portfolios with no borrow cost. It is not a measure of progress toward the programme's ambition of a net Sharpe of 1 to 2 (§13.5).
 <!-- SENSITIVITIES:END -->

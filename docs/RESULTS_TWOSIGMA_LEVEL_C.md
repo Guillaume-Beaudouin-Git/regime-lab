@@ -193,5 +193,16 @@ The logged `sharpe` is that of a near-zero-net long-short book of industry portf
 <!-- SENSITIVITIES:BEGIN -->
 ## Sensitivities (§12.13)
 
-Not read. They are read after the six primaries and the Holm step.
+They never found a PASS and never revoke one; a sign reversal is written here.
+
+| section | test | sharpe | delta | threshold | p | p2 | verdict | note |
+|---|---|---|---|---|---|---|---|---|
+| `C:K=3` | C | -0.1165 | 0.0000 | 0.0000 | 1.0000 | n/a | NOT SHOWN | delta = S_C (x/yr), threshold = the null's q99, p = p_C1 (§12.10), p2 NaN at C (§13.5) |
+| `C:K=5` | C | -0.1165 | 0.0000 | 0.0000 | 1.0000 | n/a | NOT SHOWN | delta = S_C (x/yr), threshold = the null's q99, p = p_C1 (§12.10), p2 NaN at C (§13.5) |
+| `C:K=6` | C | -0.1165 | 0.0000 | 0.0000 | 1.0000 | n/a | NOT SHOWN | delta = S_C (x/yr), threshold = the null's q99, p = p_C1 (§12.10), p2 NaN at C (§13.5) |
+| `C:smooth21` | C | -0.1165 | 0.0000 | 0.0000 | 1.0000 | n/a | NOT SHOWN | delta = S_C (x/yr), threshold = the null's q99, p = p_C1 (§12.10), p2 NaN at C (§13.5) |
+
+Level C label (§12.13): **NOT SHOWN**.
+
+The logged `sharpe` is that of a near-zero-net long-short book of industry portfolios with no borrow cost. It is not a measure of progress toward the programme's ambition of a net Sharpe of 1 to 2 (§13.5).
 <!-- SENSITIVITIES:END -->

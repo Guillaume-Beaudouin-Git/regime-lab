@@ -80,5 +80,11 @@ Verbatim from `docs/PRESPEC_TWOSIGMA.md` (LOCKED, `30f7d69`). They were fixed be
 <!-- SENSITIVITIES:BEGIN -->
 ## Sensitivities (§12.13)
 
-Not read yet.
+| level | final verdict | with the §12.13 label |
+|---|---|---|
+| A | FAIL | **FAIL** |
+| B | UNDERPOWERED | **UNDERPOWERED** |
+| C | NOT SHOWN | **NOT SHOWN** |
+
+14 sensitivity rows logged; details in each level's results file.
 <!-- SENSITIVITIES:END -->
