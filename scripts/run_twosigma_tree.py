@@ -982,16 +982,53 @@ def run_read(level: str, data: TreeData, setup: Setup, *, emit: Emit = print) ->
     setup.check_register()
     emit(f"code at HEAD {head}; packages pinned by uv.lock: {tree.locked_versions(setup.root)}")
     reading = read_level(level, data, PRIMARY, setup)
-    rows = reading["trial_rows"]
     stored = {"reading": tree.plain(reading), "rows_logged": False, "git_head": head}
     _write_json(artifact, stored)
-    _log_rows(rows, PRIMARY, setup)
+    _finish_reading(level, stored, setup, emit=emit)
+    return reading
+
+
+def _finish_reading(
+    level: str, stored: dict[str, Any], setup: Setup, *, emit: Emit = print
+) -> None:
+    """The end of a reading, shared by :func:`run_read` and :func:`resume_logging`: log the
+    artifact's §13.5 rows, mark them logged, write the READING section."""
+    artifact = setup.path(READING_FILE.format(level=level))
+    _log_rows(stored["reading"]["trial_rows"], PRIMARY, setup)
     stored["rows_logged"] = True
     _write_json(artifact, stored)
     body = READING_MARKDOWN[level](stored["reading"])
     replace_block(setup.path(RESULTS_FILE.format(level=level)), "READING", body)
     emit(body)
-    return reading
+
+
+def resume_logging(level: str, setup: Setup, *, emit: Emit = print) -> dict[str, Any]:
+    """Finish a reading whose statistics were computed and stored but whose trial rows
+    were not logged (the artifact reads ``rows_logged: false``), without recomputing
+    anything: the rows, the verdicts and the READING section come from the artifact.
+
+    Refuses unless that artifact exists and is not marked logged, the results file is
+    committed, the code a reading runs is committed and unmodified, and the register
+    holds no row of this level. Records the HEAD at which the rows were logged beside the
+    HEAD at which the reading was computed.
+    """
+    if level not in LEVELS:
+        raise ValueError(f"not a level: {level!r}")
+    artifact = setup.path(READING_FILE.format(level=level))
+    if not artifact.exists():
+        raise ReadingRefused(f"no reading artifact for level {level}: nothing to resume")
+    stored = json.loads(artifact.read_text())
+    if stored.get("rows_logged"):
+        raise ReadingRefused(f"level {level}'s rows are already logged: nothing to resume")
+    tree.require_committed(setup.path(RESULTS_FILE.format(level=level)), setup.root,
+                           what="the instrument section of the results file (§13.1 step 3)")
+    stored["logging_head"] = setup.require_code()
+    setup.refuse_logged(LEVEL_TESTS[level], PRIMARY.name)
+    setup.check_register()
+    emit(f"resuming level {level}: computed at {stored.get('git_head')}, rows logged at "
+         f"{stored['logging_head']}; nothing is recomputed")
+    _finish_reading(level, stored, setup, emit=emit)
+    return stored
 
 
 def _lock_lines(reading: Mapping[str, Any], locks: Sequence[str]) -> str:
@@ -1399,17 +1436,21 @@ def sensitivities_summary(
 
 def main(argv: Sequence[str] | None = None) -> None:
     parser = argparse.ArgumentParser(description=__doc__.split("\n", 1)[0])
-    parser.add_argument("command", choices=("instrument", "read", "holm", "sensitivities"))
+    parser.add_argument("command", choices=("instrument", "read", "resume-log", "holm",
+                                            "sensitivities"))
     parser.add_argument("level", nargs="?", choices=LEVELS)
     parser.add_argument("--workers", type=int, default=None,
                         help="processes for the placebo loops (default: the CPU count)")
     args = parser.parse_args(argv)
-    if (args.command == "read") != (args.level is not None):
-        parser.error("'read' takes one level, A, B or C; the other commands take none")
+    if (args.command in ("read", "resume-log")) != (args.level is not None):
+        parser.error("'read' and 'resume-log' take one level, A, B or C; the other commands "
+                     "take none")
     setup = Setup(workers=args.workers)
     start = time.perf_counter()
     if args.command == "holm":
         run_holm(setup)
+    elif args.command == "resume-log":
+        resume_logging(args.level, setup)
     else:
         data = tree.load_tree_data(setup.root)
         print(f"{data!r}; lock {tree.LOCK_COMMIT}; code at {tree.git_head(setup.root)[:7]}")

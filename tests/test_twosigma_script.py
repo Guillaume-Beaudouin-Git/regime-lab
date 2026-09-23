@@ -240,6 +240,55 @@ def test_the_reading_refuses_uncommitted_code_and_a_logged_level(repo, data, sec
     assert "scripts/run_twosigma_tree.py" in S.CODE_FILES
 
 
+def test_the_register_stores_a_column_as_text_when_families_mix_text_and_numbers(tmp_path):
+    """The first primary reading of A crashed here: ``m_note`` held a flag ``1.0`` from
+    another family and pyarrow refused the text note of the new row."""
+    path = tmp_path / "trials.parquet"
+    T.trials.log("other", {"x": 1}, {"note": 1.0, "sharpe": 0.1}, path=path)
+    T.trials.log("twosigma", {"x": 2}, {"note": "", "sharpe": float("nan")}, path=path)
+    T.trials.log("twosigma", {"x": 3}, {"note": "a sentence", "sharpe": 0.2}, path=path)
+    frame = T.trials.read(path)
+    assert frame["m_note"].tolist() == ["1.0", "", "a sentence"]
+    assert frame["m_sharpe"].dtype == float and np.isnan(frame["m_sharpe"].iloc[1])
+
+
+def test_a_reading_that_crashed_while_logging_resumes_without_recomputing(repo, data, sections,
+                                                                         monkeypatch):
+    setup = _setup(repo)
+    S.write_instruments(sections, setup)
+    _commit(repo, T.THRESHOLDS_FILE, *(_results(level) for level in S.LEVELS))
+    quiet = dict(emit=lambda _: None)
+    with pytest.raises(T.ReadingRefused, match="no reading artifact"):
+        S.resume_logging("A", setup, **quiet)
+
+    def crash(*_args, **_kwargs):
+        raise RuntimeError("the register refused the row")
+
+    with monkeypatch.context() as patch:
+        patch.setattr(S, "_log_rows", crash)
+        with pytest.raises(RuntimeError, match="refused the row"):
+            S.run_read("A", data, setup, **quiet)
+    artifact = repo / S.READING_FILE.format(level="A")
+    computed = json.loads(artifact.read_text())
+    assert computed["rows_logged"] is False and not setup.trials_path.exists()
+    with pytest.raises(T.ReadingRefused, match="read already"):
+        S.run_read("A", data, setup, **quiet)
+
+    def recompute(*_args, **_kwargs):
+        raise AssertionError("resuming must not recompute the reading")
+
+    with monkeypatch.context() as patch:
+        patch.setattr(S, "read_level", recompute)
+        stored = S.resume_logging("A", setup, **quiet)
+    assert stored["rows_logged"] is True and stored["logging_head"] == T.git_head(repo)
+    assert stored["reading"] == computed["reading"]
+    logged = [json.loads(c)["test"] for c in T.trials.read(setup.trials_path)["config"]]
+    assert sorted(logged) == sorted(computed["reading"]["trial_rows"])
+    assert "## Reading (§13.1 step 4)" in (repo / _results("A")).read_text()
+    with pytest.raises(T.ReadingRefused, match="already logged"):
+        S.resume_logging("A", setup, **quiet)
+
+
 def test_the_register_takes_rows_only_at_the_lock_constants():
     with pytest.raises(ValueError, match="lock's"):
         S.Setup(draws=DRAWS).check_register()

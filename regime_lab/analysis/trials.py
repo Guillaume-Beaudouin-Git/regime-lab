@@ -40,7 +40,27 @@ def log(family: str, config: dict, metrics: dict, *, path: Path = TRIALS) -> Non
     frame = pd.DataFrame([row])
     if path.exists():
         frame = pd.concat([pd.read_parquet(path), frame], ignore_index=True)
-    frame.to_parquet(path, index=False)
+    _text_where_mixed(frame).to_parquet(path, index=False)
+
+
+def _text_where_mixed(frame: pd.DataFrame) -> pd.DataFrame:
+    """Store as text any column that holds both text and non-text values.
+
+    One family may log a metric as a number and another as text under the same name
+    (``note``: a flag ``1.0`` from one family, a sentence from another). Parquet needs
+    one type per column, and the append would otherwise fail and lose the row. Missing
+    values stay missing; every other value keeps its content, written as text.
+    """
+    out = frame.copy()
+    for column in out.columns:
+        values = out[column]
+        if values.dtype != object:
+            continue
+        present = values.dropna()
+        kinds = {isinstance(v, str) for v in present}
+        if kinds == {True, False}:
+            out[column] = values.map(lambda v: v if pd.isna(v) else str(v))
+    return out
 
 
 def read(path: Path = TRIALS) -> pd.DataFrame:
