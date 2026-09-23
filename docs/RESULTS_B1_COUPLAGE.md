@@ -10,9 +10,10 @@ aller-retour, et les rendements sont en excès du taux cash.
 
 Le protocole et le critère de décision ont été commités **avant tout calcul**
 (`b737ea9`). Le script est `scripts/run_b1_regime_coupling.py`. La lecture a été faite
-une fois, et deux essais sont journalisés sous `b1_regime_coupling`.
+une fois, et trois essais sont journalisés sous `b1_regime_coupling` (le troisième,
+l'arrêt, a été ajouté après lecture).
 
-## Les deux couplages
+## Les couplages
 
 - **(b) Réduction** : on divise la position par deux quand le régime de la veille est
   « stress ».
@@ -20,6 +21,8 @@ une fois, et deux essais sont journalisés sous `b1_regime_coupling`.
   instruments, cible de volatilité de 10 %) au lieu de la stratégie de fin de mois. Ce
   choix a été fait avant la lecture : le suivi de tendance est la famille connue pour
   ses gains en crise.
+- **(a) Arrêt** *(ajouté après la lecture de (b) et (c))* : aucune position quand le
+  régime de la veille est « stress ».
 
 Chaque couplage est comparé à la stratégie seule. Il est aussi refait avec la règle de
 volatilité d'une ligne, et confronté à 400 rotations aléatoires du régime (placebo).
