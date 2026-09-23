@@ -4,3 +4,5 @@ weekly correlation  0.9865
 annualised vol      rebuilt 82.3%   VXX 73.1%
 annualised return   rebuilt -43.5%   VXX -41.4%  (VXX carries a 0.89% annual fee)
 2018-02-05          rebuilt +97.4%   VXX +33.5%
+2018-02-06          rebuilt -26.1%   VXX -1.7%
+the two sessions    rebuilt +45.8%   VXX +31.3%

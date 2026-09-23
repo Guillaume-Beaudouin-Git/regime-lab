@@ -51,8 +51,11 @@ def main() -> None:
     growth = (1 + a).prod() ** (1 / years) - 1, (1 + b).prod() ** (1 / years) - 1
     print(f"annualised return   rebuilt {growth[0]:+.1%}   VXX {growth[1]:+.1%}  "
           "(VXX carries a 0.89% annual fee)")
-    feb = slice("2018-02-05", "2018-02-05")
-    print(f"2018-02-05          rebuilt {a.loc[feb].iloc[0]:+.1%}   VXX {b.loc[feb].iloc[0]:+.1%}")
+    for day in ("2018-02-05", "2018-02-06"):
+        print(f"{day}          rebuilt {a.loc[day]:+.1%}   VXX {b.loc[day]:+.1%}")
+    two = slice("2018-02-05", "2018-02-06")
+    print(f"the two sessions    rebuilt {(1 + a.loc[two]).prod() - 1:+.1%}   "
+          f"VXX {(1 + b.loc[two]).prod() - 1:+.1%}")
 
 
 if __name__ == "__main__":
