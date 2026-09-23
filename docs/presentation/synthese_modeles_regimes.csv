@@ -1,0 +1,137 @@
+﻿section;élément;indicateur;valeur;explication;source
+0. Mode d'emploi;Ce fichier;Contenu;Données d'entrée, fonctionnement des modèles, résultats de chaque modèle, pourquoi le Sparse Jump Model;Filtrer sur la colonne « section ». La colonne « source » dit d'où vient chaque chiffre.;scripts/export_synthese_modeles.py
+0. Mode d'emploi;Question du projet;Énoncé;Un modèle de régimes appris par machine apporte-t-il une information exploitable au-delà d'une simple mesure de volatilité ?;Et résiste-t-elle aux coûts, aux données disponibles en temps réel et au nombre de tests ?;README.md
+0. Mode d'emploi;Échantillon d'évaluation;Période;01/04/2002 → 08/09/2026, 6 377 séances, 24,4 ans;Hors échantillon : aucune de ces séances n'a servi à entraîner les modèles au moment où ils les classent;data/cache/states.parquet
+1. Données d'entrée;Prix de marché;Contenu;8 séries : S&P 500 (^GSPC), Russell 2000 (^RUT), Nasdaq (^IXIC), Nikkei (^N225), taux US 30 ans (^TYX) et 10 ans (^TNX), indice dollar (DX-Y.NYB), VIX (^VIX);"Variables de momentum, de volatilité et d'asymétrie ; rendements du portefeuille de référence";data/raw/prices/cross_asset.parquet
+1. Données d'entrée;Prix de marché;Provenance et période;Yahoo Finance, clôture ajustée — 01/01/1990 → 08/09/2026;;data/raw/prices/cross_asset.parquet
+1. Données d'entrée;Pétrole WTI;Contenu;DCOILWTICO, quotidien;Momentum du pétrole;data/raw/prices/fred_daily.parquet
+1. Données d'entrée;Pétrole WTI;Provenance et période;FRED — 02/01/1990 → 01/09/2026;;data/raw/prices/fred_daily.parquet
+1. Données d'entrée;Macroéconomie;Contenu;"Production industrielle, emplois, inflation, chômage en premières publications (point-in-time) ; inscriptions au chômage, NFCI (hebdo) ; spreads Baa et Aaa, taux 3 mois, pentes 10a−2a et 10a−3m (quotidien)";"Variables macro, crédit, conditions financières, taux ; taux 3 mois pour les rendements en excès";data/raw/macro/*.parquet (11 fichiers)
+1. Données d'entrée;Macroéconomie;Provenance et période;FRED / ALFRED — 1990 → 07-09/2026 selon la série;;data/raw/macro/*.parquet (11 fichiers)
+1. Données d'entrée;Panels d'actions;Contenu;5 facteurs Fama-French, 49 portefeuilles sectoriels, 25 portefeuilles taille × valeur, quotidien;Variables transversales : dispersion, corrélation moyenne, concentration factorielle;data/raw/panels/*.parquet
+1. Données d'entrée;Panels d'actions;Provenance et période;Ken French Data Library — 02/01/1990 → 31/07/2026;;data/raw/panels/*.parquet
+1. Données d'entrée;Récessions NBER;Contenu;Indicateur mensuel USREC;Validation seulement : les modèles ne le voient jamais;data/raw/references/ref_nber.parquet
+1. Données d'entrée;Récessions NBER;Provenance et période;FRED — 01/1990 → 08/2026;;data/raw/references/ref_nber.parquet
+1. Données d'entrée;Principe point-in-time;Règle;Chaque observation porte deux dates : la période décrite et la date où on pouvait la connaître. Une valeur n'entre dans un modèle qu'à partir de sa date de publication.;Évite de regarder dans le futur via les révisions macro. Vérifié par tests/test_pit.py;README.md, docs/DATA_NOTES.md
+1. Données d'entrée;Régénérer les données;Commandes;scripts/fetch_data.py (clé API FRED gratuite dans .env), puis scripts/build_features.py;Ou décompresser l'archive donnees_regime-lab_2026-09-22.zip à la racine du dépôt;AVANCEMENT.md §3
+2. Variables construites;Ensemble;Nombre de variables;50 variables, 8 familles;Standardisées en fenêtre expansive (sans regarder le futur);data/cache/features.parquet, docs/FEATURE_NOTES.md
+2. Variables construites;Momentum (mom_*);Nombre et contenu;7 variables;rendement actions 21/63/252 j, accélération, pétrole, dollar, largeur 200 j;data/cache/features.parquet
+2. Variables construites;Volatilité (vol_*);Nombre et contenu;9 variables;volatilité réalisée 5/21/63 j, structure par terme, vol de vol, semi-variance, part des sauts, VIX, prime de variance;data/cache/features.parquet
+2. Variables construites;Asymétrie et mémoire (asy_*);Nombre et contenu;6 variables;skewness, kurtosis, drawdown 252 j, exposant de Hurst, ratios de variance 5/20 j;data/cache/features.parquet
+2. Variables construites;Transversal (xs_*);Nombre et contenu;8 variables;dispersion des secteurs et des portefeuilles taille × valeur, corrélation moyenne, absorption factorielle et sa variation, largeur, SMB, HML;data/cache/features.parquet
+2. Variables construites;Macroéconomie (mac_*);Nombre et contenu;9 variables;production industrielle, emplois, inflation (sur 12 et 3 mois), chômage (variation, règle de Sahm), inscriptions au chômage;data/cache/features.parquet
+2. Variables construites;Crédit (cre_*);Nombre et contenu;4 variables;spread Baa, qualité (Baa − Aaa) et leurs variations sur 63 j;data/cache/features.parquet
+2. Variables construites;Conditions financières (fin_*);Nombre et contenu;2 variables;NFCI et sa variation sur 13 semaines;data/cache/features.parquet
+2. Variables construites;Taux (rat_*);Nombre et contenu;5 variables;pentes 10a−2a et 10a−3m et leurs variations, variation du taux cash sur 12 mois;data/cache/features.parquet
+3. Protocole commun;Cadrage gelé;Règle;Protocole, familles et règles de décision figés avant tout résultat;"Empreinte SHA-256 et étiquette publique charter-v2 ; écarts dans docs/PROTOCOL_FREEZE.md";docs/CHARTER.html §03
+3. Protocole commun;Réestimation;Règle;Tous les 6 mois, fenêtre expansive depuis 1990;Même calendrier pour toutes les familles, pour que la comparaison soit loyale;docs/RESULTS_FINAL.md
+3. Protocole commun;Prédiction;Règle;En ligne (filtrée) entre deux réestimations, jamais lissée;Un état lissé utilise des données futures : c'est l'erreur la plus fréquente des backtests de régimes publiés;docs/RESULTS_FINAL.md
+3. Protocole commun;Variables;Règle;"Le Sparse Jump Model sélectionne au plus 10 variables sur la fenêtre d'entraînement ; toutes les familles reçoivent ce même sous-ensemble";Compare des modèles, pas des sélections de variables;docs/RESULTS_FINAL.md
+3. Protocole commun;États;Règle;2 états, ordonnés par la volatilité d'entraînement : 0 = stress, 1 = calme;Ordonner par le rendement inversait le meilleur modèle (erreur corrigée le 08/09);docs/RESULTS_FINAL.md
+3. Protocole commun;Règle de position;Règle;Tout ou rien (investi en calme, rien en stress), plus une règle de taille ajoutée et déclarée;"Fixée avant tout ajustement ; appliquée au portefeuille 60/40 de référence";docs/RESULTS_FINAL.md
+3. Protocole commun;Témoin obligatoire;Règle;Règle d'une ligne : stress quand la volatilité sur 21 j du S&P 500 dépasse sa médiane expansive;Tout résultat se lit à côté de ce que ce témoin obtient gratuitement;docs/RESULTS_FINAL.md
+3. Protocole commun;Rendements et coûts;Règle;En excès du taux 3 mois, 2 bp aller-retour;Couche portefeuille;docs/RESULTS_FINAL.md
+4. Modèles — comment ça marche;A′ — Sparse Jump Model (retenu);Principe;Même principe que A, plus une sélection de variables intégrée (pénalisation L1 : au plus 10 variables pondérées), refaite à chaque réestimation;"Modèle principal ; c'est aussi lui qui choisit les variables données aux autres familles";"Nystrup, Kolm & Lindström (2020-2021) ; Aydınhan, Kolm, Mulvey & Shu (2024) — bibliothèque jumpmodels"
+4. Modèles — comment ça marche;A′ — Sparse Jump Model (retenu);Réglages;"2 états ; λ choisi comme pour A ; au plus 10 variables";;"Nystrup, Kolm & Lindström (2020-2021) ; Aydınhan, Kolm, Mulvey & Shu (2024) — bibliothèque jumpmodels"
+4. Modèles — comment ça marche;A — Jump model;Principe;Regroupe les jours qui se ressemblent (type k-moyennes sur les variables standardisées), en faisant payer une pénalité λ à chaque changement d'état. Plus λ est grand, plus les régimes durent;Version sans sélection de variables;Nystrup, Kolm & Lindström — regime_lab/models/jump.py
+4. Modèles — comment ça marche;A — Jump model;Réglages;"2 états ; λ choisi à chaque réestimation dans {1, 3, 10, 30, 100, 300} en maximisant le Sharpe d'entraînement, avec une borne de plausibilité sur la fréquence des changements";;Nystrup, Kolm & Lindström — regime_lab/models/jump.py
+4. Modèles — comment ça marche;B — HMM gaussien filtré;Principe;Modèle de Markov caché : deux états cachés, chacun avec sa loi gaussienne, et une matrice de probabilités de transition. On lit la probabilité filtrée (passé seulement);Référence exigée par le sujet, traitée loyalement;regime_lab/models/hmm.py (hmmlearn + récursion avant maison)
+4. Modèles — comment ça marche;B — HMM gaussien filtré;Réglages;"2 états ; mêmes variables et même calendrier que A";;regime_lab/models/hmm.py (hmmlearn + récursion avant maison)
+4. Modèles — comment ça marche;C — Gradient boosting (LightGBM);Principe;Pas d'état caché : prédit directement la volatilité des 21 jours suivants à partir des mêmes variables, puis coupe la prévision en deux à sa médiane d'entraînement;Teste si la couche « régime » est un intermédiaire inutile;regime_lab/models/supervised.py
+4. Modèles — comment ça marche;C — Gradient boosting (LightGBM);Réglages;"LightGBM ; seuil = médiane de la prévision sur la fenêtre d'entraînement";;regime_lab/models/supervised.py
+4. Modèles — comment ça marche;C′ — HAR-RV;Principe;Modèle linéaire de volatilité à partir de la volatilité récente sur 1, 5 et 21 jours, coupé en deux états de la même façon;La référence que le machine learning bat rarement en prévision de volatilité;Corsi (2009) — regime_lab/models/supervised.py
+4. Modèles — comment ça marche;C′ — HAR-RV;Réglages;Régression linéaire, 3 composantes;;Corsi (2009) — regime_lab/models/supervised.py
+5. Résultats par modèle;A — Jump model;Changements d'état par an;0,53;13 changements sur la période d'évaluation;calculé ici (data/cache/states.parquet)
+5. Résultats par modèle;A — Jump model;Part du temps en stress;18,3 %;;calculé ici (data/cache/states.parquet)
+5. Résultats par modèle;A′ — Sparse Jump Model (retenu);Changements d'état par an;0,53;13 changements sur la période d'évaluation;calculé ici (data/cache/states.parquet)
+5. Résultats par modèle;A′ — Sparse Jump Model (retenu);Part du temps en stress;15,9 %;;calculé ici (data/cache/states.parquet)
+5. Résultats par modèle;B — HMM gaussien filtré;Changements d'état par an;2,01;49 changements sur la période d'évaluation;calculé ici (data/cache/states.parquet)
+5. Résultats par modèle;B — HMM gaussien filtré;Part du temps en stress;35,3 %;;calculé ici (data/cache/states.parquet)
+5. Résultats par modèle;C — Gradient boosting (LightGBM);Changements d'état par an;14,08;344 changements sur la période d'évaluation;calculé ici (data/cache/states.parquet)
+5. Résultats par modèle;C — Gradient boosting (LightGBM);Part du temps en stress;52,2 %;;calculé ici (data/cache/states.parquet)
+5. Résultats par modèle;C′ — HAR-RV;Changements d'état par an;18,41;450 changements sur la période d'évaluation;calculé ici (data/cache/states.parquet)
+5. Résultats par modèle;C′ — HAR-RV;Part du temps en stress;41,8 %;;calculé ici (data/cache/states.parquet)
+5. Résultats par modèle;Témoin — règle de volatilité d'une ligne;Changements d'état par an;6,75;165 changements;calculé ici
+5. Résultats par modèle;Témoin — règle de volatilité d'une ligne;Part du temps en stress;48,8 %;Environ la moitié du temps, par construction (médiane);calculé ici
+5. Résultats par modèle;A — Jump model;Durée moyenne d'un régime (jours);456;Plus c'est long, plus le régime est persistant (et moins il y a de trading);docs/RESULTS_FINAL.md
+5. Résultats par modèle;A′ — Sparse Jump Model (retenu);Durée moyenne d'un régime (jours);456;Plus c'est long, plus le régime est persistant (et moins il y a de trading);docs/RESULTS_FINAL.md
+5. Résultats par modèle;B — HMM gaussien filtré;Durée moyenne d'un régime (jours);128;Plus c'est long, plus le régime est persistant (et moins il y a de trading);docs/RESULTS_FINAL.md
+5. Résultats par modèle;C — Gradient boosting (LightGBM);Durée moyenne d'un régime (jours);18;Plus c'est long, plus le régime est persistant (et moins il y a de trading);docs/RESULTS_FINAL.md
+5. Résultats par modèle;C′ — HAR-RV;Durée moyenne d'un régime (jours);14;Plus c'est long, plus le régime est persistant (et moins il y a de trading);docs/RESULTS_FINAL.md
+5. Résultats par modèle;Témoin — règle de volatilité d'une ligne;Durée moyenne d'un régime (jours);34;Plus c'est long, plus le régime est persistant (et moins il y a de trading);docs/RESULTS_FINAL.md
+5. Résultats par modèle;A — Jump model;Persistance par rapport au hasard;97×;Combien de fois plus persistant qu'une suite d'états tirée au hasard;docs/RESULTS_FINAL.md
+5. Résultats par modèle;A′ — Sparse Jump Model (retenu);Persistance par rapport au hasard;83×;Combien de fois plus persistant qu'une suite d'états tirée au hasard;docs/RESULTS_FINAL.md
+5. Résultats par modèle;B — HMM gaussien filtré;Persistance par rapport au hasard;54×;Combien de fois plus persistant qu'une suite d'états tirée au hasard;docs/RESULTS_FINAL.md
+5. Résultats par modèle;C — Gradient boosting (LightGBM);Persistance par rapport au hasard;9×;Combien de fois plus persistant qu'une suite d'états tirée au hasard;docs/RESULTS_FINAL.md
+5. Résultats par modèle;C′ — HAR-RV;Persistance par rapport au hasard;7×;Combien de fois plus persistant qu'une suite d'états tirée au hasard;docs/RESULTS_FINAL.md
+5. Résultats par modèle;Témoin — règle de volatilité d'une ligne;Persistance par rapport au hasard;16×;Combien de fois plus persistant qu'une suite d'états tirée au hasard;docs/RESULTS_FINAL.md
+5. Résultats par modèle;A — Jump model;Instabilité en temps réel;0,9 %;Part des étiquettes qui changeraient si on connaissait la suite du semestre;docs/RESULTS_FINAL.md
+5. Résultats par modèle;A′ — Sparse Jump Model (retenu);Instabilité en temps réel;0,6 %;Part des étiquettes qui changeraient si on connaissait la suite du semestre;docs/RESULTS_FINAL.md
+5. Résultats par modèle;B — HMM gaussien filtré;Instabilité en temps réel;0,7 %;Part des étiquettes qui changeraient si on connaissait la suite du semestre;docs/RESULTS_FINAL.md
+5. Résultats par modèle;C — Gradient boosting (LightGBM);Instabilité en temps réel;0,0 %;Part des étiquettes qui changeraient si on connaissait la suite du semestre;docs/RESULTS_FINAL.md
+5. Résultats par modèle;C′ — HAR-RV;Instabilité en temps réel;0,0 %;Part des étiquettes qui changeraient si on connaissait la suite du semestre;docs/RESULTS_FINAL.md
+5. Résultats par modèle;Témoin — règle de volatilité d'une ligne;Instabilité en temps réel;0,0 %;Part des étiquettes qui changeraient si on connaissait la suite du semestre;docs/RESULTS_FINAL.md
+5. Résultats par modèle;A — Jump model;Exactitude équilibrée contre les récessions NBER;93,3 %;Le stress tombe-t-il sur les récessions officielles ? (50 % = hasard);docs/RESULTS_FINAL.md
+5. Résultats par modèle;A′ — Sparse Jump Model (retenu);Exactitude équilibrée contre les récessions NBER;93,2 %;Le stress tombe-t-il sur les récessions officielles ? (50 % = hasard);docs/RESULTS_FINAL.md
+5. Résultats par modèle;B — HMM gaussien filtré;Exactitude équilibrée contre les récessions NBER;84,7 %;Le stress tombe-t-il sur les récessions officielles ? (50 % = hasard);docs/RESULTS_FINAL.md
+5. Résultats par modèle;C — Gradient boosting (LightGBM);Exactitude équilibrée contre les récessions NBER;75,0 %;Le stress tombe-t-il sur les récessions officielles ? (50 % = hasard);docs/RESULTS_FINAL.md
+5. Résultats par modèle;C′ — HAR-RV;Exactitude équilibrée contre les récessions NBER;78,2 %;Le stress tombe-t-il sur les récessions officielles ? (50 % = hasard);docs/RESULTS_FINAL.md
+5. Résultats par modèle;Témoin — règle de volatilité d'une ligne;Exactitude équilibrée contre les récessions NBER;—;Le stress tombe-t-il sur les récessions officielles ? (50 % = hasard);docs/RESULTS_FINAL.md
+5. Résultats par modèle;A — Jump model;Kappa contre NBER;0,49;Accord corrigé du hasard (0 = hasard, 1 = parfait);docs/RESULTS_FINAL.md
+5. Résultats par modèle;A′ — Sparse Jump Model (retenu);Kappa contre NBER;0,53;Accord corrigé du hasard (0 = hasard, 1 = parfait);docs/RESULTS_FINAL.md
+5. Résultats par modèle;B — HMM gaussien filtré;Kappa contre NBER;0,24;Accord corrigé du hasard (0 = hasard, 1 = parfait);docs/RESULTS_FINAL.md
+5. Résultats par modèle;C — Gradient boosting (LightGBM);Kappa contre NBER;0,12;Accord corrigé du hasard (0 = hasard, 1 = parfait);docs/RESULTS_FINAL.md
+5. Résultats par modèle;C′ — HAR-RV;Kappa contre NBER;0,17;Accord corrigé du hasard (0 = hasard, 1 = parfait);docs/RESULTS_FINAL.md
+5. Résultats par modèle;Témoin — règle de volatilité d'une ligne;Kappa contre NBER;—;Accord corrigé du hasard (0 = hasard, 1 = parfait);docs/RESULTS_FINAL.md
+5. Résultats par modèle;A — Jump model;Écart de volatilité future entre états (21 j);−6,51 %;Calme moins volatil que stress : détecté pour tous;docs/RESULTS_FINAL.md
+5. Résultats par modèle;A′ — Sparse Jump Model (retenu);Écart de volatilité future entre états (21 j);−6,59 %;Calme moins volatil que stress : détecté pour tous;docs/RESULTS_FINAL.md
+5. Résultats par modèle;B — HMM gaussien filtré;Écart de volatilité future entre états (21 j);−5,42 %;Calme moins volatil que stress : détecté pour tous;docs/RESULTS_FINAL.md
+5. Résultats par modèle;C — Gradient boosting (LightGBM);Écart de volatilité future entre états (21 j);−4,54 %;Calme moins volatil que stress : détecté pour tous;docs/RESULTS_FINAL.md
+5. Résultats par modèle;C′ — HAR-RV;Écart de volatilité future entre états (21 j);−4,99 %;Calme moins volatil que stress : détecté pour tous;docs/RESULTS_FINAL.md
+5. Résultats par modèle;Témoin — règle de volatilité d'une ligne;Écart de volatilité future entre états (21 j);−3,52 %;Calme moins volatil que stress : détecté pour tous;docs/RESULTS_FINAL.md
+5. Résultats par modèle;A — Jump model;Écart de rendement futur entre états (21 j);−1,02 %;Non détecté pour aucun : les états ne prédisent pas le sens du marché;docs/RESULTS_FINAL.md
+5. Résultats par modèle;A′ — Sparse Jump Model (retenu);Écart de rendement futur entre états (21 j);−0,46 %;Non détecté pour aucun : les états ne prédisent pas le sens du marché;docs/RESULTS_FINAL.md
+5. Résultats par modèle;B — HMM gaussien filtré;Écart de rendement futur entre états (21 j);−2,58 %;Non détecté pour aucun : les états ne prédisent pas le sens du marché;docs/RESULTS_FINAL.md
+5. Résultats par modèle;C — Gradient boosting (LightGBM);Écart de rendement futur entre états (21 j);−0,84 %;Non détecté pour aucun : les états ne prédisent pas le sens du marché;docs/RESULTS_FINAL.md
+5. Résultats par modèle;C′ — HAR-RV;Écart de rendement futur entre états (21 j);−3,12 %;Non détecté pour aucun : les états ne prédisent pas le sens du marché;docs/RESULTS_FINAL.md
+5. Résultats par modèle;Témoin — règle de volatilité d'une ligne;Écart de rendement futur entre états (21 j);−2,22 %;Non détecté pour aucun : les états ne prédisent pas le sens du marché;docs/RESULTS_FINAL.md
+5. Résultats par modèle;A — Jump model;R² incrémental sur la volatilité future (t);+3,47 pts (t −3,46);Ce que le modèle ajoute au-delà du témoin : le résultat positif central de l'étude;docs/RESULTS_FINAL.md
+5. Résultats par modèle;A′ — Sparse Jump Model (retenu);R² incrémental sur la volatilité future (t);+3,93 pts (t −3,40);Ce que le modèle ajoute au-delà du témoin : le résultat positif central de l'étude;docs/RESULTS_FINAL.md
+5. Résultats par modèle;B — HMM gaussien filtré;R² incrémental sur la volatilité future (t);+2,26 pts (t −4,59);Ce que le modèle ajoute au-delà du témoin : le résultat positif central de l'étude;docs/RESULTS_FINAL.md
+5. Résultats par modèle;C — Gradient boosting (LightGBM);R² incrémental sur la volatilité future (t);+2,13 pts (t −6,34);Ce que le modèle ajoute au-delà du témoin : le résultat positif central de l'étude;docs/RESULTS_FINAL.md
+5. Résultats par modèle;C′ — HAR-RV;R² incrémental sur la volatilité future (t);+0,19 pt (t −1,84);Ce que le modèle ajoute au-delà du témoin : le résultat positif central de l'étude;docs/RESULTS_FINAL.md
+5. Résultats par modèle;Témoin — règle de volatilité d'une ligne;R² incrémental sur la volatilité future (t);+0,004 pt (t 0,21);Ce que le modèle ajoute au-delà du témoin : le résultat positif central de l'étude;docs/RESULTS_FINAL.md
+5. Résultats par modèle;A — Jump model;R² incrémental sur les rendements futurs (t);+0,022 pt (t 0,24);Rien, pour tous : ni timing, ni prévision de direction;docs/RESULTS_FINAL.md
+5. Résultats par modèle;A′ — Sparse Jump Model (retenu);R² incrémental sur les rendements futurs (t);+0,030 pt (t 0,27);Rien, pour tous : ni timing, ni prévision de direction;docs/RESULTS_FINAL.md
+5. Résultats par modèle;B — HMM gaussien filtré;R² incrémental sur les rendements futurs (t);+0,007 pt (t −0,22);Rien, pour tous : ni timing, ni prévision de direction;docs/RESULTS_FINAL.md
+5. Résultats par modèle;C — Gradient boosting (LightGBM);R² incrémental sur les rendements futurs (t);+0,023 pt (t 0,52);Rien, pour tous : ni timing, ni prévision de direction;docs/RESULTS_FINAL.md
+5. Résultats par modèle;C′ — HAR-RV;R² incrémental sur les rendements futurs (t);+0,008 pt (t −0,30);Rien, pour tous : ni timing, ni prévision de direction;docs/RESULTS_FINAL.md
+5. Résultats par modèle;Témoin — règle de volatilité d'une ligne;R² incrémental sur les rendements futurs (t);+0,000 pt (t −0,03);Rien, pour tous : ni timing, ni prévision de direction;docs/RESULTS_FINAL.md
+5. Résultats par modèle;A — Jump model;Sharpe net de la règle tout ou rien (60/40 seul : 0,47);0,54;Toutes les différences restent sous le seuil détectable (0,27-0,40) : non décidable;docs/RESULTS_FINAL.md
+5. Résultats par modèle;A′ — Sparse Jump Model (retenu);Sharpe net de la règle tout ou rien (60/40 seul : 0,47);0,55;Toutes les différences restent sous le seuil détectable (0,27-0,40) : non décidable;docs/RESULTS_FINAL.md
+5. Résultats par modèle;B — HMM gaussien filtré;Sharpe net de la règle tout ou rien (60/40 seul : 0,47);0,46;Toutes les différences restent sous le seuil détectable (0,27-0,40) : non décidable;docs/RESULTS_FINAL.md
+5. Résultats par modèle;C — Gradient boosting (LightGBM);Sharpe net de la règle tout ou rien (60/40 seul : 0,47);0,42;Toutes les différences restent sous le seuil détectable (0,27-0,40) : non décidable;docs/RESULTS_FINAL.md
+5. Résultats par modèle;C′ — HAR-RV;Sharpe net de la règle tout ou rien (60/40 seul : 0,47);0,50;Toutes les différences restent sous le seuil détectable (0,27-0,40) : non décidable;docs/RESULTS_FINAL.md
+5. Résultats par modèle;Témoin — règle de volatilité d'une ligne;Sharpe net de la règle tout ou rien (60/40 seul : 0,47);—;Toutes les différences restent sous le seuil détectable (0,27-0,40) : non décidable;docs/RESULTS_FINAL.md
+5. Résultats par modèle;A — Jump model;Perte maximale de la règle tout ou rien (60/40 seul : −35,6 %);−22,3 %;Réduit les pertes en crise, mais en réduisant aussi l'exposition;docs/RESULTS_FINAL.md
+5. Résultats par modèle;A′ — Sparse Jump Model (retenu);Perte maximale de la règle tout ou rien (60/40 seul : −35,6 %);−22,3 %;Réduit les pertes en crise, mais en réduisant aussi l'exposition;docs/RESULTS_FINAL.md
+5. Résultats par modèle;B — HMM gaussien filtré;Perte maximale de la règle tout ou rien (60/40 seul : −35,6 %);−13,7 %;Réduit les pertes en crise, mais en réduisant aussi l'exposition;docs/RESULTS_FINAL.md
+5. Résultats par modèle;C — Gradient boosting (LightGBM);Perte maximale de la règle tout ou rien (60/40 seul : −35,6 %);−10,2 %;Réduit les pertes en crise, mais en réduisant aussi l'exposition;docs/RESULTS_FINAL.md
+5. Résultats par modèle;C′ — HAR-RV;Perte maximale de la règle tout ou rien (60/40 seul : −35,6 %);−13,4 %;Réduit les pertes en crise, mais en réduisant aussi l'exposition;docs/RESULTS_FINAL.md
+5. Résultats par modèle;Témoin — règle de volatilité d'une ligne;Perte maximale de la règle tout ou rien (60/40 seul : −35,6 %);—;Réduit les pertes en crise, mais en réduisant aussi l'exposition;docs/RESULTS_FINAL.md
+5. Résultats par modèle;A — Jump model;Sharpe net de la règle de taille;0,50;Idem, non décidable;docs/RESULTS_FINAL.md
+5. Résultats par modèle;A′ — Sparse Jump Model (retenu);Sharpe net de la règle de taille;0,49;Idem, non décidable;docs/RESULTS_FINAL.md
+5. Résultats par modèle;B — HMM gaussien filtré;Sharpe net de la règle de taille;0,49;Idem, non décidable;docs/RESULTS_FINAL.md
+5. Résultats par modèle;C — Gradient boosting (LightGBM);Sharpe net de la règle de taille;0,50;Idem, non décidable;docs/RESULTS_FINAL.md
+5. Résultats par modèle;C′ — HAR-RV;Sharpe net de la règle de taille;0,53;Idem, non décidable;docs/RESULTS_FINAL.md
+5. Résultats par modèle;Témoin — règle de volatilité d'une ligne;Sharpe net de la règle de taille;—;Idem, non décidable;docs/RESULTS_FINAL.md
+5. Résultats par modèle;Tous modèles;Latence de détection;0 à 13 jours calendaires;Mesurée contre les pics NBER : les régimes sont reconnus quand ils arrivent;docs/RESULTS_FINAL.md
+5. Résultats par modèle;Tous modèles;D'où vient la valeur (décomposition);"Ciblage de volatilité +0,44 %/an ; apport propre du régime −0,04 % (avec recul), −0,25 % (net de la latence)";La valeur vient de la gestion du risque, pas du régime;docs/RESULTS_DECOMPOSITION.md
+6. Pourquoi le Sparse Jump Model;Choisi avant de mesurer;Argument;"Le cadrage gelé le désigne comme modèle principal avant tout résultat, sur la base de la littérature (Nystrup, Kolm & Lindström ; Aydınhan, Kolm, Mulvey & Shu)";;docs/CHARTER.html §03
+6. Pourquoi le Sparse Jump Model;Persistance réglée explicitement;Argument;La pénalité λ fait payer chaque changement d'état : régimes longs, peu de rotation, peu de coûts (13 changements en 24,4 ans);;docs/CHARTER.html §03
+6. Pourquoi le Sparse Jump Model;Sélection de variables intégrée;Argument;La pénalisation L1 retient au plus 10 variables : modèle lisible (centroïdes interprétables), et même sous-ensemble fourni aux autres familles pour une comparaison loyale;;docs/CHARTER.html §03
+6. Pourquoi le Sparse Jump Model;Meilleur accord avec les récessions;Argument;"Kappa 0,53, le plus élevé des cinq ; exactitude 93,2 %, à égalité avec A (93,3 %), loin devant le HMM (84,7 %) et les modèles supervisés (75-78 %)";;docs/RESULTS_FINAL.md
+6. Pourquoi le Sparse Jump Model;Plus forte information sur le risque futur;Argument;"+3,93 points de R² sur la volatilité future au-delà du témoin (t −3,40), le plus élevé des cinq ; le témoin ajoute 0";;docs/RESULTS_FINAL.md
+6. Pourquoi le Sparse Jump Model;Fiable en temps réel;Argument;0,6 % d'étiquettes instables, latence de 0 à 13 jours;;docs/RESULTS_FINAL.md
+6. Pourquoi le Sparse Jump Model;Limite à dire;Argument;Il ne prédit pas le sens du marché (+0,03 point de R² sur les rendements, t 0,27), et sa lenteur (environ 0,5 changement par an) en fait un thermomètre du risque, pas un signal de trading. Le rendre plus réactif le fait ressembler à un simple filtre de volatilité (docs/EXPLORATION_SJM_SPEED.md);;docs/RESULTS_FINAL.md
+7. Couplage à des stratégies de trading;8 stratégies × 3 couplages (arrêt, réduction, bascule);Verdict;"Aucun couplage utile ; tendance crypto et prime overnight Nasdaq pénalisées";Ces stratégies gagnent justement en période de stress : le régime décrit le risque, pas le sens;docs/RESULTS_COUPLAGE_STRATEGIES.md
