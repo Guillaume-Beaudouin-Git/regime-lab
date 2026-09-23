@@ -1,0 +1,122 @@
+==============================================================================
+IDEA 6 — THE REGIME AS AN INPUT OF A RISK FORECAST, 46 MARKETS — INSTRUMENT
+==============================================================================
+
+0.  INPUTS (SHA-256)
+
+   700f606051109195  cache/trend_universe_m1.parquet
+   570bb4c9f31732e0  raw/prices/cross_asset.parquet
+   87e2d3b7c7912a48  raw/macro/rate_cash_3m.parquet
+   0622c72fa75115cb  cache/states.parquet
+
+==============================================================================
+1.  COVERAGE — no loss, no return
+
+   training rows from 2002-04-01, at least 504, targets realised by t; HAR windows (5, 22, 66); horizon 21
+   evaluation sessions 2005-12-20 -> 2026-08-12, 5,385
+
+   panel           markets   min  median   max  empty days
+   non_us_43            43    30      43    43           0
+   us_equity_3           3     3       3     3           0
+   equity_non_us        10     9      10    10           0
+   commodity            13    12      13    13           0
+   currency             11     3      11    11           0
+   bond_credit           9     4       9     9           0
+
+   market     first forecast  defined share  stale windows
+   AGG       2006-01-02          99.8%              0
+   AUDUSD=X  2008-08-18          87.1%              0
+   BWX       2010-01-14          80.3%              0
+   CAD=X     2005-12-21         100.0%              0
+   CHF=X     2005-12-20         100.0%              0
+   CL=F      2004-04-02          98.4%              0
+   CT=F      2004-04-02         100.0%              1
+   DX-Y.NYB  2004-04-02         100.0%              0
+   EMB       2010-03-24          79.4%              0
+   EURUSD=X  2006-03-03          97.3%              2
+   GBPUSD=X  2006-03-03          99.0%              0
+   GC=F      2004-04-02         100.0%              0
+   HG=F      2004-04-02         100.0%              0
+   HO=F      2004-04-02         100.0%              0
+   HYG       2009-07-15          82.7%              0
+   IEF       2004-11-02         100.0%              0
+   JPY=X     2004-04-02          98.3%              2
+   KC=F      2004-04-02         100.0%              0
+   LQD       2004-11-02         100.0%              0
+   MXN=X     2006-03-06          99.0%              0
+   NG=F      2004-04-02         100.0%              0
+   NOK=X     2005-02-24          98.1%              3
+   NZDUSD=X  2006-03-03          99.0%              0
+   PL=F      2005-06-21          80.0%             25
+   SB=F      2004-04-02         100.0%              0
+   SEK=X     2005-02-24          98.1%              3
+   SHY       2004-11-02         100.0%              0
+   SI=F      2004-04-02         100.0%              0
+   TIP       2006-03-10          98.9%              0
+   TLT       2004-11-02         100.0%              0
+   ZC=F      2004-04-02         100.0%              4
+   ZS=F      2004-04-02         100.0%              0
+   ZW=F      2004-04-02         100.0%              1
+   ^AEX      2004-04-02         100.0%              0
+   ^AXJO     2004-04-02         100.0%              0
+   ^FCHI     2004-04-02         100.0%              0
+   ^FTSE     2004-04-02         100.0%              0
+   ^GDAXI    2004-04-02         100.0%              0
+   ^GSPC     2004-04-02         100.0%              0
+   ^GSPTSE   2004-04-02         100.0%              0
+   ^HSI      2004-04-02         100.0%              0
+   ^IBEX     2004-04-02         100.0%              0
+   ^N225     2004-04-02          98.4%              1
+   ^NDX      2004-04-02         100.0%              0
+   ^RUT      2004-04-02         100.0%              0
+   ^STOXX50E 2009-07-03          82.9%              0
+
+==============================================================================
+2.  THE STATE AND THE RULES ON THE EVALUATION SESSIONS — descriptive
+
+   state   stress share  13.2%   transitions/yr  0.56
+   median  stress share  49.7%   transitions/yr  6.88
+   80th    stress share  21.5%   transitions/yr  4.31
+   kappa(state, median rule) +0.24
+   kappa(state, 80th rule) +0.41
+
+==============================================================================
+3.  AXIS 4 OF THE OPPOSABLE RULE — effective dimension of the volatility panel,
+    remeasured before any reading (participation ratio, month-end log RV21)
+
+   advisor's sample, from 2003-07-17    level 4.14   monthly change 6.42   first eigenvalue 21.7/46   219 months 2008-01-31 -> 2026-09-30
+   this study's evaluation window       level 4.14   monthly change 6.40   first eigenvalue 21.7/46   218 months 2008-01-31 -> 2026-08-31
+   => the economic part (E1, E2) is not a seventh device on axis 4: level at or above 4
+
+==============================================================================
+4.  MINIMUM DETECTABLE EFFECT — forecast panels, blinded (demeaned d_t)
+
+   sessions 5,385, non-finite cells 0
+   test panel           base        alpha   MDE blocks 21 / 63 / 126        threshold   base QLIKE   MDE %
+   P1   non_us_43       har       0.01667   0.00615 / 0.00630 / 0.00648   0.00648       0.2986   2.17%
+   P2   non_us_43       harvix    0.01667   0.00579 / 0.00638 / 0.00660   0.00660       0.2818   2.34%
+   P3   us_equity_3     harvix    0.01667   0.01169 / 0.01194 / 0.01224   0.01224       0.3039   4.03%
+   C1   equity_non_us   har       0.00625   0.01641 / 0.01668 / 0.01656   0.01668       0.3196   5.22%
+   C2   equity_non_us   harvix    0.00625   0.01227 / 0.01215 / 0.01214   0.01227       0.3031   4.05%
+   C3   commodity       har       0.00625   0.00387 / 0.00449 / 0.00490   0.00490       0.2171   2.26%
+   C4   commodity       harvix    0.00625   0.00342 / 0.00397 / 0.00417   0.00417       0.2145   1.95%
+   C5   currency        har       0.00625   0.00814 / 0.00786 / 0.00744   0.00814       0.3023   2.69%
+   C6   currency        harvix    0.00625   0.00821 / 0.00822 / 0.00875   0.00875       0.2860   3.06%
+   C7   bond_credit     har       0.00625   0.01369 / 0.01435 / 0.01556   0.01556       0.3997   3.89%
+   C8   bond_credit     harvix    0.00625   0.02161 / 0.02336 / 0.02280   0.02336       0.3604   6.48%
+   units: mean QLIKE per market-session. The base QLIKE is the loss of the model
+   WITHOUT the state, printed only to express the MDE as a share of it.
+
+==============================================================================
+5.  THE BOOKS — coverage and blinded MDE, no Sharpe
+
+   trend_46        2006-03-13 -> 2026-09-10, 5,347 sessions, sized instruments min 36 median 46
+   risk_parity_35  2006-03-13 -> 2026-09-10, 5,347 sessions, sized instruments min 30 median 35
+   E1  trend_46         MDE (Sharpe) 0.020 / 0.019 / 0.018  ->  threshold 0.020
+   E2  risk_parity_35   MDE (Sharpe) 0.027 / 0.029 / 0.029  ->  threshold 0.029
+
+   families: P at 0.05/3, C at 0.05/8, E at 0.05/2; per market Holm at 0.05 over 46 per baseline
+
+==============================================================================
+NOT READ — re-run with --read, once.
+==============================================================================
