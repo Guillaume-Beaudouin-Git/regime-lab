@@ -161,6 +161,16 @@ d'essais compte 84 configurations distinctes (`data/trials.parquet`).
   rapportent autant en stress qu'en calme (0,62 contre 0,64), parce que les états de
   stress contiennent aussi les rebonds (2003, 2009, 2020). TLT sauve 2008 (+0,1 % au lieu
   de −22,9 %) mais rate 2009 (−6,3 % au lieu de +20,3 %).
+- **Chacune des stratégies testées, remplacée en stress par une valeur refuge**
+  (`docs/RESULTS_REFUGE.md`, 2ᵉ partie ; protocole commité avant lecture dans l'étude du
+  dépôt privé voisin ; 27 essais `sjm_haven_switch`, coût nul). 9 stratégies (les 8 des
+  couplages + le momentum UMD) × 3 jambes (or, TLT, options = volatilité achetée).
+  **Aucune bascule n'est utile.** L'or est la seule jambe qui ne détruit rien (+0,00 à
+  +0,04 hors momentum) ; les options détruisent partout sauf sur le momentum (−0,15 à
+  −0,43 : +29 à +38 % en 2008, puis −18 à −23 % au rebond de 2009). **Momentum + or :
+  0,47 → 0,77**, t +2,68, placebo 100 %, mais sous le MDE (0,62), surtout dû à l'arrêt du
+  momentum (0,70), et la règle médiane de volatilité fait autant (0,82). C'est le cas
+  retenu pour la présentation.
 
 ---
 

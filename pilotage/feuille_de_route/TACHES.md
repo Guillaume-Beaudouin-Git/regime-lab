@@ -309,6 +309,11 @@ automatiquement par toute session ouverte ici. Ce fichier-ci en est le détail.
     l'or +0,04 (sous-puissant, et la règle médiane fait mieux). Les états de stress
     contiennent les rebonds, où les actions gagnent. `docs/RESULTS_REFUGE.md`.
 
+11d. ~~Stratégies testées → valeur refuge en stress~~ **FAIT le 23/09** : 9 stratégies ×
+    (or, TLT, options), 27 essais, aucune bascule utile. Momentum + or 0,47 → 0,77, sous
+    le MDE, et la règle médiane fait autant. `docs/RESULTS_REFUGE.md`, 2ᵉ partie.
+    **Ouvert** : momentum conditionné sur 1926-2026 (plus de crises, plus de puissance).
+
 ### ⟶ 12. ENSUITE — voir `AVANCEMENT.md` §4 et §5
 
 Dans l'ordre proposé : la présentation de 10 minutes ; les instruments Two Sigma

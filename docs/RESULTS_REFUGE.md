@@ -80,3 +80,67 @@ volatilité, les **actions rapportent autant en stress qu'en calme** : Sharpe 0,
   volatilité, l'horloge fait moins de 2 transitions par an, l'usage est une bascule, et
   l'objet est de dimension 1. Ce test est donc un nouveau cas de la même famille, et il
   tombe de la même façon.
+
+---
+
+# Deuxième test : remplacer chacune des stratégies testées par une valeur refuge
+
+**La vraie idée de Guillaume, précisée le 23/09.** On reprend les stratégies déjà
+couplées au filtre (`docs/RESULTS_COUPLAGE_STRATEGIES.md`), plus le momentum actions.
+Quand le modèle est en stress, on ne fait pas tourner la stratégie : on tient à sa place
+de l'or, des obligations d'État longues (TLT) ou des options, c'est-à-dire de la
+volatilité achetée, sous la forme du straddle synthétique. On compare ensuite la
+stratégie seule avec la stratégie + filtre + jambe refuge.
+
+**Protocole.**
+- 9 stratégies × 3 jambes = 27 tests, à 0,05/27, avec le même critère que ci-dessus.
+- Chaque jambe refuge est ciblée à 10 % de volatilité. Aucun coût.
+- Le protocole a été commité avant lecture dans l'étude du dépôt privé voisin, qui
+  contient sept des stratégies. Il y a eu une seule lecture : 27 essais
+  `sjm_haven_switch` dans `data/trials.parquet`.
+- Les séries « seules » reproduisent exactement les Sharpe déjà publiés. Seul le
+  momentum passe de 0,52 à 0,47, parce que son échantillon commence en octobre 2002,
+  quand les jambes refuges deviennent disponibles.
+
+## Résultats : Δ de Sharpe avec la bascule, par rapport à la stratégie seule
+
+| stratégie | Sharpe seule | → or | → obligations (TLT) | → options |
+|---|---|---|---|---|
+| **Momentum actions** | 0,47 | **+0,30** | +0,19 | +0,00 |
+| Rebond obligataire de fin de mois | 0,85 | +0,04 | −0,10 | −0,16 |
+| Momentum USDJPY | 0,50 | +0,04 | −0,09 | −0,17 |
+| Cassure d'ouverture (ORB) Nasdaq | 0,64 | +0,04 | −0,08 | −0,15 |
+| Tendance or | 0,62 | +0,02 | −0,11 | −0,18 |
+| Tendance énergie, long seul | −0,17 | +0,00 | −0,17 | −0,28 |
+| Tendance or + argent | 0,58 | −0,01 | −0,14 | −0,21 |
+| Prime overnight Nasdaq | 1,10 | −0,10 | −0,26 | −0,35 |
+| Tendance crypto | 1,13 | −0,20 | −0,34 | −0,43 |
+
+**Aucune des 27 bascules n'est utile.** Les 12 positives sont sous-puissantes et les
+15 autres pas utiles. Aucune n'est nuisible au sens strict du critère.
+
+## Ce qu'on peut dire en présentation
+
+1. **Le meilleur cas du programme : momentum actions + or en stress, 0,47 → 0,77.**
+   - Le momentum s'effondre en stress (Sharpe −1,13 dans cet état) et l'or y gagne :
+     les deux effets s'additionnent.
+   - Le t vaut +2,68, et aucune des 400 rotations du placebo ne fait mieux.
+   - La perte maximale passe de −26 % à −21 %, et le rebond de 2009 de −17 % à +18 %.
+   - **À dire honnêtement** : l'écart reste sous le seuil de détection (0,62). L'essentiel
+     vient de l'arrêt du momentum en stress (0,70 avec des liquidités à la place), et
+     une simple règle de volatilité fait autant (0,82).
+2. **L'or est la seule valeur refuge qui ne détruit rien.** Il est positif sur 6
+   stratégies sur 9, mais avec des gains minimes (+0,00 à +0,04) hors momentum.
+3. **Les options détruisent presque partout** (−0,15 à −0,43), avec un profil très
+   parlant :
+   - pendant la chute de 2008, elles gagnent +29 % à +38 % selon la stratégie remplacée ;
+   - pendant les rebonds, où le modèle reste en stress et où la volatilité s'effondre,
+     elles perdent −18 % à −23 % en 2009 et −12 % à −20 % en 2020.
+4. **Deux stratégies gagnent surtout en stress** : la tendance crypto (Sharpe 3,89 en
+   stress) et la prime overnight (2,12). Les remplacer par quoi que ce soit les pénalise.
+   Le « stress » détecté n'est pas un mauvais moment pour toutes les stratégies.
+
+**Le message d'ensemble reste le même.** Le filtre protège pendant la chute, mais il
+reste en mode crise pendant le rebond, et c'est là qu'une couverture perd ce qu'elle a
+gagné. **Le seul couple qui fonctionne, momentum + or, fonctionne parce que le momentum
+perd précisément dans ces rebonds.**
