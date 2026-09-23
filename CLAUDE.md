@@ -56,6 +56,14 @@ synthétiques et commiter **les instruments de A, B et C**, avec leurs seuils da
 et le SHA-256 des fichiers d'entrée, **avant toute lecture**. Ensuite viennent les
 lectures A, puis B, puis C, quel que soit le résultat de chacune ; chacune est un essai.
 
+⚠ **Répartition du 23/09, 10h, décidée par Guillaume : la session du compte B
+(`projet-big-data-regimes-cd`) construit les instruments et fait les lectures Two
+Sigma.** L'autre session ne touche pas à ces fichiers : `regime_lab/selection/`
+(nouveaux modules), `scripts/run_twosigma_*`, `tests/test_twosigma_*`,
+`docs/RESULTS_TWOSIGMA*`, `docs/artifacts/twosigma/`, ni aux lignes `twosigma` de
+`data/trials.parquet`. Le dossier de travail est partagé : n'ajoute que tes fichiers,
+avec des chemins explicites, jamais `git add -A`.
+
 **3. Fermer l'arbre AHL** (priorité plus basse) :
 
 **AHL niveau C, puis fermeture de l'arbre.** Le pré-enregistrement verrouillé

@@ -296,7 +296,9 @@ automatiquement par toute session ouverte ici. Ce fichier-ci en est le détail.
 ### ⟶ 12. ENSUITE — voir `AVANCEMENT.md` §4 et §5
 
 Dans l'ordre proposé : la présentation de 10 minutes ; les instruments Two Sigma
-(A, B et C commités avant toute lecture), puis les lectures A, B et C ; la fermeture de l'arbre AHL (le MDE de C1,
+(A, B et C commités avant toute lecture), puis les lectures A, B et C — **pris par la
+session du compte B le 23/09 à 10h, sur décision de Guillaume ; fichiers réservés listés
+dans `CLAUDE.md`** ; la fermeture de l'arbre AHL (le MDE de C1,
 et la décision sur la lecture A1 principale sur (126,10)) ; le nettoyage et le commit de
 `pilotage/mesures_brutes/` ; puis le plan Bridgewater. La porte G0 de Rentec reste la
 moins chère (1,5 j), mais ses données sont dans le dépôt privé voisin : Guillaume seul.
