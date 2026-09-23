@@ -49,10 +49,12 @@ sont décrits dans `AVANCEMENT.md` §4, tâche 1.
 
 **2. Le plan Two Sigma** : c'est la piste la plus proche de l'objectif de fond, puisque
 le régime y choisit entre dix signaux. La phase 1 est faite (`22abbe0`, `3b64ab2`).
-Le verrou `docs/PRESPEC_TWOSIGMA.md` est rédigé mais **pas commité** : il attend que
-Guillaume relise son §12.0. Ne le commite pas sans cette relecture. Ensuite, on descend
-l'arbre A → B → C, avec à chaque niveau : instrument, MDE, critère commité, puis lecture,
-qui est un essai.
+Le verrou `docs/PRESPEC_TWOSIGMA.md` est **commité**. Guillaume l'a approuvé, et un
+second validateur puis un auditeur l'ont confirmé. Ne le modifie pas : toute déviation va
+dans `docs/PROTOCOL_FREEZE.md`. Prochaine étape (§13.1) : écrire, tester sur données
+synthétiques et commiter **les instruments de A, B et C**, avec leurs seuils dans un JSON
+et le SHA-256 des fichiers d'entrée, **avant toute lecture**. Ensuite viennent les
+lectures A, puis B, puis C, quel que soit le résultat de chacune ; chacune est un essai.
 
 **3. Fermer l'arbre AHL** (priorité plus basse) :
 

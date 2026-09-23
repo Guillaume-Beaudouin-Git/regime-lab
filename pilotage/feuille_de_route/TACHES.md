@@ -289,13 +289,14 @@ automatiquement par toute session ouverte ici. Ce fichier-ci en est le détail.
     l'objectif de fond est de construire des stratégies dépendantes du régime, avec
     l'ambition d'un Sharpe net de 1 à 2 à coûts institutionnels (`AVANCEMENT.md` §0).
 11. **Plan Two Sigma, phase 1 FAITE le 23/09** (`22abbe0`, `3b64ab2`) par une autre
-    session : l'outillage est construit, les chiffres du brouillon sont remesurés, le
-    verrou est rédigé mais pas commité. Aucun niveau n'a été lu.
+    session : l'outillage est construit et les chiffres du brouillon sont remesurés.
+    **Le verrou est commité le 23/09** après l'approbation de Guillaume, un second
+    validateur et un audit avant commit. Aucun niveau n'a été lu.
 
 ### ⟶ 12. ENSUITE — voir `AVANCEMENT.md` §4 et §5
 
-Dans l'ordre proposé : la présentation de 10 minutes ; la relecture et le commit du
-verrou Two Sigma, puis ses niveaux A, B et C ; la fermeture de l'arbre AHL (le MDE de C1,
+Dans l'ordre proposé : la présentation de 10 minutes ; les instruments Two Sigma
+(A, B et C commités avant toute lecture), puis les lectures A, B et C ; la fermeture de l'arbre AHL (le MDE de C1,
 et la décision sur la lecture A1 principale sur (126,10)) ; le nettoyage et le commit de
 `pilotage/mesures_brutes/` ; puis le plan Bridgewater. La porte G0 de Rentec reste la
 moins chère (1,5 j), mais ses données sont dans le dépôt privé voisin : Guillaume seul.
