@@ -117,6 +117,11 @@ d'essais compte 84 configurations distinctes (`data/trials.parquet`).
   seul, 0,82 avec réduction en stress (sous-puissant), 0,75 avec bascule vers la
   tendance (pas utile). Il est positif en 2008, 2020 et 2022. Sa pire perte (2025-2026)
   survient alors que le régime est calme depuis 2021.
+- **Comparaison « stratégie seule contre couplée au régime » sur 8 stratégies, 24
+  couplages** (`docs/RESULTS_COUPLAGE_STRATEGIES.md`, hypothèse zéro coût) : **aucun
+  couplage n'est utile**. Deux stratégies sont pénalisées, la tendance crypto et la prime
+  overnight Nasdaq, qui gagnent précisément en période de stress. C'est la matière de la
+  présentation.
 - **Remesurés à partir de code commité, plusieurs chiffres du brouillon étaient
   optimistes.** L'horloge tourne à 12,6 transitions par an hors échantillon, et non 8,3.
   Elle dépend davantage de la volatilité qu'annoncé : η² de 0,14, jusqu'à 0,6 sur un
