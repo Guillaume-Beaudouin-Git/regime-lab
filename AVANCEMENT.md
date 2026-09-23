@@ -41,10 +41,10 @@ positifs.
 **Où on en est par rapport à cet objectif.** Le meilleur livre mesuré ici fait +0,36 de
 Sharpe net en excès. C'est une tendance sur 46 instruments, déjà facturée à des coûts de
 futures institutionnels (environ 1 bp). Le régime n'y ajoute rien au-delà de la
-volatilité. Viser 1 à 2 demande donc un autre objet que les sept dispositifs testés. Les
-deux pistes qui n'ont pas encore été mesurées sont celles qui s'en approchent : un régime
-qui **arbitre entre plusieurs signaux** (plan Two Sigma, en cours) et un régime qui entre
-dans la **construction du portefeuille** (plan Bridgewater).
+volatilité. Viser 1 à 2 demande donc un autre objet que les sept dispositifs testés. Un
+régime qui **arbitre entre plusieurs signaux** a été mesuré le 23/09 (plan Two Sigma) :
+**il ne transfère pas**, voir §1. Reste un axe jamais testé : un régime qui entre dans la
+**construction du portefeuille** (plan Bridgewater).
 
 **L'hypothèse de coûts pour la suite est institutionnelle.** Le barème de tête du
 programme, en aller-retour, est déjà de ce type : 1 bp pour les futures d'indices, de
@@ -107,6 +107,30 @@ d'essais compte 84 configurations distinctes (`data/trials.parquet`).
   `3b64ab2`, 262 tests). L'outillage est en place : 10 signaux sur les 49 secteurs US,
   le classifieur de contexte K-means, un placebo apparié exact et le protocole de test.
   **Aucun niveau de l'arbre n'a été lu et aucun essai n'a été dépensé.**
+- **L'arbre Two Sigma est lu en entier et fermé** (`docs/RESULTS_TWOSIGMA.md`, commits
+  `42011e9` à `e97501d`). Un classifieur de contexte (K-means sur 20 variables,
+  orthogonalisé contre la volatilité, 12,5 changements d'état par an hors échantillon)
+  sert à choisir entre 10 signaux sur les 49 secteurs US, sur 20 ans de plis de test
+  (2006-2026) :
+  - **niveau A (la moyenne) : FAIL.** Le sélecteur fait **moins bien** que le mélange
+    équipondéré qu'il incline : −0,110 de Sharpe (−0,370 contre −0,260, nets de 5 bp). Le
+    profil d'un état ne se transmet pas d'un pli à l'autre (R 0,047, p 0,34) ;
+  - **niveau B (la variance) : sous-puissant.** La parité de risque par état gagne
+    +0,064, contre une barre de 0,338. La covariance par état prévoit **moins bien** que
+    la covariance unique ;
+  - **niveau C (les coûts) : non montré.** La règle de cadence ne trouve aucun état où
+    trader moins : économie nulle, sur la vraie partition comme sur les 1 000 placebos ;
+  - Holm ne rejette rien. Les 14 sensibilités vont dans le même sens, avec une seule
+    inversion de signe minuscule (A à K = 6 : +0,009). 20 essais sont journalisés, soit
+    exactement les 20 déclarés ;
+  - un témoin de volatilité d'une ligne fait **au moins aussi bien** que le contexte sur
+    chaque canal. C'est un diagnostic, cohérent avec tout le programme : le contenu du
+    régime, c'est la volatilité.
+  - Deux événements sont consignés dans `docs/PROTOCOL_FREEZE.md`. Le premier est un
+    amendement avant toute lecture : le placebo de C-1 valait exactement 0, donc sa
+    « puissance » ne mesurait rien, et une économie minimale S\* est désormais exigée.
+    Le second est un incident de registre à la lecture de A, terminée depuis son artefact
+    sans aucun recalcul.
 - **Le verrou Two Sigma est commité** (`docs/PRESPEC_TWOSIGMA.md`). Guillaume l'a approuvé
   le 23/09, puis deux relecteurs indépendants l'ont examiné : un second validateur sur le
   fond, un auditeur avant le commit. Leurs corrections sont les lignes 28 à 36 du §12.0 :
@@ -312,7 +336,7 @@ critère de fin.
 |---|---|---|---|---|
 | ~~0~~ | ~~Fixer l'objectif final~~ **FAIT le 23/09** : une présentation de 10 minutes ; objectif de fond, des stratégies dépendantes du régime (§0) | — | — | — |
 | **1** | **Construire la présentation de 10 minutes**, au format entreprise, en 8 à 10 diapositives. Le fil : la question → la méthode (données point-in-time, critère écrit avant le chiffre) → ce qui marche (classifieur à 93,2 %, qui prédit la variance et pas la direction) → ce que ça implique (un outil de dimensionnement, pas de timing ; 13 changements d'état en 25 ans) → ce qu'on a testé sans succès (7 dispositifs, 4 hypothèses) → la suite, vers des stratégies dépendantes du régime. Trois figures : **(a)** R² sur la volatilité contre R² sur les rendements, un point par famille ; **(b)** la frise des 13 transitions ; **(c)** les dispositifs face à la règle d'une ligne | 1-2 j | `data/cache/*` et `docs/RESULTS_*.md`, déjà calculés | les diapositives et un texte oral de 10 minutes, répétés une fois |
-| **2** | **Plan Two Sigma : descendre l'arbre A → B → C** (le verrou est commité). C'est la piste la plus proche de l'objectif de fond : le régime choisit entre dix signaux. Le verrou impose d'abord d'écrire et de commiter **les trois instruments** (A, B, C), leurs seuils et les empreintes des données (§13.1). Ensuite viennent les lectures dans l'ordre A, B, C, **quel que soit le résultat de chacune** ; chaque lecture compte comme un essai. Le verdict alimente la dernière diapositive | ~2 j pour les instruments, puis quelques heures par lecture | `industry_49`, `factors_5`, `features` (§3.1) | verdicts écrits dans `docs/RESULTS_TWOSIGMA*.md` |
+| ~~2~~ | ~~**Plan Two Sigma**~~ **FAIT et FERMÉ le 23/09** : A FAIL, B sous-puissant, C non montré (`docs/RESULTS_TWOSIGMA.md`). Ce qui suit est l'ancien énoncé : ~~descendre l'arbre A → B → C** (le verrou est commité).~~ C'est la piste la plus proche de l'objectif de fond : le régime choisit entre dix signaux. Le verrou impose d'abord d'écrire et de commiter **les trois instruments** (A, B, C), leurs seuils et les empreintes des données (§13.1). Ensuite viennent les lectures dans l'ordre A, B, C, **quel que soit le résultat de chacune** ; chaque lecture compte comme un essai. Le verdict alimente la dernière diapositive | ~2 j pour les instruments, puis quelques heures par lecture | `industry_49`, `factors_5`, `features` (§3.1) | verdicts écrits dans `docs/RESULTS_TWOSIGMA*.md` |
 | **3** | **Fermer l'arbre AHL** : le MDE de C1, que le pré-enregistrement déclare sous-puissant d'avance, la note de fermeture, et la décision sur la lecture A1 principale sur (126,10), qui reste due | ½-1 j | `trend_universe_m1.parquet` | `docs/RESULTS_AHL_LEVEL_C.md` et la fermeture |
 | **4** | **Nettoyer et commiter `pilotage/mesures_brutes/`** : retirer les chemins absolus et privés des scripts | 1-2 h | — | les scripts dans git, les données dans `data/` |
 | 5 | **Plan Bridgewater** : le régime dans la construction du portefeuille, l'autre axe jamais testé (8,5 j). Porte G0 de Rentec (1,5 j, Guillaume seul, données privées) | plusieurs jours | §3.4 | — |
@@ -333,9 +357,11 @@ Deux pistes en parallèle : la présentation ne demande aucun calcul, Two Sigma 
 | 2 h | | lecture du niveau A, puis B et C | diapositives 6 à 10, texte oral |
 | 1 h | répétition chronométrée (10 min), commits, mise à jour de ce fichier | | |
 
-**Par quoi on commence : la construction des trois instruments Two Sigma**, parce que
-toute lecture en dépend. La présentation avance en parallèle : tout son matériau est déjà
-calculé.
+⚠ **Mis à jour le 23/09 au soir : la piste A de ce tableau est faite.** Les instruments
+sont construits et commités, les trois niveaux lus et l'arbre fermé (§1). La présentation
+peut en faire une diapositive : c'est le premier test de l'axe « sélection entre
+signaux », et il échoue proprement, avec un placebo apparié exact et un témoin de
+volatilité qui fait au moins aussi bien.
 
 ---
 

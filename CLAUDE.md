@@ -47,8 +47,15 @@ Ne choisis pas à sa place. Trois chantiers sont prêts.
 **1. La présentation de 10 minutes** (rien à calculer) : le fil et les trois figures
 sont décrits dans `AVANCEMENT.md` §4, tâche 1.
 
-**2. Le plan Two Sigma** : c'est la piste la plus proche de l'objectif de fond, puisque
-le régime y choisit entre dix signaux. La phase 1 est faite (`22abbe0`, `3b64ab2`).
+**2. Le plan Two Sigma — FAIT et FERMÉ le 23/09** (`docs/RESULTS_TWOSIGMA.md`). Les trois
+niveaux sont lus, l'étape de Holm et les 14 sensibilités aussi, et 20 essais sont
+journalisés : il n'y a **plus rien à lire**. A FAIL (le sélecteur fait −0,110 de Sharpe
+contre le mélange équipondéré), B sous-puissant (+0,064 contre une barre de 0,338), C non
+montré (économie nulle). Les deux événements du 23/09, un amendement de C-1 avant lecture
+et un incident de registre à la lecture de A, sont dans `docs/PROTOCOL_FREEZE.md`. Pour
+refaire tourner le pipeline : `scripts/run_twosigma_tree.py`. Il refuse toute seconde
+lecture. Ce qui suit est l'historique de la tâche :
+La phase 1 est faite (`22abbe0`, `3b64ab2`).
 Le verrou `docs/PRESPEC_TWOSIGMA.md` est **commité**. Guillaume l'a approuvé, et un
 second validateur puis un auditeur l'ont confirmé. Ne le modifie pas : toute déviation va
 dans `docs/PROTOCOL_FREEZE.md`. Prochaine étape (§13.1) : écrire, tester sur données
@@ -102,6 +109,12 @@ volatilité future (t −3,40), contre +0,030 sur les rendements (t 0,27).
 **Sept dispositifs ont échoué à le monétiser** : T1, T3, l'atténuateur de Carver, la
 barrière propfirm, la réplication Shu 2024, H-b et AHL niveau A. AHL niveau B est
 indécidable, ce qui n'est pas la même chose.
+
+**La sélection entre signaux a été testée le 23/09 (plan Two Sigma) et ne transfère
+pas.** Il s'agit d'une partition de contexte orthogonale à la volatilité, à 12,5
+transitions par an, utilisée pour choisir entre 10 signaux sectoriels US. Niveau A FAIL,
+B sous-puissant, C non montré ; un témoin de volatilité fait au moins aussi bien partout
+(`docs/RESULTS_TWOSIGMA.md`).
 
 ⚠ **La portée exacte compte.** Ces mesures portent sur :
 

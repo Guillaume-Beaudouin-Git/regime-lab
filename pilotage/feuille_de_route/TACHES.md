@@ -294,7 +294,10 @@ automatiquement par toute session ouverte ici. Ce fichier-ci en est le détail.
 11. **Plan Two Sigma, phase 1 FAITE le 23/09** (`22abbe0`, `3b64ab2`) par une autre
     session : l'outillage est construit et les chiffres du brouillon sont remesurés.
     **Le verrou est commité le 23/09** après l'approbation de Guillaume, un second
-    validateur et un audit avant commit. Aucun niveau n'a été lu.
+    validateur et un audit avant commit. **L'arbre est lu et fermé le 23/09 au soir** par
+    la session du compte B (`42011e9` à `e97501d`) : A FAIL, B sous-puissant, C non
+    montré, Holm ne rejette rien, et les 20 essais sont journalisés.
+    `docs/RESULTS_TWOSIGMA.md`.
 
 11b. ~~Stratégies de crise × régime~~ **FAIT le 23/09** (`7d5b95c` avant lecture,
     `d3e7c48`, `892683c`) : vente de variance, futures VIX, momentum UMD, BXM, couplés
@@ -316,10 +319,8 @@ automatiquement par toute session ouverte ici. Ce fichier-ci en est le détail.
 
 ### ⟶ 12. ENSUITE — voir `AVANCEMENT.md` §4 et §5
 
-Dans l'ordre proposé : la présentation de 10 minutes ; les instruments Two Sigma
-(A, B et C commités avant toute lecture), puis les lectures A, B et C — **pris par la
-session du compte B le 23/09 à 10h, sur décision de Guillaume ; fichiers réservés listés
-dans `CLAUDE.md`** ; la fermeture de l'arbre AHL (le MDE de C1,
+Dans l'ordre proposé : la présentation de 10 minutes ; ~~les instruments et les
+lectures Two Sigma~~ (**FAIT le 23/09**, arbre fermé, voir l'item 11) ; la fermeture de l'arbre AHL (le MDE de C1,
 et la décision sur la lecture A1 principale sur (126,10)) ; le nettoyage et le commit de
 `pilotage/mesures_brutes/` ; puis le plan Bridgewater. La porte G0 de Rentec reste la
 moins chère (1,5 j), mais ses données sont dans le dépôt privé voisin : Guillaume seul.
