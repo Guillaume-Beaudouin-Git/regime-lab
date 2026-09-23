@@ -89,10 +89,21 @@ incrémental au-delà du témoin, sur la volatilité à 21 jours.
 ne change d'avis qu'une fois tous les deux ans. Les modèles plus nerveux se trompent plus
 souvent. »
 
+**À dire aussi, sans quoi le chiffre trompe** :
+- **Le 93 % repose sur deux récessions seulement.** La période de test (2002-2026) ne
+  contient que deux récessions officielles : 2008-2009 et 2020, soit 20 mois.
+- **« En temps réel » veut dire sans voir le futur, pas avant tout le monde.** Pendant le
+  Covid, le modèle passe en stress le 11 mars 2020 : le VIX, l'indice de la peur, était
+  déjà passé de 14 à 54.
+
 ### Étape 6 — La découverte qui compte : il prévoit le risque, pas la direction
 
-- Sur la **volatilité** des semaines suivantes, le modèle apporte une vraie information,
-  au-delà du témoin : +3,93 points de R², statistiquement solide (t = −3,4).
+- Sur la **volatilité** des semaines suivantes, le modèle apporte une vraie information
+  au-delà du témoin (la règle d'une ligne sur la volatilité passée) : +3,93 points de R²,
+  statistiquement solide (t = −3,4).
+- **Mais le VIX le savait déjà.** Une fois le VIX pris en compte, le modèle n'ajoute plus
+  que +0,20 point, un gain non significatif (`docs/RESULTS_CRISE.md`, test P). Le marché
+  des options anticipait déjà ce que le modèle détecte.
 - Sur la **direction** du marché, hausse ou baisse, il n'apporte rien : +0,03 point,
   t = 0,27.
 
@@ -225,8 +236,13 @@ est nerveux, plus il voit tôt, mais plus il se trompe (fausses alertes).
 
 ## 5. Les questions probables, et la réponse courte
 
-- **« Pourquoi ne pas juste regarder le VIX ? »** C'est exactement notre témoin. Le
-  modèle en sait plus que lui sur la volatilité future : +3,93 points de R².
+- **« Pourquoi ne pas juste regarder le VIX ? »** C'est la bonne question, et la réponse
+  honnête est : pour prévoir la volatilité, le VIX suffit presque. Le modèle bat une règle
+  simple sur la volatilité passée (+3,93 points de R²), mais au-delà du VIX il n'ajoute
+  que +0,20 point, non significatif. Son intérêt est ailleurs : il date les crises de
+  façon stable et lisible, et il n'a pas besoin d'un marché d'options.
+  *(Corrigé le 23/09 : une version précédente disait à tort que le VIX était notre
+  témoin.)*
 - **« Si le modèle marche, pourquoi ne gagne-t-il pas d'argent ? »** Il prévoit
   l'**ampleur** des mouvements, pas leur **sens**. Or la plupart des stratégies gagnent
   sur le sens. Il faut donc des stratégies qui gagnent ou perdent sur l'ampleur : c'est

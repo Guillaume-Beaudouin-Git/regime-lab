@@ -116,8 +116,12 @@ stratégie seule avec la stratégie + filtre + jambe refuge.
 | Prime overnight Nasdaq | 1,10 | −0,10 | −0,26 | −0,35 |
 | Tendance crypto | 1,13 | −0,20 | −0,34 | −0,43 |
 
-**Aucune des 27 bascules n'est utile.** Les 12 positives sont sous-puissantes et les
-15 autres pas utiles. Aucune n'est nuisible au sens strict du critère.
+**Aucune des 27 bascules n'est utile.** Les 8 positives sont sous-puissantes : le
+momentum vers les trois jambes, et l'or à la place du rebond obligataire, du momentum
+USDJPY, de l'ORB, de la tendance or et de la tendance énergie. Les 19 autres sont pas
+utiles. Aucune n'est nuisible au sens strict du critère. *(Corrigé le 23/09 : la première
+version disait 12 et 15, une erreur de comptage ; le registre `data/trials.parquet` fait
+foi.)*
 
 ## Ce qu'on peut dire en présentation
 
