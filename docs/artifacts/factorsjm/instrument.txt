@@ -1,0 +1,81 @@
+====================================================================================
+ONE SPARSE JUMP MODEL PER FACTOR — INSTRUMENT (no conditioned return is printed)
+====================================================================================
+
+0.  INPUTS (SHA-256)
+
+   f5fff1d98f4a69f7  data/raw/factorsjm/factors_5_full.parquet
+   302303df13aee16d  data/raw/crisis/french_umd.parquet
+   5862e06942a64ffe  data/raw/factorsjm/dgs1.parquet
+   4290d7ba675cb581  data/raw/factorsjm/dgs10.parquet
+
+0b. DATA CHECKS
+
+   max |full file - 1990 file| on 9,212 common sessions: 0.0000 (percent)
+   five-factor sessions without a UMD value: 0
+
+1.  SAMPLES
+
+   factors 1963-07-01 -> 2026-07-31, 15,876 sessions
+   out of sample (every leg finite) 1978-01-05 -> 2026-07-31, 12,243 sessions, 48.6 years
+   paper window 2007-01-03 -> 2024-06-28, 4,402 sessions
+
+2.  TUNING — the penalty chosen every six months (count of choices), features kept
+
+   factor      10     20     50    100    200    500   none  features
+   mkt          2     21      8      1     30     36      0      14.7
+   smb         46      8      5      4     23     12      0      15.2
+   hml         51     12     11      4     18      2      0      13.9
+   rmw         48      9     11      4     10     16      0      14.3
+   cma         30     31     11     20      2      4      0      14.6
+   umd         24     17      8     16      2     31      0      15.4
+
+3.  THE FOUR AXES OF THE RULE (docs, CLAUDE.md), measured before any reading
+
+   axis 2 — transitions a year, out of sample; share of sessions in bull
+   mkt     1.98/yr   2007-2024  1.26/yr   fixed-50  2.80/yr   bull  74.0%
+   smb     3.46/yr   2007-2024  3.26/yr   fixed-50  2.92/yr   bull  47.0%   paper Size 2.57
+   hml     4.49/yr   2007-2024  4.81/yr   fixed-50  3.07/yr   bull  45.2%   paper Value 3.16
+   rmw     4.65/yr   2007-2024  4.12/yr   fixed-50  3.31/yr   bull  48.4%   paper Quality 0.64
+   cma     3.75/yr   2007-2024  2.98/yr   fixed-50  2.98/yr   bull  40.8%
+   umd     4.03/yr   2007-2024  2.35/yr   fixed-50  2.88/yr   bull  60.7%   paper Momentum 3.66
+   book: 22.35 factor-state changes a year in all
+
+   axis 1 — is each latent a volatility rule, or a trailing-return rule?
+   kappa of the bear state with: own 21-session vol above its expanding median;
+   above its 80th percentile; the market's median rule; the factor's 252-session
+   return negative. Last column: correlation of bear with log market RV21.
+   mkt   own med +0.14   own 80th +0.31   market med +0.14   trend +0.56   corr(RV) +0.34
+   smb   own med +0.08   own 80th +0.15   market med +0.04   trend +0.42   corr(RV) +0.12
+   hml   own med -0.05   own 80th -0.08   market med +0.04   trend +0.38   corr(RV) +0.01
+   rmw   own med +0.01   own 80th -0.01   market med -0.09   trend +0.26   corr(RV) -0.10
+   cma   own med -0.05   own 80th -0.11   market med -0.09   trend +0.39   corr(RV) -0.09
+   umd   own med -0.06   own 80th +0.03   market med +0.10   trend +0.19   corr(RV) +0.07
+
+   axis 4 — participation ratio (effective dimension), of 6
+   raw factors 1990-2026 (advisor: 4.71)          4.71
+   raw factors, out of sample                     4.78
+   volatility-targeted sleeves, out of sample     4.89
+   on/off exposures (held), out of sample         5.30
+   paper exposures (held), out of sample          5.21
+   mean pairwise correlation of the on/off exposures -0.02 (min -0.22, max +0.40)
+   axis 3 — usage: an allocation across six factors, not a switch on one book
+
+4.  MINIMUM DETECTABLE EFFECT — demeaned legs, alpha 0.05/8 = 0.0063, blocks 21 / 63 / 126, the largest
+
+   B1_book_onoff              primary      MDE 0.506 / 0.488 / 0.495 -> 0.506   NaN 0
+   B2_book_paper              test         MDE 0.781 / 0.809 / 0.847 -> 0.847   NaN 0
+   F_mkt_paper                test         MDE 0.542 / 0.542 / 0.542 -> 0.542   NaN 0
+   F_smb_paper                test         MDE 0.757 / 0.796 / 0.803 -> 0.803   NaN 0
+   F_hml_paper                test         MDE 0.946 / 0.997 / 1.033 -> 1.033   NaN 0
+   F_rmw_paper                test         MDE 0.782 / 0.809 / 0.830 -> 0.830   NaN 0
+   F_cma_paper                test         MDE 0.883 / 0.889 / 0.885 -> 0.889   NaN 0
+   F_umd_paper                test         MDE 0.620 / 0.633 / 0.641 -> 0.641   NaN 0
+   S1_book_onoff_fixed50      sensitivity  MDE 0.512 / 0.510 / 0.516 -> 0.516   NaN 0
+   S2_book_paper_fixed50      sensitivity  MDE 0.803 / 0.832 / 0.865 -> 0.865   NaN 0
+   S3_book_onoff_mkt_held     sensitivity  MDE 0.503 / 0.485 / 0.477 -> 0.503   NaN 0
+   S4_book_paper_mkt_held     sensitivity  MDE 0.782 / 0.811 / 0.839 -> 0.839   NaN 0
+
+====================================================================================
+NOT READ — re-run with --read, once.
+====================================================================================
