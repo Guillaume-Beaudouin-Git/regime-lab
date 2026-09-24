@@ -28,11 +28,13 @@ Usage:
 from __future__ import annotations
 
 import hashlib
+import json
 import warnings
 
 import numpy as np
 import pandas as pd
 
+from regime_lab.analysis import trials
 from regime_lab.config import CACHE, RAW
 from regime_lab.data import store
 from regime_lab.evaluation.predictive import volatility_quantile_placebo
@@ -269,6 +271,20 @@ def main() -> None:
         f"{d:%Y-%m} {v:g}" for d, v in changes.items()))
     print("   penalty counts: " + ", ".join(f"{k:g}: {v}" for k, v in
                                            pen.value_counts().sort_index().items()))
+    log = trials.read()
+    cal = log[log["family"] == "longhist_calibration"].copy()
+    if not cal.empty:
+        configs = cal["config"].map(json.loads)
+        cal["train_end"] = configs.map(lambda c: c["train_end"])
+        valid = cal.groupby("train_end")["m_sharpe"].apply(lambda s: s.notna().any())
+        fallback = valid[~valid].index
+        rates = cal.loc[cal["train_end"].isin(fallback), "m_switches_per_year"]
+        print(f"   calibrations logged: {valid.size} ({len(cal)} candidates); with no admissible "
+              f"candidate, hence the grid-median fallback lambda 20: {len(fallback)} "
+              f"(train ends {', '.join(sorted(fallback))})")
+        if len(fallback):
+            print(f"   their candidates switch {rates.min():.3f} to {rates.max():.3f} times a year "
+                  "in training, under the 0.5 floor of the admissible band")
     weights = refits.filter(like="w_")
     weights.columns = [c[2:] for c in weights.columns]
     mean_w = weights.mean().sort_values(ascending=False)
