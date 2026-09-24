@@ -1,0 +1,309 @@
+==============================================================================
+IDEA 6 — THE REGIME AS AN INPUT OF A RISK FORECAST, 46 MARKETS — INSTRUMENT
+==============================================================================
+
+0.  INPUTS (SHA-256)
+
+   700f606051109195  cache/trend_universe_m1.parquet
+   570bb4c9f31732e0  raw/prices/cross_asset.parquet
+   87e2d3b7c7912a48  raw/macro/rate_cash_3m.parquet
+   0622c72fa75115cb  cache/states.parquet
+
+==============================================================================
+1.  COVERAGE — no loss, no return
+
+   training rows from 2002-04-01, at least 504, targets realised by t; HAR windows (5, 22, 66); horizon 21
+   evaluation sessions 2005-12-20 -> 2026-08-12, 5,385
+
+   panel           markets   min  median   max  empty days
+   non_us_43            43    30      43    43           0
+   us_equity_3           3     3       3     3           0
+   equity_non_us        10     9      10    10           0
+   commodity            13    12      13    13           0
+   currency             11     3      11    11           0
+   bond_credit           9     4       9     9           0
+
+   market     first forecast  defined share  stale windows
+   AGG       2006-01-02          99.8%              0
+   AUDUSD=X  2008-08-18          87.1%              0
+   BWX       2010-01-14          80.3%              0
+   CAD=X     2005-12-21         100.0%              0
+   CHF=X     2005-12-20         100.0%              0
+   CL=F      2004-04-02          98.4%              0
+   CT=F      2004-04-02         100.0%              1
+   DX-Y.NYB  2004-04-02         100.0%              0
+   EMB       2010-03-24          79.4%              0
+   EURUSD=X  2006-03-03          97.3%              2
+   GBPUSD=X  2006-03-03          99.0%              0
+   GC=F      2004-04-02         100.0%              0
+   HG=F      2004-04-02         100.0%              0
+   HO=F      2004-04-02         100.0%              0
+   HYG       2009-07-15          82.7%              0
+   IEF       2004-11-02         100.0%              0
+   JPY=X     2004-04-02          98.3%              2
+   KC=F      2004-04-02         100.0%              0
+   LQD       2004-11-02         100.0%              0
+   MXN=X     2006-03-06          99.0%              0
+   NG=F      2004-04-02         100.0%              0
+   NOK=X     2005-02-24          98.1%              3
+   NZDUSD=X  2006-03-03          99.0%              0
+   PL=F      2005-06-21          80.0%             25
+   SB=F      2004-04-02         100.0%              0
+   SEK=X     2005-02-24          98.1%              3
+   SHY       2004-11-02         100.0%              0
+   SI=F      2004-04-02         100.0%              0
+   TIP       2006-03-10          98.9%              0
+   TLT       2004-11-02         100.0%              0
+   ZC=F      2004-04-02         100.0%              4
+   ZS=F      2004-04-02         100.0%              0
+   ZW=F      2004-04-02         100.0%              1
+   ^AEX      2004-04-02         100.0%              0
+   ^AXJO     2004-04-02         100.0%              0
+   ^FCHI     2004-04-02         100.0%              0
+   ^FTSE     2004-04-02         100.0%              0
+   ^GDAXI    2004-04-02         100.0%              0
+   ^GSPC     2004-04-02         100.0%              0
+   ^GSPTSE   2004-04-02         100.0%              0
+   ^HSI      2004-04-02         100.0%              0
+   ^IBEX     2004-04-02         100.0%              0
+   ^N225     2004-04-02          98.4%              1
+   ^NDX      2004-04-02         100.0%              0
+   ^RUT      2004-04-02         100.0%              0
+   ^STOXX50E 2009-07-03          82.9%              0
+
+==============================================================================
+2.  THE STATE AND THE RULES ON THE EVALUATION SESSIONS — descriptive
+
+   state   stress share  13.2%   transitions/yr  0.56
+   median  stress share  49.7%   transitions/yr  6.88
+   80th    stress share  21.5%   transitions/yr  4.31
+   kappa(state, median rule) +0.24
+   kappa(state, 80th rule) +0.41
+
+==============================================================================
+3.  AXIS 4 OF THE OPPOSABLE RULE — effective dimension of the volatility panel,
+    remeasured before any reading (participation ratio, month-end log RV21)
+
+   advisor's sample, from 2003-07-17    level 4.14   monthly change 6.42   first eigenvalue 21.7/46   219 months 2008-01-31 -> 2026-09-30
+   this study's evaluation window       level 4.14   monthly change 6.40   first eigenvalue 21.7/46   218 months 2008-01-31 -> 2026-08-31
+   => the economic part (E1, E2) is not a seventh device on axis 4: level at or above 4
+
+==============================================================================
+4.  MINIMUM DETECTABLE EFFECT — forecast panels, blinded (demeaned d_t)
+
+   sessions 5,385, non-finite cells 0
+   test panel           base        alpha   MDE blocks 21 / 63 / 126        threshold   base QLIKE   MDE %
+   P1   non_us_43       har       0.01667   0.00615 / 0.00630 / 0.00648   0.00648       0.2986   2.17%
+   P2   non_us_43       harvix    0.01667   0.00579 / 0.00638 / 0.00660   0.00660       0.2818   2.34%
+   P3   us_equity_3     harvix    0.01667   0.01169 / 0.01194 / 0.01224   0.01224       0.3039   4.03%
+   C1   equity_non_us   har       0.00625   0.01641 / 0.01668 / 0.01656   0.01668       0.3196   5.22%
+   C2   equity_non_us   harvix    0.00625   0.01227 / 0.01215 / 0.01214   0.01227       0.3031   4.05%
+   C3   commodity       har       0.00625   0.00387 / 0.00449 / 0.00490   0.00490       0.2171   2.26%
+   C4   commodity       harvix    0.00625   0.00342 / 0.00397 / 0.00417   0.00417       0.2145   1.95%
+   C5   currency        har       0.00625   0.00814 / 0.00786 / 0.00744   0.00814       0.3023   2.69%
+   C6   currency        harvix    0.00625   0.00821 / 0.00822 / 0.00875   0.00875       0.2860   3.06%
+   C7   bond_credit     har       0.00625   0.01369 / 0.01435 / 0.01556   0.01556       0.3997   3.89%
+   C8   bond_credit     harvix    0.00625   0.02161 / 0.02336 / 0.02280   0.02336       0.3604   6.48%
+   units: mean QLIKE per market-session. The base QLIKE is the loss of the model
+   WITHOUT the state, printed only to express the MDE as a share of it.
+
+==============================================================================
+5.  THE BOOKS — coverage and blinded MDE, no Sharpe
+
+   trend_46        2006-03-13 -> 2026-09-10, 5,347 sessions, sized instruments min 36 median 46
+   risk_parity_35  2006-03-13 -> 2026-09-10, 5,347 sessions, sized instruments min 30 median 35
+   E1  trend_46         MDE (Sharpe) 0.020 / 0.019 / 0.018  ->  threshold 0.020
+   E2  risk_parity_35   MDE (Sharpe) 0.027 / 0.029 / 0.029  ->  threshold 0.029
+
+   families: P at 0.05/3, C at 0.05/8, E at 0.05/2; per market Holm at 0.05 over 46 per baseline
+
+==============================================================================
+THE READING — zero cost, excess of cash, 2005-12-20 -> 2026-08-12
+
+   rotation placebo: 400 draws, every forecast refitted on each ...
+
+==============================================================================
+A.  THE FORECAST PANELS — mean QLIKE per market-session
+
+   test panel          base    QLIKE base   +state  gain % +median %  +80th % VIX adds %
+   P1   non_us_43      har         0.2986   0.3010  -0.82%    +0.87%   +1.47%     +5.62%
+   P2   non_us_43      harvix      0.2818   0.2870  -1.84%    -1.34%   -1.04%     +5.62%
+   P3   us_equity_3    harvix      0.3039   0.3069  -0.99%    -1.97%   -0.36%    +13.74%
+   C1   equity_non_us  har         0.3196   0.3219  -0.71%    -0.80%   +0.85%     +5.15%
+   C2   equity_non_us  harvix      0.3031   0.3077  -1.50%    -2.34%   -0.74%     +5.15%
+   C3   commodity      har         0.2171   0.2207  -1.68%    -0.30%   +0.02%     +1.17%
+   C4   commodity      harvix      0.2145   0.2181  -1.66%    -0.62%   -0.66%     +1.17%
+   C5   currency       har         0.3023   0.3055  -1.07%    +0.09%   +0.81%     +5.38%
+   C6   currency       harvix      0.2860   0.2890  -1.03%    -1.25%   -0.88%     +5.38%
+   C7   bond_credit    har         0.3997   0.3995  +0.05%    +3.87%   +3.69%     +9.83%
+   C8   bond_credit    harvix      0.3604   0.3724  -3.33%    -1.09%   -2.08%     +9.83%
+
+==============================================================================
+B.  DECISIONS — forecast panels
+
+   P1 non_us_43 beyond har: delta -0.00246  MDE 0.00648  t HAC21 -1.30  (every 21st, HAC6: -0.27)
+        placebo pct 50.0% (p5 -0.01041, p95 +0.00133)   rules: median +0.00259, 80th +0.00439
+        folds -0.00331 -0.00385 +0.00184 -0.00803 +0.00106  (2/5 positive)
+        by lagged state (descriptive): stress sessions -0.00495 (711), calm -0.00208 (4674)
+        => NOT USEFUL — the state does not improve on the arm it is added to
+   P2 non_us_43 beyond harvix: delta -0.00518  MDE 0.00660  t HAC21 -2.92  (every 21st, HAC6: -1.93)
+        placebo pct 14.2% (p5 -0.00779, p95 +0.00095)   rules: median -0.00377, 80th -0.00292
+        folds -0.01110 -0.00459 -0.00116 -0.01003 +0.00099  (1/5 positive)
+        by lagged state (descriptive): stress sessions -0.02173 (711), calm -0.00266 (4674)
+        => NOT USEFUL — the state does not improve on the arm it is added to
+   P3 us_equity_3 beyond harvix: delta -0.00302  MDE 0.01224  t HAC21 -0.85  (every 21st, HAC6: -0.29)
+        placebo pct 33.0% (p5 -0.00759, p95 +0.00423)   rules: median -0.00597, 80th -0.00109
+        folds -0.00286 +0.00137 +0.00533 -0.01909 +0.00016  (3/5 positive)
+        by lagged state (descriptive): stress sessions -0.01067 (711), calm -0.00185 (4674)
+        => NOT USEFUL — the state does not improve on the arm it is added to
+   C1 equity_non_us beyond har: delta -0.00227  MDE 0.01668  t HAC21 -0.50  (every 21st, HAC6: +0.20)
+        placebo pct 45.5% (p5 -0.01125, p95 +0.00454)   rules: median -0.00256, 80th +0.00272
+        folds -0.00385 -0.00691 +0.00295 -0.00968 +0.00612  (2/5 positive)
+        by lagged state (descriptive): stress sessions -0.00431 (711), calm -0.00197 (4674)
+        => NOT USEFUL — the state does not improve on the arm it is added to
+   C2 equity_non_us beyond harvix: delta -0.00454  MDE 0.01227  t HAC21 -1.35  (every 21st, HAC6: -0.98)
+        placebo pct 15.0% (p5 -0.00817, p95 +0.00270)   rules: median -0.00710, 80th -0.00223
+        folds -0.00320 -0.01055 -0.00243 -0.00987 +0.00336  (1/5 positive)
+        by lagged state (descriptive): stress sessions -0.01096 (711), calm -0.00356 (4674)
+        => NOT USEFUL — the state does not improve on the arm it is added to
+   C3 commodity beyond har: delta -0.00364  MDE 0.00490  t HAC21 -3.48  (every 21st, HAC6: -2.69)
+        placebo pct 7.8% (p5 -0.00385, p95 -0.00045)   rules: median -0.00066, 80th +0.00004
+        folds -0.00746 -0.00339 +0.00163 -0.00783 -0.00115  (1/5 positive)
+        by lagged state (descriptive): stress sessions -0.01112 (711), calm -0.00250 (4674)
+        => NOT USEFUL — the state does not improve on the arm it is added to
+   C4 commodity beyond harvix: delta -0.00357  MDE 0.00417  t HAC21 -3.96  (every 21st, HAC6: -2.73)
+        placebo pct 7.8% (p5 -0.00388, p95 -0.00061)   rules: median -0.00134, 80th -0.00142
+        folds -0.00673 -0.00438 -0.00070 -0.00712 +0.00108  (1/5 positive)
+        by lagged state (descriptive): stress sessions -0.00981 (711), calm -0.00262 (4674)
+        => NOT USEFUL — the state does not improve on the arm it is added to
+   C5 currency beyond har: delta -0.00324  MDE 0.00814  t HAC21 -1.36  (every 21st, HAC6: -1.34)
+        placebo pct 49.0% (p5 -0.01884, p95 +0.00024)   rules: median +0.00029, 80th +0.00244
+        folds -0.00979 -0.00169 -0.00120 -0.00433 +0.00083  (1/5 positive)
+        by lagged state (descriptive): stress sessions -0.01022 (711), calm -0.00217 (4674)
+        => NOT USEFUL — the state does not improve on the arm it is added to
+   C6 currency beyond harvix: delta -0.00294  MDE 0.00875  t HAC21 -1.24  (every 21st, HAC6: -1.80)
+        placebo pct 50.5% (p5 -0.01502, p95 +0.00149)   rules: median -0.00357, 80th -0.00252
+        folds -0.01305 -0.00075 -0.00157 +0.00124 -0.00059  (1/5 positive)
+        by lagged state (descriptive): stress sessions -0.02600 (711), calm +0.00057 (4674)
+        => NOT USEFUL — the state does not improve on the arm it is added to
+   C7 bond_credit beyond har: delta +0.00020  MDE 0.01556  t HAC21 +0.05  (every 21st, HAC6: +0.69)
+        placebo pct 66.5% (p5 -0.01472, p95 +0.00561)   rules: median +0.01547, 80th +0.01477
+        folds +0.01202 -0.00383 +0.00462 -0.01069 -0.00112  (2/5 positive)
+        by lagged state (descriptive): stress sessions +0.00982 (711), calm -0.00126 (4674)
+        => UNDERPOWERED — positive, below the MDE, never useful
+   C8 bond_credit beyond harvix: delta -0.01199  MDE 0.02336  t HAC21 -1.98  (every 21st, HAC6: -1.11)
+        placebo pct 3.0% (p5 -0.00967, p95 +0.00547)   rules: median -0.00392, 80th -0.00750
+        folds -0.02906 -0.00305 +0.00010 -0.02813 +0.00018  (2/5 positive)
+        by lagged state (descriptive): stress sessions -0.05465 (711), calm -0.00550 (4674)
+        => NOT USEFUL — the state does not improve on the arm it is added to
+
+==============================================================================
+C.  PER MARKET — DM t (HAC 21) of QLIKE(base) - QLIKE(base+state), Holm at 0.05 over 46
+
+   beyond har:  better (Holm) 0, worse (Holm) 0, positive delta 10/46
+                  markets  positive  better  worse
+   class                                          
+   bond_credit          9         3       0      0
+   commodity           13         0       0      0
+   currency            11         2       0      0
+   equity_non_us       10         3       0      0
+   us_equity            3         2       0      0
+
+   beyond harvix:  better (Holm) 0, worse (Holm) 0, positive delta 5/46
+                  markets  positive  better  worse
+   class                                          
+   bond_credit          9         1       0      0
+   commodity           13         0       0      0
+   currency            11         3       0      0
+   equity_non_us       10         1       0      0
+   us_equity            3         0       0      0
+
+   beyond har, every market (delta x 1e4, t):
+     AGG +103.1 (+0.8)   AUDUSD=X -43.0 (-0.8)   BWX +80.0 (+0.9)   CAD=X +45.8 (+1.1)   CHF=X -49.6 (-1.0)
+     CL=F -26.3 (-0.6)   CT=F -9.0 (-0.3)   DX-Y.NYB +10.9 (+0.8)   EMB -193.4 (-0.8)   EURUSD=X -12.3 (-1.1)
+     GBPUSD=X -0.8 (-0.0)   GC=F -5.9 (-0.4)   HG=F -123.6 (-1.7)   HO=F -39.9 (-1.1)   HYG +18.2 (+0.3)
+     IEF -13.0 (-2.2)   JPY=X -33.9 (-0.7)   KC=F -10.0 (-1.0)   LQD -21.0 (-0.5)   MXN=X -175.1 (-1.8)
+     NG=F -39.9 (-1.5)   NOK=X -33.6 (-0.3)   NZDUSD=X -5.6 (-0.2)   PL=F -57.3 (-1.5)   SB=F -0.9 (-0.0)
+     SEK=X -6.5 (-1.2)   SHY -40.0 (-1.0)   SI=F -85.6 (-1.8)   TIP -0.4 (-0.0)   TLT -14.5 (-1.0)
+     ZC=F -20.1 (-1.1)   ZS=F -48.0 (-1.9)   ZW=F -0.5 (-0.0)   ^AEX -9.6 (-0.1)   ^AXJO -67.1 (-1.9)
+     ^FCHI -62.3 (-0.8)   ^FTSE -95.4 (-1.1)   ^GDAXI +13.5 (+0.2)   ^GSPC -65.7 (-0.7)   ^GSPTSE +130.1 (+1.0)
+     ^HSI -24.4 (-1.3)   ^IBEX -124.7 (-1.1)   ^N225 +25.4 (+0.5)   ^NDX +41.3 (+0.8)   ^RUT +34.6 (+0.8)
+     ^STOXX50E -22.5 (-0.6)
+   beyond harvix, every market (delta x 1e4, t):
+     AGG -63.9 (-0.7)   AUDUSD=X -184.5 (-1.3)   BWX -23.2 (-1.0)   CAD=X -12.4 (-1.2)   CHF=X -46.1 (-2.2)
+     CL=F -56.8 (-1.8)   CT=F -27.8 (-1.6)   DX-Y.NYB -12.3 (-1.4)   EMB -317.8 (-1.5)   EURUSD=X -6.1 (-0.6)
+     GBPUSD=X -30.8 (-1.6)   GC=F -23.2 (-1.9)   HG=F -22.6 (-0.6)   HO=F -46.6 (-1.7)   HYG -39.9 (-0.8)
+     IEF -20.9 (-1.2)   JPY=X -98.3 (-1.5)   KC=F -10.1 (-1.3)   LQD -425.8 (-1.6)   MXN=X +63.9 (+0.6)
+     NG=F -27.4 (-1.9)   NOK=X +79.2 (+0.4)   NZDUSD=X -46.1 (-1.3)   PL=F -47.1 (-1.5)   SB=F -3.3 (-0.1)
+     SEK=X +5.1 (+0.6)   SHY -71.7 (-1.6)   SI=F -84.5 (-2.2)   TIP -33.7 (-1.6)   TLT +11.1 (+0.6)
+     ZC=F -16.9 (-1.0)   ZS=F -50.8 (-1.6)   ZW=F -40.8 (-1.7)   ^AEX +7.6 (+0.1)   ^AXJO -42.7 (-2.1)
+     ^FCHI -46.7 (-1.0)   ^FTSE -36.2 (-0.6)   ^GDAXI -20.5 (-0.5)   ^GSPC -56.7 (-0.8)   ^GSPTSE -37.2 (-0.8)
+     ^HSI -26.2 (-1.1)   ^IBEX -145.7 (-1.3)   ^N225 -26.3 (-2.0)   ^NDX -3.9 (-0.1)   ^RUT -29.9 (-2.1)
+     ^STOXX50E -99.7 (-1.4)
+
+==============================================================================
+D.  OTHER CRITERIA — descriptive, never deciding
+
+   MSE of the variance, each market scaled by its mean realised variance;
+   Mincer-Zarnowitz in levels per market (median slope, median R2)
+   P1 non_us_43    MSE gain +1.18% (t HAC21 +1.46)   MZ har: b 0.83 R2 0.203   +state: b 0.85 R2 0.201
+   P2 non_us_43    MSE gain +1.94% (t HAC21 +1.32)   MZ harvix: b 0.79 R2 0.243   +state: b 0.78 R2 0.233
+   P3 us_equity_3  MSE gain +1.41% (t HAC21 +0.37)   MZ harvix: b 0.84 R2 0.342   +state: b 1.05 R2 0.336
+
+==============================================================================
+E.  SENSITIVITIES — declared, never deciding
+
+   P1 without CL=F: delta -0.00246 (t -1.30)   cross-sectional median: +0.00018 (t +0.24)
+   P2 without CL=F: delta -0.00517 (t -2.87)   cross-sectional median: -0.00016 (t -0.39)
+   P1 with a calibrated EWMA (0.94) as the base: delta -0.00302 (-1.02%), t -1.23, sessions 5385
+   US equities beyond HAR alone (the known result, descriptive): delta +0.00034 (+0.10%), t +0.06
+
+==============================================================================
+F.  THE BOOKS — zero cost, excess of cash, 2006-03-13 -> 2026-09-10
+
+   E1 trend_46
+   sizing          Sharpe   return     vol    maxDD  turn/yr  gross track err
+   har             +0.456   +4.77%  10.47%   -24.4%     66.1   3.14     0.294
+   har+state       +0.456   +4.77%  10.48%   -24.4%     65.3   3.13     0.297
+   har+median      +0.458   +4.79%  10.47%   -24.3%     66.5   3.14     0.294
+   har+80th        +0.467   +4.89%  10.46%   -24.7%     66.0   3.14     0.294
+   harvix          +0.488   +5.09%  10.43%   -23.3%     66.6   3.14     0.284
+   M3 sigma63 (ref.)  +0.465   +4.91%  10.57%   -24.1%     57.7   3.13     0.331
+
+   delta -0.000  MDE 0.020  t HAC6 +0.01  placebo pct 49.5% (p5 -0.008, p95 +0.007)
+   controls: har+median +0.002, har+80th +0.012, harvix +0.033
+   folds +0.001 -0.007 -0.003 +0.005 +0.002  (3/5 positive)
+   => NOT USEFUL — the state does not improve on the arm it is added to
+
+   E2 risk_parity_35
+   sizing          Sharpe   return     vol    maxDD  turn/yr  gross track err
+   har             +0.648   +6.47%   9.98%   -27.6%     16.1   2.34     0.310
+   har+state       +0.640   +6.38%   9.98%   -27.2%     15.6   2.32     0.314
+   har+median      +0.652   +6.51%   9.98%   -27.4%     16.2   2.34     0.310
+   har+80th        +0.655   +6.54%   9.97%   -27.9%     15.9   2.34     0.309
+   harvix          +0.670   +6.67%   9.94%   -27.5%     15.9   2.34     0.307
+
+   delta -0.008  MDE 0.029  t HAC6 -1.09  placebo pct 6.2% (p5 -0.009, p95 +0.007)
+   controls: har+median +0.004, har+80th +0.007, harvix +0.022
+   folds +0.002 -0.022 -0.001 -0.031 +0.009  (2/5 positive)
+   => NOT USEFUL — the state does not improve on the arm it is added to
+
+==============================================================================
+SUMMARY
+
+   P1   NOT USEFUL — the state does not improve on the arm it is added to
+   P2   NOT USEFUL — the state does not improve on the arm it is added to
+   P3   NOT USEFUL — the state does not improve on the arm it is added to
+   C1   NOT USEFUL — the state does not improve on the arm it is added to
+   C2   NOT USEFUL — the state does not improve on the arm it is added to
+   C3   NOT USEFUL — the state does not improve on the arm it is added to
+   C4   NOT USEFUL — the state does not improve on the arm it is added to
+   C5   NOT USEFUL — the state does not improve on the arm it is added to
+   C6   NOT USEFUL — the state does not improve on the arm it is added to
+   C7   UNDERPOWERED — positive, below the MDE, never useful
+   C8   NOT USEFUL — the state does not improve on the arm it is added to
+   E1   NOT USEFUL — the state does not improve on the arm it is added to
+   E2   NOT USEFUL — the state does not improve on the arm it is added to
+
+   logged 16 rows to data/trials.parquet (196 distinct)
+==============================================================================
