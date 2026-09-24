@@ -22,8 +22,9 @@ What differs from A', and only this:
 
 The calibration candidates are written to the trials log (family
 ``longhist_calibration``, or ``longhist_calibration_indpro``), as `run_phase2.py` does
-for A'. They are in-training Sharpe ratios of the gated market, the model's own
-estimation; no return of the tested object (UMD) is read here.
+for A', once each: a candidate already logged by an interrupted run is skipped. They
+are in-training Sharpe ratios of the gated market, the model's own estimation; no
+return of the tested object (UMD) is read here.
 
 Outputs, all in `data/cache/` (gitignored), never `states.parquet`:
     longhist_features[_indpro].parquet   the standardised feature matrix
@@ -66,9 +67,24 @@ def build_features(with_indpro: bool) -> pd.DataFrame:
     return lh.standardise(raw).dropna()
 
 
+def logged_hashes(family: str) -> set[str]:
+    """Configuration hashes of ``family`` already in the trials log."""
+    log = trials.read()
+    if log.empty:
+        return set()
+    return set(log.loc[log["family"] == family, "config_hash"])
+
+
 def factory(family: str, tag: str, chosen: dict[int, float]):
-    """Calibrate the penalty on the training window every fourth refit, then reuse it."""
+    """Calibrate the penalty on the training window every fourth refit, then reuse it.
+
+    A candidate whose configuration is already logged under ``family`` is not logged
+    again: the fit is deterministic, so a re-run after an interruption re-evaluates
+    the same candidates, and duplicating them would count the search twice.
+    """
     state = {"penalty": None, "last": -999}
+    seen = logged_hashes(family)
+    counts = {"logged": 0, "skipped": 0}
 
     def make(train, train_returns, refit_index):
         if refit_index - state["last"] >= CALIBRATE_EVERY:
@@ -79,16 +95,21 @@ def factory(family: str, tag: str, chosen: dict[int, float]):
             state["penalty"] = calibration.jump_penalty
             state["last"] = refit_index
             for penalty, sharpe, rate in calibration.candidates:
-                trials.log(family,
-                           {"lambda": penalty, "train_end": str(train.index.max().date()),
-                            "features": tag, "model": "longhist reduced SJM"},
+                config = {"lambda": penalty, "train_end": str(train.index.max().date()),
+                          "features": tag, "model": "longhist reduced SJM"}
+                if trials.config_hash(config) in seen:
+                    counts["skipped"] += 1
+                    continue
+                trials.log(family, config,
                            {"sharpe": sharpe, "switches_per_year": rate, "stage": "calibration"})
+                counts["logged"] += 1
             print(f"   calibration at refit {refit_index:>3} (train to "
                   f"{train.index.max():%Y-%m-%d}, {len(train):,} rows): lambda "
                   f"{calibration.jump_penalty:g}  [{time.time() - started:.0f} s]", flush=True)
         chosen[refit_index] = state["penalty"]
         return JumpRegimes(jump_penalty=state["penalty"], max_features=MAX_FEATURES)
 
+    make.counts = counts
     return make
 
 
@@ -109,10 +130,12 @@ def main() -> None:
 
     chosen: dict[int, float] = {}
     started = time.time()
+    make = factory(f"longhist_calibration{suffix}", tag, chosen)
     online, fitted, diagnostics, offline = run_expanding(
-        factory(f"longhist_calibration{suffix}", tag, chosen), features, market,
-        first_refit=FIRST_REFIT, months=MONTHS)
-    print(f"\n   {len(fitted)} refits in {(time.time() - started) / 60:.1f} min", flush=True)
+        make, features, market, first_refit=FIRST_REFIT, months=MONTHS)
+    print(f"\n   {len(fitted)} refits in {(time.time() - started) / 60:.1f} min; calibration "
+          f"candidates logged {make.counts['logged']}, already in the log and skipped "
+          f"{make.counts['skipped']}", flush=True)
 
     rows = []
     for i, (refit, model) in enumerate(fitted.items()):
