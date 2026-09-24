@@ -215,6 +215,20 @@ d'essais compte 84 configurations distinctes (`data/trials.parquet`).
   8 ; une réponse fausse sur le VIX dans `PARTIE1_CHEMINEMENT.md` ; le 93 % et le « temps
   réel » sans leurs réserves) sont **corrigés partout** le 23/09 (`527063a`).
 
+### Le 24 septembre : le PDF de la partie 2
+
+- **`docs/presentation/presentation_partie2.pdf`** (16 pages), généré par
+  `scripts/build_presentation_partie2.py`. Il montre le filtre appliqué à **trois
+  stratégies choisies par Guillaume pour leurs profils opposés** : le momentum actions (le
+  filtre aide), le rebond obligataire de fin de mois (il est neutre) et la tendance crypto
+  (il pénalise). Il compare **six façons d'utiliser le filtre** : couper, réduire,
+  basculer vers la tendance, or, obligations, options. Il ajoute la vérification du
+  momentum sur 90 ans, le mécanisme de l'échec et la diversification. Les chiffres viennent
+  des lectures uniques, copiées dans `docs/artifacts/partie2/lectures_trois_strategies.txt`.
+  Les courbes sont recalculées sur données publiques et vérifiées contre ces lectures
+  (le script refuse de dessiner en cas d'écart). La crypto n'apparaît qu'en chiffres
+  agrégés.
+
 ### Le 24 septembre : les cinq pistes du conseiller, lancées en parallèle
 
 Guillaume a dit « lance tout ». Cinq études, chacune pré-enregistrée, une lecture chacune,
