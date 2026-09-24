@@ -18,7 +18,7 @@ What differs from A', and only this:
   on (features are complete from 1928-05-24) and puts 14 NBER recessions out of
   sample;
 - the dynamic programme runs through `extensions.longhist.fast_dp`, bit-identical to
-  the reference implementation and about twenty times faster.
+  the reference implementation and much faster (no numpy reduction per session).
 
 The calibration candidates are written to the trials log (family
 ``longhist_calibration``, or ``longhist_calibration_indpro``), as `run_phase2.py` does
