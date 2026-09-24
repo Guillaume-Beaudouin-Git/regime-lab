@@ -1,0 +1,39 @@
+==============================================================================
+LONGHIST PHASE B — UMD stopped in stress, 1937-2026 — INSTRUMENT
+==============================================================================
+
+0.  INPUTS (SHA-256)
+
+   302303df13aee16d  raw/crisis/french_umd.parquet
+   87f4d694a996e411  raw/longhist/ff3_daily.parquet
+   94ac5b93d78bccdb  cache/longhist_states.parquet
+   0622c72fa75115cb  cache/states.parquet
+
+==============================================================================
+1.  SAMPLE, COVERAGE, SIZING — no mean, no Sharpe
+
+   1937-01-04 -> 2026-07-31, 23,170 sessions, 0 missing values, 0 sessions dropped inside the window
+   weight: median 1.33, 95th pct 2.86, at the cap 3.8%; realised vol of the alone arm 10.9%
+
+   lagged label    stress  episodes  tr/yr
+   SJM long         12.2%        92   2.05
+   asym k=10         8.3%        88   1.96
+   asym k=5          7.3%        92   2.05
+   median rule      47.5%       397   8.85
+   80th rule        16.0%       159   3.55
+   DM panic         11.3%        78   1.74
+   A' (2002+, descriptive only): 2002-04-02 -> 2026-07-31, stress 16.0%
+
+==============================================================================
+2.  MINIMUM DETECTABLE EFFECT — demeaned legs, alpha 0.05/3 = 0.0167, power 0.80
+
+   B1    SJM long vs alone       (primary    ) MDE 0.158 / 0.154 / 0.152  ->  threshold 0.158
+   B2    asym k=10 vs alone       (primary    ) MDE 0.139 / 0.143 / 0.145  ->  threshold 0.145
+   B3    SJM long vs 80th rule   (primary    ) MDE 0.153 / 0.148 / 0.151  ->  threshold 0.153
+   S_k5  asym k=5 vs alone       (sensitivity) MDE 0.131 / 0.137 / 0.139  ->  threshold 0.139
+
+   HAC t critical value |t| >= 2.394; placebo 400 rotations >= 252 sessions; 5 folds, at least 3 positive
+
+==============================================================================
+NOT READ — re-run with --read, once.
+==============================================================================
