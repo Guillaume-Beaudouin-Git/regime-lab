@@ -315,7 +315,17 @@ automatiquement par toute session ouverte ici. Ce fichier-ci en est le détail.
 11d. ~~Stratégies testées → valeur refuge en stress~~ **FAIT le 23/09** : 9 stratégies ×
     (or, TLT, options), 27 essais, aucune bascule utile. Momentum + or 0,47 → 0,77, sous
     le MDE, et la règle médiane fait autant. `docs/RESULTS_REFUGE.md`, 2ᵉ partie.
-    **Ouvert** : momentum conditionné sur 1926-2026 (plus de crises, plus de puissance).
+    ~~**Ouvert** : momentum conditionné sur 1926-2026.~~ **Fait le 24/09** (`RESULTS_LONGHIST.md`).
+
+11e. ~~Les cinq pistes du conseiller~~ **FAIT le 24/09** (`PISTES_AMELIORATION.md`) :
+    budget de risque, prévision de risque, corrélation, SJM par facteur, SJM sur
+    1926-2026. **Aucun usage utile du régime.** Ce qui reste prometteur n'est pas un
+    régime : le socle multi-stratégies (1,52 brut, à remesurer à coûts institutionnels et
+    hors conception) et la corrélation actions-obligations comme entrée de risque.
+    **Ouvert, à pré-enregistrer comme pistes neuves** : la règle de panique de Daniel et
+    Moskowitz sur le momentum, comme hypothèse et non comme témoin ; un état de stress
+    relatif à un passé récent, pour qu'une crise extrême ne définisse pas « stress » pour
+    des décennies.
 
 ### ⟶ 12. ENSUITE — voir `AVANCEMENT.md` §4 et §5
 

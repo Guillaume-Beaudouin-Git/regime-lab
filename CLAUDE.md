@@ -110,14 +110,34 @@ est `docs/PRESPEC_AHL.md` (commit `92e4e9e`). Ne le modifie pas.
 ## Ce que le programme a établi
 
 **Le classifieur marche comme classifieur** : 93,2 % d'exactitude équilibrée contre les
-récessions NBER, kappa 0,53, sur 6 377 jours hors échantillon.
+récessions NBER, kappa 0,53, sur 6 377 jours hors échantillon. ⚠ **Sur deux récessions
+seulement** (2008-09, 2020). La même méthode réduite à 30 variables et réestimée sur
+1926-2026 n'en reconnaît que **6 sur 14** (57,5 %, κ 0,16), pas mieux qu'une règle de
+volatilité (`docs/RESULTS_LONGHIST.md`) : ne jamais citer le 93 % sans ces deux faits.
 
 **Il porte la variance, pas la moyenne** : +3,93 points de R² incrémental sur la
-volatilité future (t −3,40), contre +0,030 sur les rendements (t 0,27).
+volatilité future (t −3,40), contre +0,030 sur les rendements (t 0,27). ⚠ **Au-delà du
+VIX, il n'ajoute que +0,20 point** (t −1,34, non significatif ; `docs/RESULTS_CRISE.md`,
+test P). Le +3,93 est « au-delà d'une règle de volatilité passée », jamais « au-delà du
+VIX ».
 
 **Sept dispositifs ont échoué à le monétiser** : T1, T3, l'atténuateur de Carver, la
 barrière propfirm, la réplication Shu 2024, H-b et AHL niveau A. AHL niveau B est
 indécidable, ce qui n'est pas la même chose.
+
+**Les 23 et 24/09, huit études de plus, toutes pré-enregistrées, et aucun usage utile du
+régime** : stratégies de crise (`RESULTS_CRISE`), valeurs refuges (`RESULTS_REFUGE`,
+deux parties), corrélation actions-obligations (`RESULTS_COUVERTURE`), budget de risque
+multi-stratégies (`RESULTS_BUDGET_RISQUE`), prévision de risque sur 46 marchés
+(`RESULTS_RISQUE`), un SJM par facteur (`RESULTS_FACTORSJM`), le SJM réduit sur
+1926-2026 (`RESULTS_LONGHIST`). Deux choses en ressortent, **qui ne sont pas des
+résultats de régime** : un livre de 9 stratégies non conditionné fait 1,52 de Sharpe brut
+sur 2005-2026 (plafond : sans coût, stratégies choisies en connaissant ces années) ; le
+signe de la corrélation actions-obligations prédit le risque d'un portefeuille à risque
+égal au-delà du VIX (placebo pile au seuil de 95 %). Le mécanisme de l'échec du SJM : il
+entre en stress tard et **y reste pendant les reprises** (55 % des séances de stress après
+le creux, 97 % au Covid). La réserve scellée AQR (1971-1989) a été **ouverte** le 23/09
+pour `longhist` (`docs/PROTOCOL_FREEZE.md`).
 
 **La sélection entre signaux a été testée le 23/09 (plan Two Sigma) et ne transfère
 pas.** Il s'agit d'une partition de contexte orthogonale à la volatilité, à 12,5
