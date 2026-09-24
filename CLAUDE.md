@@ -71,6 +71,15 @@ Sigma.** L'autre session ne touche pas à ces fichiers : `regime_lab/selection/`
 `data/trials.parquet`. Le dossier de travail est partagé : n'ajoute que tes fichiers,
 avec des chemins explicites, jamais `git add -A`.
 
+⚠ **Plan Bridgewater — lancé le 24/09 par Guillaume dans la session du compte B
+(`projet-big-data-regimes-cd`).** Cette session construit l'outillage, le verrou, les
+instruments et les lectures. L'autre session ne touche pas à : `regime_lab/construction/`,
+`scripts/*bridgewater*`, `scripts/fetch_spf.py`, `tests/test_bridgewater_*`,
+`docs/PRESPEC_BRIDGEWATER.md`, `docs/RESULTS_BRIDGEWATER*`, `docs/artifacts/bridgewater/`,
+`data/raw/spf/`, ni aux lignes `bridgewater` de `data/trials.parquet`. Recouvrement
+connu, à déclarer dans le verrou : l'idée 3 « Couverture » (`docs/RESULTS_COUVERTURE.md`)
+et l'idée 4 « Budget de risque » (`docs/RESULTS_BUDGET_RISQUE.md`).
+
 **3. Fermer l'arbre AHL** (priorité plus basse) :
 
 **AHL niveau C, puis fermeture de l'arbre.** Le pré-enregistrement verrouillé
