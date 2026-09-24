@@ -19,6 +19,7 @@ Sections
     7  the 50-feature A' on the common period 2002-2026                 (§5.3)
     8  the model itself: penalty path and feature weights
     9  the INDPRO sensitivity, if its states exist                      (§3.4)
+   10  descriptive, added after 1-9 were seen: where the stress state lives
 
 Usage:
     .venv/bin/python scripts/longhist_validate.py > docs/artifacts/longhist/validation.txt
@@ -38,6 +39,7 @@ from regime_lab.evaluation.predictive import volatility_quantile_placebo
 from regime_lab.evaluation.reliability import external_validation
 from regime_lab.extensions import crisis
 from regime_lab.extensions import longhist as lh
+from regime_lab.models.jump import JumpRegimes
 
 warnings.filterwarnings("ignore")
 RULE = "=" * 78
@@ -286,6 +288,38 @@ def main() -> None:
         print("   never deciding: INDPRO is the current vintage and feeds the NBER dating")
     else:
         print("   not run (no longhist_states_indpro.parquet)")
+
+    print(f"\n{RULE}\n10. DESCRIPTIVE, ADDED AFTER SECTIONS 1-9 WERE SEEN — where the stress state")
+    print("    lives. No verdict changes; this checks a cause instead of asserting it.\n")
+    s_on = states["state"].reindex(oos)
+    s_off = states["state_offline"].reindex(oos)
+    decade = (oos.year // 10) * 10
+    share = pd.DataFrame({"online": s_on.eq(lh.STRESS), "offline": s_off.eq(lh.STRESS)},
+                         index=oos).groupby(decade).mean()
+    print("   out-of-sample stress share by decade:")
+    print("   " + "  ".join(f"{d}s {r['online']:>5.1%}" for d, r in share.iterrows()))
+    runs = s_on.ne(s_on.shift()).cumsum()
+    first = next((g.index[0] for _, g in s_on.groupby(runs)
+                  if g.iloc[0] == lh.STRESS and len(g) >= 21), None)
+    print(f"   first stress run of at least 21 sessions starts {first:%Y-%m-%d}")
+    lh.use_fast_dp()
+    features = pd.read_parquet(CACHE / "longhist_features.parquet")
+    market = lh.market_returns(lh.load_wide("ff3_daily"))["excess"]
+    for refit in (pd.Timestamp("1936-12-31"), pd.Timestamp("1970-06-30")):
+        at = refits.index[refits.index <= refit].max()
+        train = features.loc[features.index < at]
+        model = JumpRegimes(jump_penalty=float(refits.loc[at, "penalty"]), max_features=10.0)
+        model.fit(train, market.reindex(train.index))
+        inside = model.predict_online(train).eq(lh.STRESS)
+        by_year = inside.groupby(inside.index.year).mean()
+        top = by_year[by_year > 0.05]
+        vols = {k: v * np.sqrt(252) for k, v in model.state_vol_.items()}
+        print(f"\n   refit {at:%Y-%m-%d} (penalty {refits.loc[at, 'penalty']:g}), training "
+              f"{train.index.min():%Y} -> {train.index.max():%Y}: stress on "
+              f"{inside.mean():.1%} of training sessions; market vol in stress "
+              f"{vols.get(0, float('nan')):.1%}, in calm {vols.get(1, float('nan')):.1%}")
+        print("   training years with more than 5% stress sessions: " + ", ".join(
+            f"{y} {v:.0%}" for y, v in top.items()))
     print(f"\n{RULE}")
 
 
