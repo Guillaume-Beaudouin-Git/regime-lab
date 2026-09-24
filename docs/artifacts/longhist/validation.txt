@@ -150,7 +150,12 @@ LONGHIST PHASE A — the reduced SJM as a classifier, 1937-2026, no return read
 ==============================================================================
 9.  SENSITIVITY — the same model with INDPRO (revised, partly circular)
 
-   not run (no longhist_states_indpro.parquet)
+   label                   bal.acc  kappa  recall  precis.  detected  latency  tr/yr  stress
+   SJM long                  57.5%   0.16   25.2%    27.9%    6/14       -81d   2.05   12.2%
+   SJM long + INDPRO         60.6%   0.22   31.2%    32.8%    7/14        -3d   1.99   12.9%
+
+   kappa(SJM long, SJM long + INDPRO) +0.923; 59b90f96e6201953 cache/longhist_states_indpro.parquet
+   never deciding: INDPRO is the current vintage and feeds the NBER dating
 
 ==============================================================================
 10. DESCRIPTIVE, ADDED AFTER SECTIONS 1-9 WERE SEEN — where the stress state

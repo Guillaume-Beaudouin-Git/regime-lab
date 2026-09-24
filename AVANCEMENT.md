@@ -1,4 +1,4 @@
-# Avancement du projet — état au 23 septembre 2026
+# Avancement du projet — état au 24 septembre 2026
 
 Ce document sert à partir du même point : **ce qui est fait, où sont les données, ce qui
 reste et par quoi commencer.** Chaque chiffre renvoie à un document ou à un script du
@@ -16,12 +16,17 @@ pour tests multiples ?
 **La réponse, établie.**
 1. **Le classifieur marche comme classifieur.** 93,2 % d'exactitude équilibrée contre
    les récessions NBER, kappa 0,53, sur 6 377 jours hors échantillon. Cinq méthodes
-   concordent.
+   concordent. ⚠ **Mais sur deux récessions seulement.** Réestimée sur 1926-2026 avec
+   les 30 variables disponibles depuis 1926, la méthode ne reconnaît que 6 récessions sur
+   14 (57,5 %), pas mieux qu'une règle de volatilité (`docs/RESULTS_LONGHIST.md`).
 2. **Il porte de la variance, pas de la moyenne.** Il ajoute +3,93 points de R² sur la
    volatilité future (t −3,40), contre +0,030 sur les rendements futurs (t 0,27). C'est
-   donc un signal de **dimensionnement**, pas de **timing**.
+   donc un signal de **dimensionnement**, pas de **timing**. ⚠ **Le VIX le savait
+   déjà** : au-delà du VIX, l'état n'ajoute que +0,20 point, non significatif.
 3. **Aucun des sept dispositifs testés pour le monétiser ne bat une règle d'une ligne**
-   (volatilité réalisée sous sa médiane). Le chiffre qui explique tout : l'état change
+   (volatilité réalisée sous sa médiane). Les huit études des 23 et 24 septembre (§1)
+   n'ont trouvé aucun usage utile non plus, et en expliquent la raison : le modèle entre
+   en stress tard et **y reste pendant les reprises**. Le chiffre qui explique tout : l'état change
    **13 fois en 6 377 séances**, soit treize décisions en 25 ans.
 4. **Quatre hypothèses dérivées ont été falsifiées** : H1, H2, H3 et la prime de
    retournement.
@@ -44,7 +49,12 @@ futures institutionnels (environ 1 bp). Le régime n'y ajoute rien au-delà de l
 volatilité. Viser 1 à 2 demande donc un autre objet que les sept dispositifs testés. Un
 régime qui **arbitre entre plusieurs signaux** a été mesuré le 23/09 (plan Two Sigma) :
 **il ne transfère pas**, voir §1. Reste un axe jamais testé : un régime qui entre dans la
-**construction du portefeuille** (plan Bridgewater).
+**construction du portefeuille** (plan Bridgewater, en cours depuis le 24/09 dans la
+session du compte B). **La piste la plus prometteuse du programme n'est pas un régime** :
+un livre de 9 stratégies, sans filtre, fait 1,52 de Sharpe brut sur 2005-2026 et 1,91 sur
+2016-2026 (`docs/RESULTS_BUDGET_RISQUE.md`). C'est un plafond : sans coût, avec des
+stratégies choisies en connaissant ces années. À remesurer à coûts institutionnels et
+sur les seules dates postérieures à la conception de chaque stratégie.
 
 **L'hypothèse de coûts pour la suite est institutionnelle.** Le barème de tête du
 programme, en aller-retour, est déjà de ce type : 1 bp pour les futures d'indices, de
@@ -200,10 +210,41 @@ d'essais compte 84 configurations distinctes (`data/trials.parquet`).
   descriptives dans `scripts/describe_pistes.py`. **55 % des séances de stress de A′
   tombent après le creux du S&P 500** ; la courbe des futures VIX s'était normalisée 4 à
   9 mois avant la sortie de A′. Six idées classées, dont un SJM réduit sur 1926-2026
-  (14 récessions au lieu de 2, MDE du test UMD ≈ 0,15 au lieu de 0,395). Deux écarts
-  signalés, non corrigés : la diapositive 3 annonce 109 configurations, le registre en
-  compte 168 ; `RESULTS_REFUGE.md` annonce 12 bascules sous-puissantes, le registre en
-  a 8.
+  (14 récessions au lieu de 2, MDE du test UMD ≈ 0,15 au lieu de 0,395). Les écarts
+  signalés (109 configurations au lieu de 168 ; 12 bascules sous-puissantes au lieu de
+  8 ; une réponse fausse sur le VIX dans `PARTIE1_CHEMINEMENT.md` ; le 93 % et le « temps
+  réel » sans leurs réserves) sont **corrigés partout** le 23/09 (`527063a`).
+
+### Le 24 septembre : les cinq pistes du conseiller, lancées en parallèle
+
+Guillaume a dit « lance tout ». Cinq études, chacune pré-enregistrée, une lecture chacune,
+coût nul. **Aucune ne trouve un usage utile du régime.**
+- **Budget de risque multi-stratégies** (`docs/RESULTS_BUDGET_RISQUE.md`, étude dans le
+  dépôt privé voisin, 6 essais `sjm_risk_budget`). Le **socle** non conditionné (9
+  stratégies, inverse de la volatilité, 10 % de cible) : **Sharpe brut 1,52** sur
+  2005-2026 (IC 95 % [1,06 ; 1,96], perte max −24,4 %, 5 plis sur 5), **1,91** sur
+  2016-2026 (perte max −10,0 %), 3,29 fois la moyenne des stratégies seules. Le régime en
+  budget de risque : 3 bras, aucun utile ; diviser le risque par deux en stress ramène la
+  perte max à −17,4 %, les règles de volatilité aussi.
+- **Prévision de risque sur 46 marchés** (`docs/RESULTS_RISQUE.md`, 16 essais
+  `risque_forecast`). L'état n'améliore la prévision d'**aucun** marché (−0,8 % de QLIKE
+  sur les 43 marchés sans VIX propre) ; **le VIX améliore tous les marchés** (+5,6 %).
+- **Corrélation actions-obligations** (`docs/RESULTS_COUVERTURE.md`, 6 essais
+  `couverture`). Son signe **prédit le risque** d'un portefeuille à risque égal au-delà
+  du VIX et de la volatilité (+3,10 points de R², t 5,50, hors échantillon confirmé ;
+  placebo pile au seuil, 95,0 %) ; pas sur un 60/40 (placebo 92,8 %). Il **ne choisit pas
+  la couverture** (0,78 contre 0,95 pour une poche fixe 50/50).
+- **Un SJM par facteur, d'après Shu et Mulvey** (`docs/RESULTS_FACTORSJM.md`, 18 essais,
+  1978-2026). Franchit les quatre axes de la règle opposable, et perd quand même : 1,39
+  contre 1,51 en tenant les six facteurs. Gagne sur la fenêtre du papier (+0,29), perd
+  avant 1990 (−0,63). Réplication partielle, 2 facteurs sur 4.
+- **Le SJM réduit sur 1926-2026** (`docs/RESULTS_LONGHIST.md`, réserve AQR ouverte,
+  4 essais `longhist_umd`). **FAIL-A** : 6 récessions sur 14, 57,5 %, κ 0,16. Le modèle a
+  appris que « stress » veut dire « Grande Dépression » : aucun épisode de stress d'un
+  mois hors échantillon de 1937 à 1974. Le momentum coupé en stress : +0,045 sur 90 ans
+  (MDE 0,158, contre +0,166 sur 2002-2026), par le dénominateur ; la sortie asymétrique
+  (idée 2) n'aide pas (−0,013) ; la règle publiée de Daniel et Moskowitz fait mieux
+  (+0,106, perte max −37 % → −27 %), comme témoin sans verdict.
 
 ---
 

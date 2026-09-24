@@ -262,8 +262,20 @@ au sens du critère).
 
 ## 8. Sensibilité INDPRO (déclarée, ne décide rien)
 
-*À compléter à la fin de la relance ; voir `docs/artifacts/longhist/validation.txt`,
-section 9.*
+Complété le 24/09 par la session principale. La relance de l'ajustement INDPRO s'est
+terminée après la coupure de l'agent ; la validation a été relancée et **seule sa section
+9 a changé** (le reste du fichier est identique à l'octet près).
+`docs/artifacts/longhist/validation.txt`, section 9 :
+
+| étiquette | exactitude équilibrée | κ | récessions détectées | latence médiane | transitions / an |
+|---|---|---|---|---|---|
+| SJM long (30 variables) | 57,5 % | 0,16 | 6 / 14 | −81 j | 2,05 |
+| SJM long + INDPRO | 60,6 % | 0,22 | 7 / 14 | −3 j | 1,99 |
+
+κ entre les deux versions : 0,923. **Ne décide rien** : INDPRO est le millésime actuel,
+révisé, et la production industrielle sert elle-même à dater les récessions NBER, ce qui
+rend la comparaison en partie circulaire. Même avec elle, la méthode reste très loin de
+PASS-A (85 %, κ 0,40, 12 récessions sur 14). La conclusion de la phase A ne change pas.
 
 ## Reproduire
 
