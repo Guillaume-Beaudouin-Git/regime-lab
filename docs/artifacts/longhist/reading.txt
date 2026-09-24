@@ -1,0 +1,93 @@
+==============================================================================
+LONGHIST PHASE B — UMD stopped in stress, 1937-2026 — INSTRUMENT
+==============================================================================
+
+0.  INPUTS (SHA-256)
+
+   302303df13aee16d  raw/crisis/french_umd.parquet
+   87f4d694a996e411  raw/longhist/ff3_daily.parquet
+   94ac5b93d78bccdb  cache/longhist_states.parquet
+   0622c72fa75115cb  cache/states.parquet
+
+==============================================================================
+1.  SAMPLE, COVERAGE, SIZING — no mean, no Sharpe
+
+   1937-01-04 -> 2026-07-31, 23,170 sessions, 0 missing values, 0 sessions dropped inside the window
+   weight: median 1.33, 95th pct 2.86, at the cap 3.8%; realised vol of the alone arm 10.9%
+
+   lagged label    stress  episodes  tr/yr
+   SJM long         12.2%        92   2.05
+   asym k=10         8.3%        88   1.96
+   asym k=5          7.3%        92   2.05
+   median rule      47.5%       397   8.85
+   80th rule        16.0%       159   3.55
+   DM panic         11.3%        78   1.74
+   A' (2002+, descriptive only): 2002-04-02 -> 2026-07-31, stress 16.0%
+
+==============================================================================
+2.  MINIMUM DETECTABLE EFFECT — demeaned legs, alpha 0.05/3 = 0.0167, power 0.80
+
+   B1    SJM long vs alone       (primary    ) MDE 0.158 / 0.154 / 0.152  ->  threshold 0.158
+   B2    asym k=10 vs alone       (primary    ) MDE 0.139 / 0.143 / 0.145  ->  threshold 0.145
+   B3    SJM long vs 80th rule   (primary    ) MDE 0.153 / 0.148 / 0.151  ->  threshold 0.153
+   S_k5  asym k=5 vs alone       (sensitivity) MDE 0.131 / 0.137 / 0.139  ->  threshold 0.139
+
+   HAC t critical value |t| >= 2.394; placebo 400 rotations >= 252 sessions; 5 folds, at least 3 positive
+
+==============================================================================
+3.  THE ARMS — 1937-01-04 -> 2026-07-31, zero cost
+
+   arm                     Sharpe   return     vol   max DD  turnover  exposed
+   alone                   +1.120  +12.19%  10.88%   -37.1%      4.37   100.0%
+   stop (SJM long)         +1.166  +11.80%  10.12%   -37.1%      6.27    87.8%
+   stop (asym k=10)        +1.107  +11.41%  10.31%   -37.1%      6.21    91.7%
+   stop (asym k=5)         +1.093  +11.33%  10.36%   -37.1%      6.18    92.7%
+   stop (median rule)      +0.749   +5.69%   7.60%   -34.5%     15.13    52.5%
+   stop (80th rule)        +1.140  +11.12%   9.76%   -33.6%      7.26    84.0%
+   stop (DM panic)         +1.226  +12.64%  10.31%   -26.6%      5.58    88.7%
+
+   alone, by lagged label (descriptive):
+     SJM long    stress  2,827 sessions Sharpe  +0.28   calm 20,343 Sharpe  +1.24
+     asym k=10   stress  1,922 sessions Sharpe  +0.78   calm 21,248 Sharpe  +1.16
+     80th rule   stress  3,705 sessions Sharpe  +0.56   calm 19,465 Sharpe  +1.24
+     DM panic    stress  2,610 sessions Sharpe  -0.38   calm 20,560 Sharpe  +1.30
+
+==============================================================================
+4.  THE DECISIONS (§6.5)
+
+   B1 (primary) SJM long vs alone
+      delta +0.045  MDE 0.158  t HAC6 -0.78  placebo pct 96.2% (median -0.067, p95 +0.036)
+      folds +0.000 -0.056 +0.234 -0.111 +0.196  (2/5 > 0)
+      controls (delta of the same stop): median rule -0.371, 80th rule +0.019, DM panic +0.106
+      sub-periods: 1937-1962 -0.008, 1963-2001 +0.031, 2002-2026 +0.145
+      annual mean of the daily difference -0.39% (the t above tests it)
+      => UNDERPOWERED — positive, below the MDE, never useful
+
+      descriptive, 2002-04-02 -> 2026-07-31: stop by A' delta +0.166, stop by the long SJM delta +0.138
+      descriptive, raw UMD at weight 1: alone Sharpe +0.510 max DD -63.3%; stopped by the long SJM +0.691 max DD -54.6%
+
+   B2 (primary) asym k=10 vs alone
+      delta -0.013  MDE 0.145  t HAC6 -1.82  placebo pct 69.8% (median -0.046, p95 +0.034)
+      folds +0.000 -0.056 +0.083 -0.193 +0.108  (2/5 > 0)
+      controls (delta of the same stop): median rule -0.371, 80th rule +0.019, DM panic +0.106
+      sub-periods: 1937-1962 -0.008, 1963-2001 -0.064, 2002-2026 +0.061
+      annual mean of the daily difference -0.78% (the t above tests it)
+      => NOT USEFUL — does not raise the Sharpe
+
+   B3 (primary) SJM long vs 80th rule
+      delta +0.026  MDE 0.153  t HAC6 +1.47  placebo pct 96.2% (median -0.086, p95 +0.017)
+      folds -0.009 -0.023 +0.252 -0.148 +0.074  (2/5 > 0)
+      sub-periods: 1937-1962 -0.010, 1963-2001 +0.063, 2002-2026 +0.029
+      annual mean of the daily difference +0.69% (the t above tests it)
+      => UNDERPOWERED — positive, below the MDE, never useful
+
+   S_k5 (sensitivity) asym k=5 vs alone
+      delta -0.027  MDE 0.139  t HAC6 -2.12  placebo pct 57.5% (median -0.040, p95 +0.031)
+      folds +0.000 -0.048 +0.085 -0.243 +0.072  (2/5 > 0)
+      controls (delta of the same stop): median rule -0.371, 80th rule +0.019, DM panic +0.106
+      sub-periods: 1937-1962 -0.008, 1963-2001 -0.084, 2002-2026 +0.039
+      annual mean of the daily difference -0.86% (the t above tests it)
+      => NOT USEFUL — does not raise the Sharpe  [SENSITIVITY — does not decide]
+
+   logged 4 rows to data/trials.parquet, family longhist_umd (680 distinct configurations)
+==============================================================================
