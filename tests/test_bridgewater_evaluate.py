@@ -639,3 +639,118 @@ def test_the_draft_mde_is_one_log_sigma():
     two_cells = E.analytic_mde_log_variance_difference(1792, 841)
     assert two_cells > 5 * E.DRAFT_MDE
     assert E.sidak_alpha() == pytest.approx(0.01021, abs=1e-5)
+
+
+# ------------------------------------------------------- the declared book and its folds
+
+#: A toy instrument universe with the five sleeve names of the draft.
+TOY_SLEEVES = {
+    "equity": ("^AAA", "^BBB"),
+    "duration": ("SHY", "TLT"),
+    "inflation_linked": ("TIP",),
+    "commodity": ("CL=F", "NG=F"),
+    "precious": ("GC=F",),
+}
+
+
+def _instrument_world(sessions: pd.DatetimeIndex, stamps: pd.DatetimeIndex, seed: int = 4):
+    from regime_lab.construction import sleeves as S
+
+    rng = np.random.default_rng(seed)
+    vols = {"^AAA": 0.012, "^BBB": 0.018, "SHY": 0.001, "TLT": 0.009, "TIP": 0.004,
+            "CL=F": 0.022, "NG=F": 0.03, "GC=F": 0.01}
+    excess = pd.DataFrame({n: rng.normal(0.0, v, len(sessions)) for n, v in vols.items()},
+                          index=sessions)
+    dates = [d for d in stamps if sessions[0] <= d <= sessions[-1]]
+    within = S.hold(S.within_sleeve_weights(excess, TOY_SLEEVES, dates), sessions)
+    return excess, within, S.sleeve_returns(excess, within, TOY_SLEEVES)
+
+
+def test_stamp_folds_expand_and_cut_only_at_stamps(world):
+    sessions, stamped, labels, _ = world
+    folds = E.stamp_folds(stamped, sessions, min_quarters=4)
+    assert len(folds) == 5
+    starts = set(E.stamps_to_sessions(E.stamps_in_force(stamped, sessions).index, sessions))
+    previous_end = None
+    for fold in folds:
+        test, train = fold.test(sessions), fold.train(sessions)
+        assert fold.test_start in starts  # a fold never splits a quarter
+        assert train[0] == sessions[0] and train[-1] == sessions[sessions < test[0]][-1]
+        if previous_end is not None:
+            assert test[0] == sessions[sessions > previous_end][0]
+        previous_end = test[-1]
+    assert folds[-1].test_end == sessions[-1]
+    # The first training window is the shortest one holding four quarters of every cell.
+    in_force = E.stamps_in_force(stamped, sessions)
+    position = E.expand_to_sessions(pd.Series(np.arange(len(in_force)), index=in_force.index),
+                                    sessions)
+    held = np.unique(position.loc[: folds[0].train_end].dropna().to_numpy()).astype(int)
+    trained = in_force.iloc[held]
+    counts = trained.value_counts()
+    assert (counts.reindex(range(4), fill_value=0) >= 4).all()
+    shorter = trained.iloc[:-1].value_counts().reindex(range(4), fill_value=0)
+    assert (shorter < 4).any()
+    with pytest.raises(ValueError, match="every cell"):
+        E.stamp_folds(stamped, sessions, min_quarters=40)
+
+
+def test_stamp_folds_count_only_usable_quarters(world):
+    sessions, stamped, _, _ = world
+    base = E.stamp_folds(stamped, sessions, min_quarters=3)
+    later = E.stamp_folds(stamped, sessions, min_quarters=3, usable=sessions[1500:])
+    assert later[0].train_end >= base[0].train_end
+    assert later[0].train_end > sessions[1500]
+
+
+def test_the_instrument_leg_is_the_sleeve_leg_plus_instrument_costs(world):
+    from regime_lab.construction import sleeves as S
+
+    sessions, stamped, _, _ = world
+    excess, within, sleeve_r = _instrument_world(sessions, stamped.index)
+    live = sleeve_r.notna().all(axis=1)
+    path = pd.DataFrame(np.nan, index=sessions, columns=list(TOY_SLEEVES))
+    path.loc[live] = [0.1, 0.4, 0.2, 0.2, 0.1]
+    free = E.InstrumentLegBuilder(excess, within, TOY_SLEEVES, cost_column=None)(path)
+    sleeve_leg = E.SleeveLegBuilder(sleeve_r)(path)
+    pd.testing.assert_series_equal(free.returns, sleeve_leg.returns, check_names=False,
+                                   rtol=1e-12, atol=1e-15)
+    unscaled = (path * sleeve_r).sum(axis=1, min_count=5)
+    ratio = (free.returns / free.multiplier).dropna()
+    np.testing.assert_allclose(ratio, unscaled.reindex(ratio.index), rtol=1e-10, atol=1e-15)
+    charged = E.InstrumentLegBuilder(excess, within, TOY_SLEEVES)(path)
+    drag = S.cost_drag(charged.held, "headline")
+    np.testing.assert_allclose((free.returns - charged.returns).dropna(),
+                               drag.reindex(free.returns.dropna().index), atol=1e-15)
+    assert (drag >= 0).all() and drag.sum() > 0
+    # A sleeve at zero weight holds nothing, even where its within weights are undefined.
+    gone = within.copy()
+    gone[list(TOY_SLEEVES["precious"])] = np.nan
+    zero = path.copy()
+    zero.loc[live] = [0.1, 0.4, 0.2, 0.3, 0.0]
+    leg = E.InstrumentLegBuilder(excess, gone, TOY_SLEEVES)(zero)
+    assert leg.returns.notna().sum() > 0.8 * live.sum()
+    assert (leg.held.loc[leg.returns.notna(), "GC=F"] == 0.0).all()
+
+
+def test_level_a_runs_on_the_instrument_book_and_its_blind_leg_reads_no_label(world):
+    sessions, stamped, labels, _ = world
+    excess, within, sleeve_r = _instrument_world(sessions, stamped.index)
+    folds = E.stamp_folds(stamped, sessions, usable=sleeve_r.dropna().index)
+    builder = E.InstrumentLegBuilder(excess, within, TOY_SLEEVES)
+    engine = E.LevelA(sleeve_r, folds, leg_builder=builder)
+    other = labels.sample(frac=1.0, random_state=1).set_axis(labels.index)
+    a, b = engine.run(labels), engine.run(other)
+    pd.testing.assert_series_equal(a.blind_leg.returns, b.blind_leg.returns)
+    assert np.isfinite(a.reduction) and a.missing_sessions == 0
+    assert a.blind_leg.held.shape[1] == 8  # instrument level, not sleeve level
+
+
+def test_placebo_session_paths_are_the_null_draws(world, planted):
+    sessions, stamped, _, folds = world
+    engine = E.LevelA(planted, folds)
+    paths = E.placebo_session_paths(engine, stamped, 6, seed=3)
+    null = E.null_statistics(engine, stamped, 6, seed=3,
+                             statistics={"r": lambda result: result.reduction})
+    replay = [engine.run(paths[c]).reduction for c in paths.columns]
+    np.testing.assert_array_equal(replay, null["r"].values)
+    assert paths.shape == (len(sessions), 6)

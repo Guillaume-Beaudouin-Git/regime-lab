@@ -81,8 +81,10 @@ defaults is a decision: the lock must choose.
     Sigma §12.3 convention.
   - Weights are constant within a fold, and the book is rebalanced back to them every
     session without charge, as in `construction.sleeves`.
-  - The default leg charges costs at sleeve level only. Instrument-level costing is
-    plugged in through `leg_builder`.
+  - The default leg charges costs at sleeve level only. :class:`InstrumentLegBuilder`,
+    passed as `leg_builder`, is the declared book instead: the sleeve weights spread
+    over the 30 instruments by the within-sleeve weights held on each session, built
+    by `construction.sleeves.build_book` and charged per instrument.
 - OC-A11 **Label timing.**
   - Session t holds the label stamped at or before session t, shifted one session. This
     is `quadrant.daily_labels`, and `protocol.map_states` in Two Sigma.
@@ -95,7 +97,10 @@ defaults is a decision: the lock must choose.
 - OC-A12 **The walk-forward.** "5 folds = 18.2 quarters and 1,187 sessions each" (§1.3,
   §7 killer 7) tiles the whole sample: 5 × 1,187 = 5,935 of 5,938 sessions. Under a
   walk-forward, that leaves fold 1 no training window. An initial training window is
-  needed, taken from the sample or from before it.
+  needed, taken from the sample or from before it. :func:`stamp_folds` builds the
+  proposal measured before the lock, from label counts only: the first training
+  window ends once every cell has held four quarters, and the remaining quarters form
+  five test folds cut at the stamps.
 - OC-A13 **The bootstrap of the reduction.** The (blind, balanced, label) triplets of
   the pooled test sessions are resampled jointly. A bootstrap of a max − min is biased
   where two cells nearly tie.
@@ -211,8 +216,10 @@ from regime_lab.analysis.placebo import (
     matched_placebos,
     run_lengths,
 )
+from regime_lab.construction import sleeves as sleeve_module
 from regime_lab.extensions.trend import MAX_LEVERAGE, VOL_TARGET
 from regime_lab.extensions.vehicle import charge_by_instrument
+from regime_lab.selection.folds import Fold
 from regime_lab.selection.protocol import (
     annual_turnover,
     placebo_p_value,
@@ -400,6 +407,68 @@ def transition_stamps(stamped: pd.Series) -> pd.DatetimeIndex:
     values = stamped.to_numpy()
     change = np.r_[False, values[1:] != values[:-1]]
     return pd.DatetimeIndex(stamped.index[change])
+
+
+def stamp_folds(
+    stamped: pd.Series,
+    sessions: pd.DatetimeIndex,
+    *,
+    n_folds: int = 5,
+    min_quarters: int = 4,
+    usable: pd.DatetimeIndex | None = None,
+    lag: int = 1,
+    n_cells: int = N_CELLS,
+) -> tuple[Fold, ...]:
+    """OC-A12: an expanding walk-forward cut at the stamps, from label COUNTS only.
+
+    The draft's "5 folds = 18.2 quarters and 1,187 sessions each" tiles the whole
+    sample and leaves fold 1 no training window. This is the proposal measured before
+    the lock, not a decision:
+    - Each stamp holds the sessions on which its label is in force
+      (:func:`expand_to_sessions` with ``lag``), so no quarter is ever split by a fold.
+    - Quarters are counted, in order, from the first whose holding window starts on or
+      after the first ``usable`` session (default: the first session), for example the
+      first session on which the sleeve returns exist.
+    - The first training window ends with the first counted quarter at which every
+      cell has been held by at least ``min_quarters`` counted quarters.
+    - The later quarters form ``n_folds`` contiguous test folds of equal numbers of
+      quarters (`numpy.array_split`: the first folds take the remainder).
+    - Fold ``k`` trains on every session before its test window (expanding).
+
+    Label counts only: no return is read. Returns `selection.folds.Fold` objects.
+
+    Raises:
+        ValueError: if the rule is never met, or leaves fewer quarters than folds.
+    """
+    sessions = pd.DatetimeIndex(sessions)
+    _check_calendar(sessions, "sessions")
+    used = stamps_in_force(stamped, sessions, lag=lag)
+    pos = _asof_positions(pd.DatetimeIndex(used.index), sessions, lag)
+    held = np.flatnonzero(np.bincount(pos[pos >= 0], minlength=len(used)) > 0)
+    first = np.array([int(np.argmax(pos == k)) for k in held])
+    last = np.array([len(pos) - 1 - int(np.argmax(pos[::-1] == k)) for k in held])
+    start = 0 if usable is None or len(usable) == 0 else int(
+        sessions.searchsorted(pd.DatetimeIndex(usable)[0], side="left"))
+    counted = first >= start
+    codes = _codes(used.to_numpy(float)[held], n_cells)
+    tally = np.zeros(n_cells, dtype=np.int64)
+    k0 = None
+    for i in np.flatnonzero(counted):
+        tally[codes[i]] += 1
+        if (tally >= min_quarters).all():
+            k0 = int(i)
+            break
+    if k0 is None:
+        raise ValueError(f"no cell count reaches {min_quarters} quarters in every cell")
+    rest = np.arange(k0 + 1, len(held))
+    if rest.size < n_folds:
+        raise ValueError("fewer test quarters than folds")
+    folds = []
+    for number, group in enumerate(np.array_split(rest, n_folds), start=1):
+        a, b = int(first[group[0]]), int(last[group[-1]])
+        folds.append(Fold(number, sessions[0], sessions[a - 1], sessions[a], sessions[b],
+                          sessions[a - 1], sessions[b]))
+    return tuple(folds)
 
 
 def _codes(values: np.ndarray, n_cells: int) -> np.ndarray:
@@ -776,6 +845,51 @@ class SleeveLegBuilder:
             out = charge_by_instrument(scaled, held, self.sleeve_bps)
         return Leg(out.rename("leg"), held, multiplier.rename("multiplier"),
                    pd.Series(binds, index=path.index, dtype=float).rename("cap_binds"))
+
+
+@dataclass(frozen=True)
+class InstrumentLegBuilder:
+    """The declared leg of §2, at instrument level: the builder the power script runs.
+
+    A sleeve-weight path ``S_s(t)`` becomes instrument weights ``S_s(t) · w_i|s(t)``,
+    where ``w_i|s(t)`` are the within-sleeve weights HELD on t (for example
+    `sleeves.hold` of `sleeves.within_sleeve_weights`, re-estimated at every stamp and
+    held from the next session). The book is `sleeves.build_book`, so it is the same
+    object as the state-blind book of `construction.sleeves`:
+    - the 10% target on 63 sessions, lagged one, with the multiplier capped at 3;
+    - NaN during the warm-up, never zero;
+    - net of `sleeves.cost_drag` at ``cost_column`` on ``|Δw|`` of the held instrument
+      weights, entry included (``None`` charges nothing).
+
+    ``excess`` must be instrument excess returns, funded where the instrument is a
+    total-return ETF (`sleeves.excess_returns`). The unscaled leg return equals
+    ``Σ_s S_s · r_s`` with ``r_s`` = `sleeves.sleeve_returns` on the same held
+    within-sleeve weights, which is what `LevelA` fits its weights on (tested). A sleeve
+    at weight zero holds nothing, even where its within weights are undefined.
+    """
+
+    excess: pd.DataFrame
+    within: pd.DataFrame
+    sleeves: Mapping[str, Sequence[str]]
+    cost_column: str | None = "headline"
+    target: float = VOL_TARGET
+    window: int = VOL_WINDOW
+    cap: float = MAX_LEVERAGE
+
+    def __call__(self, path: pd.DataFrame) -> Leg:
+        names = sleeve_module.instruments(self.sleeves)
+        owner = [s for s, members in self.sleeves.items() for _ in members]
+        scale = path.reindex(columns=list(self.sleeves)).to_numpy(float)[
+            :, [list(self.sleeves).index(s) for s in owner]]
+        inner = self.within.reindex(index=path.index, columns=names).to_numpy(float)
+        held = np.where(scale == 0.0, 0.0, inner * scale)
+        held_frame = pd.DataFrame(held, index=path.index, columns=names)
+        book = sleeve_module.build_book(self.excess, held_frame, target=self.target,
+                                        window=self.window, cap=self.cap)
+        out = book.returns
+        if self.cost_column is not None:
+            out = out - sleeve_module.cost_drag(book.weights, self.cost_column)
+        return Leg(out.rename("leg"), book.weights, book.multiplier, book.cap_binds)
 
 
 @dataclass(frozen=True)
@@ -1355,6 +1469,28 @@ def null_reductions(
         engine, labels, n_draws, statistics={"reduction": lambda r: r.reduction}, seed=seed,
         blocks=blocks, lag=lag, stamped=stamped,
     )["reduction"]
+
+
+def placebo_session_paths(
+    engine: LevelA,
+    labels: pd.Series,
+    n_draws: int = PLACEBO_DRAWS,
+    *,
+    seed: int = 0,
+    blocks: pd.Series | None = None,
+    lag: int = 1,
+    stamped: bool = True,
+) -> pd.DataFrame:
+    """The P1 draws of :func:`null_statistics`, as session paths (sessions × draws).
+
+    Column ``d`` is exactly the path that :func:`null_statistics` runs as its draw ``d``
+    with the same arguments, so a caller can split the draws across processes, or
+    check them, without re-deriving the construction. Content-free by construction.
+    """
+    paths = list(_placebo_paths(engine, labels, n_draws, seed=seed, blocks=blocks, lag=lag,
+                                stamped=stamped))
+    return pd.DataFrame(np.column_stack([p.to_numpy(float) for p in paths]),
+                        index=engine.sessions, columns=pd.RangeIndex(n_draws, name="draw"))
 
 
 # ---------------------------------------------------------------------------------- P2

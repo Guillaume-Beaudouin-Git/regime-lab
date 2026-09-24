@@ -1,0 +1,215 @@
+
+==============================================================================
+1. Which panel
+==============================================================================
+trend_universe     (6822, 46), 2000-07-17 -> 2026-09-10
+trend_universe_m1  (6822, 46), same index: True
+30 headline columns identical in both: True
+3 credit columns identical in both:    True
+columns that differ (8): ['AUDUSD=X', 'CHF=X', 'EURUSD=X', 'GBPUSD=X', 'JPY=X', 'NOK=X', 'NZDUSD=X', 'SEK=X']
+-> the module reads trend_universe_m1: identical on the headline, repaired FX.
+
+==============================================================================
+2. §1.3 — coverage, sample length, resolvable Sharpe (Lo, 80% power, 5%)
+==============================================================================
+                   n      start   binding
+sleeve                                   
+equity            12 2000-07-17     ^GSPC
+duration           4 2003-09-29       AGG
+inflation_linked   1 2003-12-05       TIP
+commodity         11 2000-09-15      ZS=F
+precious           2 2000-08-30      GC=F
+credit             3 2007-12-19       EMB
+fx                11 2006-05-15  AUDUSD=X
+
+configuration      start   n sessions yrs=s/252 yrs cal SR s/252  SR cal  draft
+headline     2003-12-05  30     5938     23.56   22.77    0.632   0.645  0.632
+with_credit  2007-12-19  33     4885     19.38   18.73    0.713   0.728  0.712
+with_fx      2007-12-19  44     4885     19.38   18.73    0.713   0.728  0.712
+
+the panel is a UNION calendar: 260.9 sessions per calendar year, so 'years = sessions / 252' overstates length by 3.5%
+first session with all 30 prices present at once: 2003-12-18 (the latest first price is 2003-12-05)
+sessions of the headline sample missing at least one of the 30: 541 of 5938
+missing prices by instrument: {'^N225': 1, 'PL=F': 540}
+PL=F: 21 gaps, longest 50 sessions, last gap ends 2009-11-26
+non-positive prices: {'CL=F': 1} (CL=F on 2020-04-20: no return that session or the next)
+
+==============================================================================
+3. §5 — blended round-trip cost over the 30 instruments
+==============================================================================
+commodity       13
+equity_index    12
+fixed_income     3
+cash_vehicle     2
+cash_vehicle instruments in the headline: ['AGG', 'TIP']
+
+draft formula (TIP and AGG at 1.0 bp): 1.217 bp  <- reproduces 1.217
+vehicle.cost_bps, equal weight, headline    : 1.650 bp
+vehicle.cost_bps, equal weight, conservative: 3.300 bp
+vehicle.cost_bps, equal weight, stress      : 7.750 bp
+vehicle.cost_bps, equal weight, all_cash    : 7.500 bp
+the draft priced TIP and AGG at the fixed-income 1.0 bp; vehicle.py prices both at the 7.5 bp cash-vehicle rate (neither has a futures contract).
+
+rebalance stamps: 91, 2004-02-23 -> 2026-08-14; source: quadrant module, SPF release dates (rule='release')
+
+==============================================================================
+4. The declared blind book (state-blind; no mean read)
+==============================================================================
+within sleeve: inverse volatility; across sleeves: ERC on the sleeve covariance;
+estimation: trailing 252 sessions inside the sample, at each stamp; held from the
+next session; 10% target on 63 sessions lagged one, multiplier capped at 3.0;
+costs on |Δw| of held weights; ETFs funded at rate_cash_3m (available_at).
+
+reading                                  live  sess     sd  sd wk  unsc  cap% g med g p95 g max    TO   TOu
+DECLARED erc, 252, cap 3           2005-02-18  5623  9.49% 10.19% 4.45% 50.9%  3.00  3.00  3.00  3.87  0.31
+inverse_vol, 252, cap 3            2005-02-18  5623  9.60% 10.19% 4.50% 42.9%  2.87  3.00  3.00  4.25  0.26
+erc, 63, cap 3                     2004-08-20  5753  9.45% 10.11% 4.55% 50.2%  3.00  3.00  3.00  5.07  0.75
+erc, expanding, cap 3              2005-02-18  5623  9.78% 10.34% 4.41% 40.2%  2.81  3.00  3.00  3.94  0.03
+erc, 252, weekly estimates, cap 3  2005-02-18  5623  9.30%  9.89% 4.33% 55.1%  3.00  3.00  3.00  3.92  0.41
+erc, 252, no cap                   2005-02-18  5623 10.58% 11.36% 4.45%  0.0%  3.02  5.17  8.96 10.13  0.31
+
+reading                                      headline       conservative             stress           all_cash        funding
+                                       %/yr  SR(real)     %/yr  SR(real)     %/yr  SR(real)     %/yr  SR(real)       %/yr  SR
+DECLARED erc, 252, cap 3             0.118%    0.0124   0.236%    0.0249   0.505%    0.0532   0.300%    0.0316  2.830%  0.298
+inverse_vol, 252, cap 3              0.139%    0.0145   0.278%    0.0290   0.590%    0.0615   0.328%    0.0341  2.931%  0.305
+erc, 63, cap 3                       0.149%    0.0157   0.297%    0.0314   0.637%    0.0674   0.388%    0.0411  2.834%  0.300
+erc, expanding, cap 3                0.125%    0.0127   0.249%    0.0255   0.529%    0.0541   0.305%    0.0312  3.052%  0.312
+erc, 252, weekly estimates, cap 3    0.120%    0.0129   0.241%    0.0259   0.514%    0.0553   0.304%    0.0327  2.990%  0.322
+erc, 252, no cap                     0.297%    0.0281   0.595%    0.0562   1.270%    0.1200   0.770%    0.0727  3.078%  0.291
+
+reading                            bp per unit traded on held weights, by cost column:
+DECLARED erc, 252, cap 3           headline 2.95 conservative 5.90 stress 12.60 all_cash 7.50
+inverse_vol, 252, cap 3            headline 3.18 conservative 6.37 stress 13.50 all_cash 7.50
+erc, 63, cap 3                     headline 2.87 conservative 5.74 stress 12.31 all_cash 7.50
+erc, expanding, cap 3              headline 3.06 conservative 6.12 stress 13.01 all_cash 7.50
+erc, 252, weekly estimates, cap 3  headline 2.97 conservative 5.93 stress 12.66 all_cash 7.50
+erc, 252, no cap                   headline 2.90 conservative 5.79 stress 12.38 all_cash 7.50
+
+§5's cost kill (0.10 Sharpe), re-derived on held weights at the realised sd
+(the draft: 82 extra round trips a year at headline, 13.3 at all_cash):
+  headline      2.95 bp per unit traded ->  32.2 extra units of held-weight turnover a year
+  conservative  5.90 bp per unit traded ->  16.1 extra units of held-weight turnover a year
+  stress       12.60 bp per unit traded ->   7.5 extra units of held-weight turnover a year
+  all_cash      7.50 bp per unit traded ->  12.7 extra units of held-weight turnover a year
+
+sleeve weights, median, daily vs weekly estimates:
+  equity             daily 0.130  weekly 0.107
+  duration           daily 0.504  weekly 0.525
+  inflation_linked   daily 0.203  weekly 0.188
+  commodity          daily 0.085  weekly 0.086
+  precious           daily 0.061  weekly 0.053
+
+sleeve weights at the 88 rebalances (unscaled, rows sum to one):
+     equity  duration  inflation_linked  commodity  precious
+min   0.056     0.296             0.122      0.036     0.020
+50%   0.130     0.504             0.203      0.085     0.061
+max   0.233     0.756             0.328      0.157     0.104
+inverse-vol sleeve weights, median: equity 0.110, duration 0.482, inflation_linked 0.246, commodity 0.088, precious 0.069
+instrument-rebalances excluded for too few returns: {'PL=F': 4}
+median within-sleeve weight: SHY 0.622, IEF 0.129, TLT 0.059, AGG 0.190
+
+quarter-level log variance across 85 complete quarters (unconditional):
+  unscaled book: sd 0.864, range 4.838
+  targeted book: sd 0.535, range 3.370
+  corr(quarter cap share, quarter log var of the targeted book): -0.521
+  quarters with the cap binding on >50% of sessions: 43 of 85
+
+==============================================================================
+5. Time zones — same-day vs lagged correlation with ^GSPC (label-free)
+==============================================================================
+index      same  i(t+1)~us(t)  i(t)~us(t+1)    sum  weekly
+^NDX      0.926        -0.124        -0.093  0.709   0.915
+^RUT      0.897        -0.117        -0.084  0.696   0.895
+^GDAXI    0.578         0.177        -0.041  0.714   0.771
+^FTSE     0.539         0.212        -0.061  0.689   0.758
+^N225     0.142         0.480         0.004  0.626   0.632
+^AXJO     0.201         0.459        -0.045  0.615   0.667
+^GSPTSE   0.758         0.021        -0.150  0.629   0.803
+^HSI      0.208         0.342        -0.018  0.532   0.509
+^AEX      0.573         0.212        -0.052  0.733   0.771
+^FCHI     0.567         0.199        -0.059  0.707   0.765
+^IBEX     0.519         0.172        -0.056  0.635   0.682
+
+variance ratio = var(weekly sum) / (sessions per week x var(daily)); >1 means
+daily returns understate risk (asynchronous closes, or autocorrelation):
+  equity sleeve          1.226
+    US + Canada only     0.872
+    Europe only          0.994
+    Asia only            0.927
+  duration sleeve        0.906
+  commodity sleeve       1.032
+  whole unscaled book    1.138
+
+correlation of the equity sleeve with each other sleeve, daily vs weekly:
+  duration           daily -0.172  weekly -0.069
+  inflation_linked   daily -0.022  weekly +0.140
+  commodity          daily +0.359  weekly +0.394
+  precious           daily +0.168  weekly +0.224
+
+==============================================================================
+6. Dividends (draft killer 5) — inventory and size, label-free
+==============================================================================
+  data/cache/shu_sp500_tr.parquet          present  S&P 500 price return + Shiller D/P accrual (daily)
+  data/cache/shu_sp500.parquet             present  S&P 500 price and 3-month bill
+  data/raw/prices/cross_asset.parquet      present  eq_us_large, eq_us_small, eq_us_tech, eq_jp prices, no dividends
+  nothing on disk carries a dividend for the 11 non-S&P indices;
+  ^GDAXI is the DAX PERFORMANCE index (dividends reinvested): total return already.
+
+Shiller S&P 500 yield recovered from the cache: 6575 sessions, 275 changes of level (a monthly step, as built)
+  over the blind book's live sample 2005-02-18 -> 2026-09-10:
+  mean dividend yield 1.892%, mean cash rate 1.769%, mean (d - r) +0.123%
+    2005-2008: d 1.94%  r 3.43%  d - r -1.49%
+    2009-2015: d 2.10%  r 0.08%  d - r +2.02%
+    2016-2021: d 1.85%  r 0.94%  d - r +0.91%
+    2022-2026: d 1.59%  r 3.97%  d - r -2.39%
+  sd(^GSPC + accrual) / sd(^GSPC) - 1 = -1.89e-05: a smooth accrual leaves every
+  variance, every risk-parity weight and the statistic D unchanged; it moves means.
+  held equity notional in the blind book: mean 0.338, median 0.327
+  if all 12 indices carried the S&P's d - r, the blind book's excess return would
+  move by +0.042%/yr = +0.0044 Sharpe; adding d alone (no r): +0.0675 Sharpe
+
+==============================================================================
+7. Walk-forward layout (label counts only)
+==============================================================================
+draft: 5 folds of 18.2 quarters and 1187 sessions = 91 quarters / 5 and 5938 sessions / 5.
+measured: 5938 sessions from 2003-12-05; 1187.6 per fold if the WHOLE sample is tested, which leaves fold 1 no training window. That is a K-fold
+split, not an expanding walk-forward.
+the blind book is live from 2005-02-18 (252 sessions of estimation, a stamp, then 63 of volatility warm-up): 5623 sessions.
+
+labelled quarters held inside the sample: 92 (the first is held from 2003-12-05 for 57 sessions, stamped before the sample); cell counts {0: 13, 1: 28, 2: 25, 3: 26}
+stamps inside the sample that are not sessions of the panel: 0 []
+
+  min 2 quarters per cell: first training window ends 2007-02-13 (3.19 years); tested 79 quarters, 5105 sessions; the draft's own variance-MDE formula on the tested sessions: 0.220 (draft 0.204 on all)
+    fold 1: 2007-02-14 -> 2011-02-11  16 q  1043 s  train cells [2, 6, 2, 3]  test cells [2, 6, 3, 5]
+    fold 2: 2011-02-14 -> 2015-02-13  16 q  1045 s  train cells [4, 12, 5, 8]  test cells [3, 4, 4, 5]
+    fold 3: 2015-02-16 -> 2019-03-22  16 q  1070 s  train cells [7, 16, 9, 13]  test cells [3, 4, 6, 3]
+    fold 4: 2019-03-25 -> 2023-02-10  16 q  1015 s  train cells [10, 20, 15, 16]  test cells [3, 4, 3, 6]
+    fold 5: 2023-02-13 -> 2026-09-10  15 q   932 s  train cells [13, 24, 18, 22]  test cells [0, 4, 7, 4]
+
+  min 3 quarters per cell: first training window ends 2009-05-15 (5.44 years); tested 70 quarters, 4517 sessions; the draft's own variance-MDE formula on the tested sessions: 0.234 (draft 0.204 on all)
+    fold 1: 2009-05-18 -> 2012-11-09  14 q   910 s  train cells [3, 10, 4, 5]  test cells [3, 4, 1, 6]
+    fold 2: 2012-11-12 -> 2016-05-13  14 q   915 s  train cells [6, 14, 5, 11]  test cells [3, 3, 6, 2]
+    fold 3: 2016-05-16 -> 2019-11-15  14 q   915 s  train cells [9, 17, 11, 13]  test cells [2, 3, 5, 4]
+    fold 4: 2019-11-18 -> 2023-05-12  14 q   910 s  train cells [11, 20, 16, 17]  test cells [2, 4, 3, 5]
+    fold 5: 2023-05-15 -> 2026-09-10  14 q   867 s  train cells [13, 24, 19, 22]  test cells [0, 4, 6, 4]
+
+  min 4 quarters per cell: first training window ends 2010-11-15 (6.95 years); tested 64 quarters, 4126 sessions; the draft's own variance-MDE formula on the tested sessions: 0.245 (draft 0.204 on all)
+    fold 1: 2010-11-16 -> 2014-02-14  13 q   849 s  train cells [4, 11, 5, 8]  test cells [3, 3, 2, 5]
+    fold 2: 2014-02-17 -> 2017-05-12  13 q   845 s  train cells [7, 14, 7, 13]  test cells [3, 4, 5, 1]
+    fold 3: 2017-05-15 -> 2020-08-14  13 q   850 s  train cells [10, 18, 12, 14]  test cells [2, 2, 5, 4]
+    fold 4: 2020-08-17 -> 2023-11-13  13 q   846 s  train cells [12, 20, 17, 18]  test cells [1, 4, 3, 5]
+    fold 5: 2023-11-14 -> 2026-09-10  12 q   736 s  train cells [13, 24, 20, 23]  test cells [0, 4, 5, 3]
+
+  min 5 quarters per cell: first training window ends 2012-05-11 (8.43 years); tested 58 quarters, 3737 sessions; the draft's own variance-MDE formula on the tested sessions: 0.257 (draft 0.204 on all)
+    fold 1: 2012-05-14 -> 2015-05-15  12 q   785 s  train cells [5, 14, 5, 10]  test cells [2, 2, 5, 3]
+    fold 2: 2015-05-18 -> 2018-05-11  12 q   780 s  train cells [7, 16, 10, 13]  test cells [3, 3, 3, 3]
+    fold 3: 2018-05-14 -> 2021-05-14  12 q   785 s  train cells [10, 19, 13, 16]  test cells [3, 1, 4, 4]
+    fold 4: 2021-05-17 -> 2024-02-09  11 q   715 s  train cells [13, 20, 17, 20]  test cells [0, 4, 3, 4]
+    fold 5: 2024-02-12 -> 2026-09-10  11 q   672 s  train cells [13, 24, 20, 24]  test cells [0, 4, 5, 2]
+
+  min 6 quarters per cell: first training window ends 2013-08-16 (9.70 years); tested 53 quarters, 3407 sessions; the draft's own variance-MDE formula on the tested sessions: 0.269 (draft 0.204 on all)
+    fold 1: 2013-08-19 -> 2016-05-13  11 q   715 s  train cells [7, 14, 6, 12]  test cells [2, 3, 5, 1]
+    fold 2: 2016-05-16 -> 2019-03-22  11 q   745 s  train cells [9, 17, 11, 13]  test cells [1, 3, 4, 3]
+    fold 3: 2019-03-25 -> 2021-11-15  11 q   691 s  train cells [10, 20, 15, 16]  test cells [3, 1, 2, 5]
+    fold 4: 2021-11-16 -> 2024-05-10  10 q   649 s  train cells [13, 21, 17, 21]  test cells [0, 3, 4, 3]
+    fold 5: 2024-05-13 -> 2026-09-10  10 q   607 s  train cells [13, 24, 21, 24]  test cells [0, 4, 4, 2]

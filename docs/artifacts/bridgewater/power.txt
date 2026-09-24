@@ -1,0 +1,373 @@
+
+====================================================================================================
+0. Inputs: file inventory of §1.1 / §1.4, and the SHA-256 of every input read
+====================================================================================================
+  data/raw/spf/median_rgdp_level.xlsx           312a047c8a98871c
+  data/raw/spf/median_cpi_level.xlsx            da5c7b637545a8d9
+  data/raw/spf/median_unemp_level.xlsx          491e09e1a98d11e2
+  data/raw/spf/median_indprod_level.xlsx        63f61dfae1dbbf1b
+  data/raw/spf/median_rgdp_growth.xlsx          fbfc845565f9070d
+  data/raw/spf/spf_release_dates.csv            729620607b8685d4
+  data/raw/spf/fred_t10yie.parquet              492f92c733175c03
+  data/cache/trend_universe_m1.parquet          700f606051109195
+  data/raw/macro/rate_cash_3m.parquet           87e2d3b7c7912a48
+  data/raw/macro/fin_baa_spread.parquet         ebc074a6aceac900
+
+  §1.1 SPF median files (rows x columns as pandas opens them, survey span):
+    median_rgdp_level.xlsx        232 x 12  1968Q4-2026Q3
+    median_cpi_level.xlsx         232 x 11  1968Q4-2026Q3
+    median_unemp_level.xlsx       232 x 12  1968Q4-2026Q3
+    median_indprod_level.xlsx     232 x 10  1968Q4-2026Q3
+
+  §1.4 on-disk point-in-time series:
+    rate_cash_3m        9,177 rows  9,177 periods  1990-01-02 -> 2026-09-08
+    fin_baa_spread      9,171 rows  9,171 periods  1990-01-02 -> 2026-09-08
+    fin_aaa_spread      9,171 rows  9,171 periods  1990-01-02 -> 2026-09-08
+    macro_cpi             438 rows    438 periods  1990-01-01 -> 2026-07-01
+    macro_indpro          439 rows    439 periods  1990-01-01 -> 2026-07-01
+    macro_indpro 1990-02 -> 1990-03: 141.8 -> 108.8
+    h3_macro/payems     4,560 rows    344 periods (vintages)
+    fred_t10yie         5,936 valued rows 2003-01-02 -> 2026-09-23; 5,934 up to 2026-09-21
+
+====================================================================================================
+1. The draft's §3-§5 arithmetic, re-derived (formulas only, no data)
+====================================================================================================
+  §3 Sidak table (family 0.05):
+    1 tests: alpha 0.05000  two-sided z 1.960
+    3 tests: alpha 0.01695  two-sided z 2.388
+    5 tests: alpha 0.01021  two-sided z 2.569
+    6 tests: alpha 0.00851  two-sided z 2.631
+  Holm over 5 (not in the draft): 0.0100, 0.0125, 0.0167, 0.0250, 0.0500
+
+  §4 standalone resolvable Sharpe (Lo, 80% power, two-sided 5%):
+    5-sleeve panel 23.60 yr     23.60 yr ->  0.632
+    cell (g-,i+) 1792 s          7.11 yr ->  1.569
+    cell (g+,i+) 1675 s          6.65 yr ->  1.698
+    cell (g+,i-) 1630 s          6.47 yr ->  1.757
+    cell (g-,i-) 841 s           3.34 yr ->    inf
+    denominator positive above z^2/2 = 3.924 years
+
+  §4 paired table, MDE = 2.8016 sqrt(2(1-rho)) SE, SE = sqrt((1 + 0.5^2/2) / years):
+    full panel 23.6 yr         SE 0.2183  0.274  0.193  0.122  0.087
+    one fold of five 4.7 yr    SE 0.4882  0.612  0.433  0.274  0.193
+    largest cell 7.1 yr        SE 0.3977  0.498  0.352  0.223  0.158
+    smallest cell 3.3 yr       SE 0.5806  0.727  0.514  0.325  0.230
+
+  §4 variance statistic, SE(log sigma) = 1/sqrt(2 n_eff), n_eff = n/63:
+     5938 sessions: n_eff  94.3  MDE 0.204   (the unpaired two-cell log-VARIANCE difference against a cell of equal size: 0.577)
+     1792 sessions: n_eff  28.4  MDE 0.371   (the unpaired two-cell log-VARIANCE difference against a cell of equal size: 1.051)
+      841 sessions: n_eff  13.3  MDE 0.542   (the unpaired two-cell log-VARIANCE difference against a cell of equal size: 1.534)
+    exp(0.204) - 1 = 22.6%; log 1.5 = 0.405 (1.99 x 0.204); log 1.2 = 0.182
+    the unpaired two-cell MDE, largest vs smallest cell (1792 vs 841): 1.314
+
+  §5 cost table at the draft's 1.217 bp, Sharpe at a 10% target:
+    + 2 round trips -> 0.024%  0.0024 Sharpe
+    + 4 round trips -> 0.049%  0.0049 Sharpe
+    + 8 round trips -> 0.097%  0.0097 Sharpe
+    +16 round trips -> 0.195%  0.0195 Sharpe
+    kill at 0.10 Sharpe: 82.2 round trips at 1.217 bp; 13.3 at 7.5 bp
+
+====================================================================================================
+2. The declared object of level A (label COUNTS and state-blind books only)
+====================================================================================================
+  headline sample 2003-12-05 -> 2026-09-10: 5,938 sessions
+  within-sleeve inverse volatility on trailing 252 sessions at each of the 88 stamps with a full window; sleeve returns from 2004-11-23
+  blind leg: ERC on every finite training session of the fold (expanding); balanced leg: R1 equal
+  cell variance on training cells (63 sessions, 3 episodes); both constant within a fold;
+  book: instrument weights, 10% target on 63 sessions lagged one, cap 3, headline costs on
+  held weights, ETFs funded; D read on the pooled test sessions, each leg's own extremes, centred.
+
+  walk-forward (evaluate.stamp_folds, min 4 quarters per cell before the first test):
+  fold  train end                    test  sess   q   train q per cell  test q per cell   test sessions per cell
+     1 2010-11-15 2010-11-16 -> 2014-02-14   849  13       [4, 9, 4, 7]     [3, 3, 2, 5]     [190, 195, 141, 323]
+     2 2014-02-14 2014-02-17 -> 2017-05-12   845  13     [7, 12, 6, 12]     [3, 4, 5, 1]      [195, 262, 323, 65]
+     3 2017-05-12 2017-05-15 -> 2020-08-14   850  13   [10, 16, 11, 13]     [2, 2, 5, 4]     [100, 130, 356, 264]
+     4 2020-08-14 2020-08-17 -> 2023-11-13   846  13   [12, 18, 16, 17]     [1, 4, 3, 5]      [66, 261, 195, 324]
+     5 2023-11-13 2023-11-14 -> 2026-09-10   736  12   [13, 22, 19, 22]     [0, 4, 5, 3]       [0, 214, 315, 207]
+  pooled test: 4,126 sessions, 16.37 session-years, 15.82 calendar years (2010-11-16 -> 2026-09-10)
+
+  real label on the pooled test sessions (label-only), sessions / episodes per cell:
+    sessions [551, 1062, 1330, 1183]  episodes [7, 12, 15, 15]
+    (growth-, inflation-)      551 sessions =  2.19 yr -> resolvable SR    inf (the §3 A secondary statistic, Lo, one leg)
+    (growth-, inflation+)     1062 sessions =  4.21 yr -> resolvable SR  5.204 (the §3 A secondary statistic, Lo, one leg)
+    (growth+, inflation-)     1330 sessions =  5.28 yr -> resolvable SR  2.408 (the §3 A secondary statistic, Lo, one leg)
+    (growth+, inflation+)     1183 sessions =  4.69 yr -> resolvable SR  3.193 (the §3 A secondary statistic, Lo, one leg)
+
+  real label on each fold's TRAINING path (label-only): the cell-qualification counts
+  of OC-A8 (>= 63 sessions and >= 3 episodes), sessions / episodes per cell:
+    fold 1: sessions [262, 585, 254, 459]  episodes [4, 7, 4, 5]  cells qualifying 4 of 4
+    fold 2: sessions [452, 780, 395, 782]  episodes [7, 9, 5, 10]  cells qualifying 4 of 4
+    fold 3: sessions [647, 1042, 718, 847]  episodes [9, 12, 9, 11]  cells qualifying 4 of 4
+    fold 4: sessions [747, 1172, 1074, 1111]  episodes [11, 14, 13, 14]  cells qualifying 4 of 4
+    fold 5: sessions [813, 1433, 1269, 1435]  episodes [11, 16, 15, 17]  cells qualifying 4 of 4
+
+  the engine's blind leg (state-blind), on the pooled test sessions:
+    sleeve weights per fold:
+          equity  duration  inflation_linked  commodity  precious
+    fold                                                         
+    1      0.114     0.526             0.216      0.080     0.064
+    2      0.111     0.546             0.208      0.078     0.057
+    3      0.114     0.545             0.206      0.078     0.057
+    4      0.111     0.542             0.207      0.081     0.059
+    5      0.120     0.516             0.214      0.086     0.064
+    realised sd 9.39%; cap binds 53.4%; gross median 3.00 p95 3.00; held turnover 3.47x/yr; finite on 4126 of 4126 test sessions
+    OC-A7: the sleeves module's blind book (ERC re-estimated at every stamp on 252 sessions)
+    realises 9.19% with 3.53x/yr on the same sessions; correlation with the engine's blind leg 0.968
+
+====================================================================================================
+3. The null of the level-A reduction under P1 (primary, 2000 draws)
+====================================================================================================
+  P1 on the 92 stamps in force: 71 transitions, log10 of join-free orders 30.6; per calendar block (OC-P1a) the freedom runs 2.4 to 8.8
+             points  episodes  transitions  longest  episodes_0.0  episodes_1.0  episodes_2.0  episodes_3.0  log10_orders  feasible
+    block                                                                                                                          
+    0:train      28        23           22        3             4             8             5             6      8.849630      True
+    1:test       13        11           10        2             3             2             1             5      2.911690      True
+    2:test       13        10            9        2             2             3             4             1      3.031004      True
+    3:test       13        11           10        2             2             2             4             3      3.813981      True
+    4:test       13         8            7        3             1             2             2             3      2.584331      True
+    5:test       12        10            9        2             0             3             4             3      2.394452      True
+  draws identical to the real sequence: 0; share of stamps agreeing with it: mean 0.267, max 0.435 (independent draws at this occupancy: 0.266)
+  session-level occupancy: largest deviation from the real one over 200 draws 0.019 (quarterly occupancy, clock and episodes are exact)
+
+  2000 draws in 38 s; every draw finite: True
+  mean/q50/q95/q99: the reduction D(blind) - D(balanced) under content-free partitions (positive = the
+  balanced leg narrows D). qSid: the 1 - 0.0102 quantile (Sidak over 5). MDEs: location-shift MDE
+  q(1-a) - q(0.20); MDEsd: (z_(1-a) + z_0.80) x sd. P.405 / P.182: share of draws that, shifted by
+  log 1.5 / log 1.2, reach the 95th percentile (S: the Sidak percentile).
+  null                                             n    mean     sd   skew  atom     q50     q95     q99    qSid  MDEs05 MDEsSid MDEsd05  P.405  P.182 P.405S P.182S
+  level A, declared object                      2000   0.005  0.152  -0.36 0.001   0.014   0.241   0.337   0.336   0.356   0.452   0.379  0.866  0.374  0.709  0.154
+
+  the legs under the null (content-free):
+    d_blind      mean 0.285  sd 0.114  q05 0.111  q95 0.491
+    d_balanced   mean 0.280  sd 0.132  q05 0.101  q95 0.508
+    fallback folds per draw: mean 0.000, draws with any 0.000, with all five 0.0000; unconverged folds per draw 0.040
+    balanced weights (OC-A5/A6): L1 distance to the blind weights, mean over folds, median 1.240 (q05 0.593, q95 1.741; 2 is the maximum); sleeves at zero per fold, mean 2.60 of 5
+    equity: blind 0.114, balanced median 0.003, at zero 79%; duration: blind 0.535, balanced median 0.263, at zero 48%; inflation_linked: blind 0.210, balanced median 0.095, at zero 55%; commodity: blind 0.080, balanced median 0.101, at zero 57%; precious: blind 0.060, balanced median 0.340, at zero 22%
+    balanced leg on test: realised sd median 10.54% (8.96% to 10.83%); cap binds median 7.1%; gross median 1.38
+    extra held turnover of the balanced leg over the blind leg: median +0.11x/yr, q95 +1.90 (the §5 kill, re-derived on held weights: 32.2 units a year at headline)
+  P2 gross-matched reduction                    2000  -0.327  0.380  -1.58 0.001  -0.259   0.140   0.279   0.278   0.701   0.839   0.946  0.504  0.215  0.323  0.073
+
+  thresholds of the primary: q95 0.241, q99 0.337, Sidak (1 - 0.0102) 0.336; Holm ladder 0.0100: 0.337, 0.0125: 0.321, 0.0167: 0.301, 0.0250: 0.284, 0.0500: 0.241
+  MDE of the declared statistic: 0.356 (shift, alpha 0.05), 0.452 (shift, Sidak), 0.379 (sd, 0.05), 0.482 (sd, Sidak) — against the draft's 0.204
+
+  P2 vol-matched reduction (300 draws)           300   0.039  0.088  -0.13 0.003   0.041   0.170   0.232   0.231   0.206   0.267   0.218  1.000  0.720  0.993  0.463
+
+====================================================================================================
+4. Sensitivities of the level-A null (1000 draws each; the choices the lock owns)
+====================================================================================================
+  mean/q50/q95/q99: the reduction D(blind) - D(balanced) under content-free partitions (positive = the
+  balanced leg narrows D). qSid: the 1 - 0.0102 quantile (Sidak over 5). MDEs: location-shift MDE
+  q(1-a) - q(0.20); MDEsd: (z_(1-a) + z_0.80) x sd. P.405 / P.182: share of draws that, shifted by
+  log 1.5 / log 1.2, reach the 95th percentile (S: the Sidak percentile).
+  null                                             n    mean     sd   skew  atom     q50     q95     q99    qSid  MDEs05 MDEsSid MDEsd05  P.405  P.182 P.405S P.182S
+  primary, repeated at this draw count          1000   0.011  0.149  -0.27 0.001   0.021   0.248   0.343   0.341   0.353   0.447   0.371  0.867  0.367  0.721  0.134
+  P1 within calendar blocks (OC-P1a)            1000   0.019  0.154  -0.34 0.001   0.026   0.258   0.356   0.353   0.360   0.455   0.382  0.865  0.378  0.687  0.152
+  no volatility target, no cost (OC-A1)         1000  -0.084  0.373  -1.34 0.001  -0.031   0.408   0.524   0.523   0.732   0.848   0.928  0.460  0.168  0.299  0.091
+  sleeve-level book at the target, no cost      1000   0.011  0.149  -0.28 0.001   0.022   0.246   0.338   0.337   0.351   0.443   0.371  0.867  0.370  0.726  0.143
+  no leverage cap                               1000  -0.016  0.135  -0.96 0.001  -0.008   0.182   0.252   0.252   0.287   0.357   0.335  0.939  0.474  0.883  0.256
+  R2 equal share, occupancy-weighted D (OC-A4)  1000  -0.004  0.195   0.15 0.001  -0.012   0.317   0.486   0.483   0.476   0.642   0.485  0.657  0.237  0.314  0.061
+  R2 equal share, plain D                       1000  -0.005  0.154  -0.54 0.001   0.007   0.213   0.325   0.324   0.335   0.447   0.383  0.898  0.433  0.724  0.157
+  extremes picked on the blind leg (OC-A2)      1000   0.131  0.170  -0.12 0.001   0.134   0.411   0.516   0.514   0.411   0.514   0.422  0.784  0.268  0.555  0.119
+  variance about zero (OC-A3)                   1000   0.012  0.148  -0.29 0.001   0.025   0.243   0.340   0.340   0.347   0.443   0.369  0.870  0.383  0.727  0.143
+  blind leg inverse volatility (OC-A7)          1000  -0.006  0.145  -0.51 0.001   0.003   0.211   0.303   0.302   0.323   0.415   0.360  0.897  0.429  0.780  0.182
+  tie-break pull to blind x 0.01 (OC-A6)        1000   0.024  0.144  -0.38 0.001   0.034   0.243   0.342   0.341   0.333   0.431   0.357  0.906  0.396  0.752  0.145
+  tie-break pull to blind x 1 (OC-A6)           1000   0.045  0.104  -0.18 0.001   0.049   0.208   0.296   0.294   0.247   0.333   0.258  0.985  0.608  0.922  0.237
+  folds: min 3 quarters per cell (4517 test s)  1000   0.024  0.132  -0.16 0.001   0.027   0.238   0.321   0.321   0.317   0.400   0.328  0.924  0.412  0.812  0.177
+  folds: min 5 quarters per cell (3407 test s)  1000   0.043  0.156  -0.27 0.001   0.051   0.282   0.417   0.415   0.366   0.500   0.388  0.865  0.359  0.605  0.108
+  stamps + 1 month (71 transitions)             1000  -0.009  0.136  -0.19 0.001  -0.001   0.204   0.295   0.294   0.322   0.412   0.338  0.921  0.428  0.778  0.184
+  within-vintage growth axis (68 transitions)   1000   0.023  0.146  -0.18 0.001   0.027   0.244   0.374   0.373   0.341   0.470   0.362  0.902  0.408  0.661  0.112
+
+====================================================================================================
+5. B1 candidate axes: clocks (label-only) and nulls (1000 draws each)
+====================================================================================================
+  candidate                                   /yr    occupancy (test sessions)   test ep per cell   train cells ok
+  change 63, daily                          21.32 0.287 / 0.128 / 0.185 / 0.400 [68, 71, 104, 107]  [4, 4, 4, 4, 4]
+  change 252, daily                         12.85 0.321 / 0.124 / 0.205 / 0.351   [40, 40, 48, 49]  [4, 4, 4, 4, 4]
+  level vs expanding median, daily           7.98 0.254 / 0.070 / 0.351 / 0.325   [29, 19, 45, 36]  [4, 4, 4, 4, 4]
+  change 252, sampled at the SPF stamps      1.90 0.248 / 0.161 / 0.242 / 0.348       [7, 7, 8, 9]  [3, 4, 4, 4, 4]
+  level vs median, sampled at the SPF stamps   0.92 0.271 / 0.063 / 0.363 / 0.304       [5, 3, 5, 4]  [0, 2, 2, 2, 4]
+
+  mean/q50/q95/q99: the reduction D(blind) - D(balanced) under content-free partitions (positive = the
+  balanced leg narrows D). qSid: the 1 - 0.0102 quantile (Sidak over 5). MDEs: location-shift MDE
+  q(1-a) - q(0.20); MDEsd: (z_(1-a) + z_0.80) x sd. P.405 / P.182: share of draws that, shifted by
+  log 1.5 / log 1.2, reach the 95th percentile (S: the Sidak percentile).
+  null                                             n    mean     sd   skew  atom     q50     q95     q99    qSid  MDEs05 MDEsSid MDEsd05  P.405  P.182 P.405S P.182S
+  B1 change 63, daily                           1000   0.016  0.126  -0.05 0.001   0.017   0.215   0.286   0.285   0.303   0.373   0.312  0.945  0.441  0.861  0.232
+  B1 change 252, daily                          1000   0.022  0.142  -0.24 0.001   0.028   0.252   0.344   0.343   0.348   0.439   0.354  0.896  0.374  0.742  0.152
+  B1 level vs expanding median, daily           1000   0.030  0.185  -0.37 0.001   0.039   0.319   0.450   0.450   0.426   0.557   0.460  0.762  0.276  0.488  0.083
+  B1 change 252, sampled at the SPF stamps      1000   0.017  0.154   0.03 0.001   0.016   0.267   0.383   0.383   0.379   0.495   0.382  0.849  0.328  0.607  0.124
+  B1 level vs median, sampled at the SPF stamps  1000   0.016  0.217  -0.48 0.001   0.011   0.359   0.513   0.512   0.494   0.647   0.540  0.624  0.209  0.315  0.066
+  fallback folds per draw (balanced leg = blind): change 63, daily 0.00 (any 0.00); change 252, daily 0.00 (any 0.00); level vs expanding median, daily 0.00 (any 0.00); change 252, sampled at the SPF stamps 0.11 (any 0.11); level vs median, sampled at the SPF stamps 1.31 (any 0.86)
+
+====================================================================================================
+6. The volatility witness: clocks and nulls (1000 draws each); its own reduction is NOT computed
+====================================================================================================
+  witness (window 21, 4 training-quantile bins)           /yr               test occupancy   train cells ok
+  W1 ^GSPC, daily                                       21.96 0.259 / 0.277 / 0.255 / 0.209  [4, 4, 4, 4, 4]
+  W1 ^GSPC, stamp grid                                   2.71 0.236 / 0.293 / 0.259 / 0.213  [3, 4, 4, 4, 4]
+  W2 blind leg, unscaled, daily                         22.66 0.378 / 0.206 / 0.203 / 0.213  [4, 4, 4, 4, 4]
+  W2 blind leg, unscaled, stamp grid                     2.13 0.395 / 0.189 / 0.199 / 0.217  [4, 4, 4, 4, 4]
+
+  mean/q50/q95/q99: the reduction D(blind) - D(balanced) under content-free partitions (positive = the
+  balanced leg narrows D). qSid: the 1 - 0.0102 quantile (Sidak over 5). MDEs: location-shift MDE
+  q(1-a) - q(0.20); MDEsd: (z_(1-a) + z_0.80) x sd. P.405 / P.182: share of draws that, shifted by
+  log 1.5 / log 1.2, reach the 95th percentile (S: the Sidak percentile).
+  null                                             n    mean     sd   skew  atom     q50     q95     q99    qSid  MDEs05 MDEsSid MDEsd05  P.405  P.182 P.405S P.182S
+  witness W1 ^GSPC, daily                       1000   0.013  0.116  -0.17 0.001   0.018   0.200   0.282   0.281   0.281   0.362   0.289  0.964  0.496  0.882  0.228
+  witness W1 ^GSPC, stamp grid                  1000   0.011  0.140  -0.25 0.001   0.009   0.233   0.321   0.320   0.334   0.420   0.349  0.916  0.384  0.771  0.180
+  witness W2 blind leg, unscaled, daily         1000   0.011  0.119  -0.25 0.001   0.012   0.197   0.278   0.276   0.286   0.365   0.297  0.969  0.493  0.883  0.249
+  witness W2 blind leg, unscaled, stamp grid    1000   0.026  0.160  -0.36 0.001   0.025   0.275   0.396   0.392   0.375   0.493   0.397  0.848  0.350  0.604  0.110
+  fallback folds per draw (balanced leg = blind): W1 ^GSPC, daily 0.00 (any 0.00); W1 ^GSPC, stamp grid 0.00 (any 0.00); W2 blind leg, unscaled, daily 0.00 (any 0.00); W2 blind leg, unscaled, stamp grid 0.08 (any 0.08)
+  The witness's own reduction (its real partition) is the comparator of the declared test: not
+  computed before the lock. The daily-grid nulls draw on session paths (stamped=False).
+
+====================================================================================================
+7. B2: map spaces, the null of its D reduction (1000 draws), P3 on content-free partitions (200), paired-Sharpe MDE
+====================================================================================================
+  permutation      maps    120  distinct books    60  draft-map ties   2  min p 0.0167  max percentile 0.9917
+  profile          maps    752  distinct books    61  draft-map ties  32  min p 0.0426  max percentile 0.9787
+  axis_consistent  maps  21300  distinct books  1315  draft-map ties  32  min p 0.0015  max percentile 0.9992
+  any_subset       maps 693601 (not enumerated)
+  draft-map budgets: equity 0.1250, duration 0.3750, inflation_linked 0.0833, commodity 0.2083, precious 0.2083
+  B2 weights per fold (inverse_vol, training moments only):
+          equity  duration  inflation_linked  commodity  precious
+    fold                                                         
+    1      0.052     0.724             0.086      0.077     0.061
+    2      0.050     0.740             0.081      0.074     0.055
+    3      0.049     0.742             0.080      0.074     0.054
+    4      0.048     0.740             0.081      0.075     0.056
+    5      0.052     0.726             0.083      0.078     0.060
+  B2 weights per fold (erc, training moments only):
+          equity  duration  inflation_linked  commodity  precious
+    fold                                                         
+    1      0.079     0.707             0.079      0.077     0.058
+    2      0.077     0.723             0.075      0.074     0.051
+    3      0.079     0.722             0.074      0.074     0.051
+    4      0.077     0.719             0.075      0.076     0.053
+    5      0.082     0.701             0.078      0.082     0.057
+  mean/q50/q95/q99: the reduction D(blind) - D(balanced) under content-free partitions (positive = the
+  balanced leg narrows D). qSid: the 1 - 0.0102 quantile (Sidak over 5). MDEs: location-shift MDE
+  q(1-a) - q(0.20); MDEsd: (z_(1-a) + z_0.80) x sd. P.405 / P.182: share of draws that, shifted by
+  log 1.5 / log 1.2, reach the 95th percentile (S: the Sidak percentile).
+  null                                             n    mean     sd   skew  atom     q50     q95     q99    qSid  MDEs05 MDEsSid MDEsd05  P.405  P.182 P.405S P.182S
+  B2 draft map (inverse vol) vs blind           1000  -0.015  0.061  -0.24 0.001  -0.011   0.082   0.121   0.121   0.147   0.186   0.151  1.000  0.919  1.000  0.778
+  P3 permutation  on 200 content-free partitions: draft map at or above the 95th percentile of its space in 0.025 of them; mean percentile 0.436
+  P3 profile      on 200 content-free partitions: draft map at or above the 95th percentile of its space in 0.010 of them; mean percentile 0.285
+
+  paired Sharpe MDE, B2 map leg vs blind leg, pooled test, DEMEANED legs (blinded_mde):
+    block  21: SE 0.0666  MDE 0.187 (0.05)  0.227 (Sidak)
+    block  63: SE 0.0657  MDE 0.184 (0.05)  0.224 (Sidak)
+    block 126: SE 0.0626  MDE 0.175 (0.05)  0.214 (Sidak)
+    correlation of the legs 0.966; B2 leg realised sd 8.70%
+
+====================================================================================================
+8. Level C on PLACEBO transition dates: paired-Sharpe MDE (10 draws), turnover-saving null (200)
+====================================================================================================
+  calendar 'every SPF stamp': 3.85 rebalances a year on the test sessions; held turnover 3.53x/yr
+  calendar 'calendar quarter-ends': 3.91 rebalances a year on the test sessions; held turnover 3.47x/yr
+  placebo transition dates: 3.00 a year on the test sessions (sd 0.10); 296 s
+
+  against 'every SPF stamp':
+    block  21: SE median 0.0151; paired Sharpe MDE median 0.042 (0.030 to 0.063) at 0.05, 0.051 at Sidak
+    block  63: SE median 0.0156; paired Sharpe MDE median 0.044 (0.024 to 0.071) at 0.05, 0.053 at Sidak
+    block 126: SE median 0.0155; paired Sharpe MDE median 0.043 (0.020 to 0.073) at 0.05, 0.053 at Sidak
+    turnover saving (calendar - conditional, held, x/yr) under the null: median -0.001, sd 0.072, skew -0.46, atom share 0.005, q99 - q20 0.197, distinct values 200
+
+  against 'calendar quarter-ends':
+    block  21: SE median 0.0273; paired Sharpe MDE median 0.076 (0.065 to 0.087) at 0.05, 0.093 at Sidak
+    block  63: SE median 0.0277; paired Sharpe MDE median 0.078 (0.063 to 0.095) at 0.05, 0.095 at Sidak
+    block 126: SE median 0.0264; paired Sharpe MDE median 0.074 (0.062 to 0.097) at 0.05, 0.090 at Sidak
+    turnover saving (calendar - conditional, held, x/yr) under the null: median -0.061, sd 0.072, skew -0.46, atom share 0.005, q99 - q20 0.197, distinct values 200
+
+  The target moves between rebalances (ERC re-estimated on 252 sessions at every stamp),
+  so the level-C null is not the Two Sigma C-1 atom. Real transition dates were not used.
+
+====================================================================================================
+9. Disclosed figures of §1.4 and §3-§5 against the re-measurement
+====================================================================================================
+  §1.1     median_rgdp_level.xlsx shape                  disclosed                 232 x 12  measured                 232 x 12  ok
+  §1.1     median_rgdp_level.xlsx coverage               disclosed            1968Q4-2026Q3  measured            1968Q4-2026Q3  ok
+  §1.1     median_cpi_level.xlsx shape                   disclosed                 232 x 11  measured                 232 x 11  ok
+  §1.1     median_cpi_level.xlsx coverage                disclosed            1968Q4-2026Q3  measured            1968Q4-2026Q3  ok
+  §1.1     median_unemp_level.xlsx shape                 disclosed                 232 x 12  measured                 232 x 12  ok
+  §1.1     median_unemp_level.xlsx coverage              disclosed            1968Q4-2026Q3  measured            1968Q4-2026Q3  ok
+  §1.1     median_indprod_level.xlsx shape               disclosed                 232 x 10  measured                 232 x 10  ok
+  §1.1     median_indprod_level.xlsx coverage            disclosed            1968Q4-2026Q3  measured            1968Q4-2026Q3  ok
+  §1.4     rate_cash_3m rows                             disclosed                     9177  measured                     9177  ok
+  §1.4     rate_cash_3m span                             disclosed 1990-01-02 -> 2026-09-08  measured 1990-01-02 -> 2026-09-08  ok
+  §1.4     fin_baa_spread rows                           disclosed                     9171  measured                     9171  ok
+  §1.4     fin_baa_spread span                           disclosed 1990-01-02 -> 2026-09-04  measured 1990-01-02 -> 2026-09-08  DIFFERS
+  §1.4     fin_aaa_spread rows                           disclosed                     9171  measured                     9171  ok
+  §1.4     fin_aaa_spread span                           disclosed 1990-01-02 -> 2026-09-04  measured 1990-01-02 -> 2026-09-08  DIFFERS
+  §1.4     macro_cpi rows                                disclosed                      438  measured                      438  ok
+  §1.4     macro_cpi span                                disclosed 1990-01-01 -> 2026-07-01  measured 1990-01-01 -> 2026-07-01  ok
+  §1.4     macro_indpro rows                             disclosed                      439  measured                      439  ok
+  §1.4     macro_indpro span                             disclosed 1990-01-01 -> 2026-07-01  measured 1990-01-01 -> 2026-07-01  ok
+  §1.4     macro_indpro Feb->Mar 1990                    disclosed           141.8 -> 108.8  measured           141.8 -> 108.8  ok
+  §1.4     h3 payems rows / periods                      disclosed               4560 / 344  measured               4560 / 344  ok
+  §1.4     T10YIE first date                             disclosed               2003-01-02  measured               2003-01-02  ok
+  §3       Sidak alpha, 1 tests                          disclosed                  0.05000  measured                  0.05000  ok
+  §3       Sidak z, 1 tests                              disclosed                    1.960  measured                    1.960  ok
+  §3       Sidak alpha, 3 tests                          disclosed                  0.01695  measured                  0.01695  ok
+  §3       Sidak z, 3 tests                              disclosed                    2.388  measured                    2.388  ok
+  §3       Sidak alpha, 5 tests                          disclosed                  0.01021  measured                  0.01021  ok
+  §3       Sidak z, 5 tests                              disclosed                    2.569  measured                    2.569  ok
+  §3       Sidak alpha, 6 tests                          disclosed                  0.00851  measured                  0.00851  ok
+  §3       Sidak z, 6 tests                              disclosed                    2.631  measured                    2.631  ok
+  §4       resolvable SR, 5-sleeve panel 23.60 yr        disclosed                    0.632  measured                    0.632  ok
+  §4       resolvable SR, cell (g-,i+) 1792 s            disclosed                    1.569  measured                    1.569  ok
+  §4       resolvable SR, cell (g+,i+) 1675 s            disclosed                    1.698  measured                    1.698  ok
+  §4       resolvable SR, cell (g+,i-) 1630 s            disclosed                    1.757  measured                    1.757  ok
+  §4       resolvable SR, cell (g-,i-) 841 s             disclosed                      inf  measured                      inf  ok
+  §4       years for a positive denominator              disclosed                     3.92  measured                     3.92  ok
+  §4       paired SE, full panel 23.6 yr                 disclosed                   0.2183  measured                   0.2183  ok
+  §4       paired MDE rho=0.9, full panel 23.6 yr        disclosed                    0.274  measured                    0.274  ok
+  §4       paired MDE rho=0.95, full panel 23.6 yr       disclosed                    0.193  measured                    0.193  ok
+  §4       paired MDE rho=0.98, full panel 23.6 yr       disclosed                    0.122  measured                    0.122  ok
+  §4       paired MDE rho=0.99, full panel 23.6 yr       disclosed                    0.087  measured                    0.087  ok
+  §4       paired SE, one fold of five 4.7 yr            disclosed                   0.4882  measured                   0.4882  ok
+  §4       paired MDE rho=0.9, one fold of five 4.7 yr   disclosed                    0.612  measured                    0.612  ok
+  §4       paired MDE rho=0.95, one fold of five 4.7 yr  disclosed                    0.433  measured                    0.433  ok
+  §4       paired MDE rho=0.98, one fold of five 4.7 yr  disclosed                    0.274  measured                    0.274  ok
+  §4       paired MDE rho=0.99, one fold of five 4.7 yr  disclosed                    0.193  measured                    0.193  ok
+  §4       paired SE, largest cell 7.1 yr                disclosed                   0.3977  measured                   0.3977  ok
+  §4       paired MDE rho=0.9, largest cell 7.1 yr       disclosed                    0.498  measured                    0.498  ok
+  §4       paired MDE rho=0.95, largest cell 7.1 yr      disclosed                    0.352  measured                    0.352  ok
+  §4       paired MDE rho=0.98, largest cell 7.1 yr      disclosed                    0.223  measured                    0.223  ok
+  §4       paired MDE rho=0.99, largest cell 7.1 yr      disclosed                    0.158  measured                    0.158  ok
+  §4       paired SE, smallest cell 3.3 yr               disclosed                   0.5806  measured                   0.5806  ok
+  §4       paired MDE rho=0.9, smallest cell 3.3 yr      disclosed                    0.727  measured                    0.727  ok
+  §4       paired MDE rho=0.95, smallest cell 3.3 yr     disclosed                    0.514  measured                    0.514  ok
+  §4       paired MDE rho=0.98, smallest cell 3.3 yr     disclosed                    0.325  measured                    0.325  ok
+  §4       paired MDE rho=0.99, smallest cell 3.3 yr     disclosed                    0.230  measured                    0.230  ok
+  §4       variance n_eff, 5938 sessions                 disclosed                     94.3  measured                     94.3  ok
+  §4       variance MDE, 5938 sessions                   disclosed                    0.204  measured                    0.204  ok
+  §4       variance n_eff, 1792 sessions                 disclosed                     28.4  measured                     28.4  ok
+  §4       variance MDE, 1792 sessions                   disclosed                    0.371  measured                    0.371  ok
+  §4       variance n_eff, 841 sessions                  disclosed                     13.3  measured                     13.3  ok
+  §4       variance MDE, 841 sessions                    disclosed                    0.542  measured                    0.542  ok
+  §4       reduction threshold in %                      disclosed                     22.6  measured                     22.6  ok
+  §4       log 1.5                                       disclosed                    0.405  measured                    0.405  ok
+  §4       log 1.2                                       disclosed                    0.182  measured                    0.182  ok
+  §5       blended bp (draft formula)                    disclosed                    1.217  measured                    1.217  ok
+  §5       +2 trips drag %                               disclosed                    0.024  measured                    0.024  ok
+  §5       +2 trips Sharpe                               disclosed                   0.0024  measured                   0.0024  ok
+  §5       +4 trips drag %                               disclosed                    0.049  measured                    0.049  ok
+  §5       +4 trips Sharpe                               disclosed                   0.0049  measured                   0.0049  ok
+  §5       +8 trips drag %                               disclosed                    0.097  measured                    0.097  ok
+  §5       +8 trips Sharpe                               disclosed                   0.0097  measured                   0.0097  ok
+  §5       +16 trips drag %                              disclosed                    0.195  measured                    0.195  ok
+  §5       +16 trips Sharpe                              disclosed                   0.0195  measured                   0.0195  ok
+  §5       kill round trips, headline                    disclosed                       82  measured                       82  ok
+  §5       kill round trips, all_cash                    disclosed                     13.3  measured                     13.3  ok
+  §1.3/§7  sessions per fold                             disclosed                     1187  measured                      825  DIFFERS   declared object: 4126 test sessions, folds [849, 845, 850, 846, 736]
+  §3 A/§4  MDE of D (the PASS floor)                     disclosed                    0.204  measured                    0.356  DIFFERS   declared object: shift 0.356 / Sidak 0.452; sd 0.379 / 0.482
+  §4       log 1.5 at P1 95th pct                        disclosed                decidable  measured                decidable  ok   declared object: location-shift power 0.866
+  §4       log 1.5 at Sidak                              disclosed                decidable  measured             underpowered  DIFFERS   declared object: location-shift power 0.709
+  §4       log 1.2 at P1 95th pct                        disclosed             underpowered  measured             underpowered  ok   declared object: location-shift power 0.374
+  §4       log 1.2 at Sidak                              disclosed             underpowered  measured             underpowered  ok   declared object: location-shift power 0.154
+
+  76 of 81 reproduce
+
+  LevelA.run calls on the primary engine: 40,501, every one on a placebo path (the guard refused none); total 2431 s
+  written: docs/artifacts/bridgewater/power.json

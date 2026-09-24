@@ -24,6 +24,10 @@ dependencies = [
     # absent from this list, so a fresh clone failed with an ImportError that the
     # tests could not see because main() is never called by them.
     "xlrd>=2.0",
+    # regime_lab.construction.quadrant reads the Philadelphia Fed SPF and real-time
+    # workbooks (.xlsx) with pandas.read_excel, which needs openpyxl. It was present
+    # only through chantiers/macro-momentum's dependencies (hygiene item B5).
+    "openpyxl>=3.1",
 ]
 
 [project.optional-dependencies]

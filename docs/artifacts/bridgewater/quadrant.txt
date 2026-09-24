@@ -1,0 +1,247 @@
+
+====================================================================================================
+0. Files and SHA-256 (data/raw/spf/manifest.json)
+====================================================================================================
+  raw/spf/median_rgdp_level.xlsx             23,605 B  312a047c8a98871c  ok  same bytes as the draft
+  raw/spf/median_cpi_level.xlsx              16,807 B  da5c7b637545a8d9  ok  same bytes as the draft
+  raw/spf/median_unemp_level.xlsx            17,503 B  491e09e1a98d11e2  ok  same bytes as the draft
+  raw/spf/median_indprod_level.xlsx          17,987 B  63f61dfae1dbbf1b  ok  same bytes as the draft
+  raw/spf/median_rgdp_growth.xlsx            15,701 B  fbfc845565f9070d  ok
+  raw/spf/routput_first_second_third.xlsx    16,432 B  38c7c7316b7ce3f7  ok
+  raw/spf/spf_release_dates.txt               8,298 B  c5f4c4dc349068ba  ok
+  raw/spf/spf_release_dates.csv              22,828 B  729620607b8685d4  ok
+  raw/spf/fred_t10yie.parquet               116,775 B  492f92c733175c03  ok
+  negative control: median_cpi_growth.xlsx -> 18,386 B, refused=True
+
+====================================================================================================
+1. The surprise panel (§1.1)
+====================================================================================================
+  usable quarters 180  1981Q3 -> 2026Q2
+  growth surprise sd 35.481 annualised points, inflation sd 1.333 points
+
+  Denominator. The draft script divides by RGDP1 of survey q (level of q-1),
+  which is what the §1.1 formula says. Dividing by RGDP2_q instead:
+    sd 35.220; every sign identical: True -> no label depends on the denominator
+
+  Level revisions inside the declared growth axis. The ten largest |growth|:
+    1985Q4  declared  +452.700   within-vintage  -0.769
+    1995Q4  declared   +87.118   within-vintage   n/a
+    1991Q4  declared   +68.326   within-vintage  -1.208
+    2009Q2  declared   +56.259   within-vintage  +0.511
+    2013Q2  declared   +53.424   within-vintage  -0.146
+    1999Q3  declared   +52.048   within-vintage  +1.524
+    2023Q3  declared   +39.037   within-vintage  +2.978
+    2003Q4  declared   +28.717   within-vintage  +0.024
+    2018Q2  declared   +22.811   within-vintage  +1.037
+    2020Q3  declared   +14.180   within-vintage +13.989
+  |declared growth| > 10 points: 10 quarters ['1985Q4', '1991Q4', '1995Q4', '1999Q3', '2003Q4', '2009Q2', '2013Q2', '2018Q2', '2020Q3', '2023Q3']
+  declared growth sd without them: 2.351  (within-vintage sd 1.899, n=177)
+  growth sign, declared vs within-vintage: 31 of 177 quarters disagree; within-vintage undefined for ['1995Q4', '2025Q3', '2025Q4']
+    of which reference quarters 2003Q3 onward: 13 of 90
+  Flags: reference quarter 2025Q3 is revealed by survey 2025Q4, which had no
+  published jump-off value for real GDP (shutdown); RGDP1 of that survey is the
+  forecasters' own estimate, so its growth 'surprise' is not against an outturn.
+  Survey 1990Q2 was not taken in real time (collected in August 1990), which
+  touches reference quarters 1990Q1 and 1990Q2 (full history only).
+
+====================================================================================================
+2. The draft's figures, with the draft's stamp (15th of month 2 of q+1), no lag
+====================================================================================================
+  full SPF history: 180 quarters, 44.75 yr, 132 transitions -> 2.950/yr
+  first stamp 1981-11-15 (the text says the 14th; the code adds 14 days to the 1st, the 15th)
+  draft stamp, lag 0 (the draft)
+    quarters stamped on/after the start 91, span 22.50 yr, transitions 70 -> 3.112/yr, spell median 1.0 max 3
+    P(same as last quarter) 0.2222 over 90 pairs (0.2198 dividing by n, the draft); independent draws 0.2660
+    quarters per cell   13 /   28 /   25 /   25  shares 0.143 / 0.308 / 0.275 / 0.275
+    sessions labelled 5938 from 2003-12-05; per cell  841 / 1792 / 1630 / 1675  shares 0.142 / 0.302 / 0.275 / 0.282
+    session grid: 71 changes over 22.77 yr -> 3.119/yr
+  NB the session sample also holds the label stamped before 2003-12-05 (2003Q3), which the quarter counts leave out
+  TIP first valid date 2003-12-05 (the sample start)
+
+====================================================================================================
+3. Real release dates (spf-release-dates.txt) and the declared T-1 lag
+====================================================================================================
+  stamp sources over the 180 usable quarters: {'release': 146, 'fallback_quarter_end': 34}
+  surveys with a real date: 1990Q2 -> 2026Q3; reference quarters with a real stamp: 1990Q1 -> 2026Q2
+  real release minus draft stamp, days: median 0, min -6, max 108; draft stamp BEFORE the release (look-ahead) on 71 of 146 quarters
+  in the asset window (91 stamps): look-ahead on 16, worst 35 days; the list:
+    reference 2003Q4  survey 2004Q1  draft 2004-02-15  release 2004-02-23  (+8 d)
+    reference 2004Q1  survey 2004Q2  draft 2004-05-15  release 2004-05-24  (+9 d)
+    reference 2004Q2  survey 2004Q3  draft 2004-08-15  release 2004-08-20  (+5 d)
+    reference 2004Q3  survey 2004Q4  draft 2004-11-15  release 2004-11-22  (+7 d)
+    reference 2005Q1  survey 2005Q2  draft 2005-05-15  release 2005-05-16  (+1 d)
+    reference 2008Q3  survey 2008Q4  draft 2008-11-15  release 2008-11-17  (+2 d)
+    reference 2009Q3  survey 2009Q4  draft 2009-11-15  release 2009-11-16  (+1 d)
+    reference 2013Q2  survey 2013Q3  draft 2013-08-15  release 2013-08-16  (+1 d)
+    reference 2013Q3  survey 2013Q4  draft 2013-11-15  release 2013-11-25  (+10 d)
+    reference 2014Q1  survey 2014Q2  draft 2014-05-15  release 2014-05-16  (+1 d)
+    reference 2014Q3  survey 2014Q4  draft 2014-11-15  release 2014-11-17  (+2 d)
+    reference 2018Q4  survey 2019Q1  draft 2019-02-15  release 2019-03-22  (+35 d)
+    reference 2020Q3  survey 2020Q4  draft 2020-11-15  release 2020-11-16  (+1 d)
+    reference 2025Q1  survey 2025Q2  draft 2025-05-15  release 2025-05-16  (+1 d)
+    reference 2025Q3  survey 2025Q4  draft 2025-11-15  release 2025-11-17  (+2 d)
+    reference 2025Q4  survey 2026Q1  draft 2026-02-15  release 2026-03-06  (+19 d)
+
+  full history with real dates (fallback = end of survey quarter before 1990Q2): 180 quarters, 44.62 yr, 132 transitions -> 2.958/yr, P(same) 0.2626 vs independent 0.2644
+  release, lag 0
+    quarters stamped on/after the start 91, span 22.47 yr, transitions 70 -> 3.115/yr, spell median 1.0 max 3
+    P(same as last quarter) 0.2222 over 90 pairs (0.2198 dividing by n, the draft); independent draws 0.2660
+    quarters per cell   13 /   28 /   25 /   25  shares 0.143 / 0.308 / 0.275 / 0.275
+    sessions labelled 5938 from 2003-12-05; per cell  813 / 1778 / 1649 / 1698  shares 0.137 / 0.299 / 0.278 / 0.286
+    session grid: 71 changes over 22.77 yr -> 3.119/yr
+  release, lag 1 (DECLARED OBJECT)
+    quarters stamped on/after the start 91, span 22.47 yr, transitions 70 -> 3.115/yr, spell median 1.0 max 3
+    P(same as last quarter) 0.2222 over 90 pairs (0.2198 dividing by n, the draft); independent draws 0.2660
+    quarters per cell   13 /   28 /   25 /   25  shares 0.143 / 0.308 / 0.275 / 0.275
+    sessions labelled 5938 from 2003-12-05; per cell  813 / 1777 / 1649 / 1699  shares 0.137 / 0.299 / 0.278 / 0.286
+    session grid: 71 changes over 22.77 yr -> 3.119/yr
+  release, lag 2 (release time of day unknown)
+    quarters stamped on/after the start 91, span 22.47 yr, transitions 70 -> 3.115/yr, spell median 1.0 max 3
+    P(same as last quarter) 0.2222 over 90 pairs (0.2198 dividing by n, the draft); independent draws 0.2660
+    quarters per cell   13 /   28 /   25 /   25  shares 0.143 / 0.308 / 0.275 / 0.275
+    sessions labelled 5938 from 2003-12-05; per cell  813 / 1776 / 1649 / 1700  shares 0.137 / 0.299 / 0.278 / 0.286
+    session grid: 71 changes over 22.77 yr -> 3.119/yr
+  draft, lag 1
+    quarters stamped on/after the start 91, span 22.50 yr, transitions 70 -> 3.112/yr, spell median 1.0 max 3
+    P(same as last quarter) 0.2222 over 90 pairs (0.2198 dividing by n, the draft); independent draws 0.2660
+    quarters per cell   13 /   28 /   25 /   25  shares 0.143 / 0.308 / 0.275 / 0.275
+    sessions labelled 5938 from 2003-12-05; per cell  841 / 1791 / 1630 / 1676  shares 0.142 / 0.302 / 0.275 / 0.282
+    session grid: 71 changes over 22.77 yr -> 3.119/yr
+  release + 1 month, lag 1 (sensitivity)
+    quarters stamped on/after the start 92, span 22.72 yr, transitions 71 -> 3.124/yr, spell median 1.0 max 3
+    P(same as last quarter) 0.2198 over 91 pairs (0.2174 dividing by n, the draft); independent draws 0.2663
+    quarters per cell   13 /   28 /   25 /   26  shares 0.141 / 0.304 / 0.272 / 0.283
+    sessions labelled 5938 from 2003-12-05; per cell  818 / 1752 / 1665 / 1703  shares 0.138 / 0.295 / 0.280 / 0.287
+    session grid: 72 changes over 22.77 yr -> 3.163/yr
+  draft + 1 month, lag 1 (sensitivity)
+    quarters stamped on/after the start 92, span 22.75 yr, transitions 71 -> 3.121/yr, spell median 1.0 max 3
+    P(same as last quarter) 0.2198 over 91 pairs (0.2174 dividing by n, the draft); independent draws 0.2663
+    quarters per cell   13 /   28 /   25 /   26  shares 0.141 / 0.304 / 0.272 / 0.283
+    sessions labelled 5938 from 2003-12-05; per cell  852 / 1758 / 1632 / 1696  shares 0.143 / 0.296 / 0.275 / 0.286
+    session grid: 72 changes over 22.77 yr -> 3.163/yr
+
+  persistence against order-destroying permutations of the 91 quarterly labels: P(null P(same) <= observed) = 0.258 -> the quadrant is indistinguishable from independent
+
+  sessions whose label differs from the draft's (draft stamp, lag 0):
+    release, lag 0                                 153 of 5938 sessions
+    release, lag 1 (DECLARED OBJECT)               128 of 5938 sessions
+    release, lag 2 (release time of day unknown)   147 of 5938 sessions
+    draft, lag 1                                    71 of 5938 sessions
+    release + 1 month, lag 1 (sensitivity)        1567 of 5938 sessions
+    draft + 1 month, lag 1 (sensitivity)          1604 of 5938 sessions
+    declared vs draft, (growth-, inflation-): 813 sessions (-28)
+    declared vs draft, (growth-, inflation+): 1777 sessions (-15)
+    declared vs draft, (growth+, inflation-): 1649 sessions (+19)
+    declared vs draft, (growth+, inflation+): 1699 sessions (+24)
+
+====================================================================================================
+4. Within-vintage growth candidate (first release - DRGDP2), real dates, lag 1
+====================================================================================================
+  full history: 177 quarters, 134 transitions -> 3.003/yr, P(same) 0.2386 vs 0.2507
+  within-vintage growth, release, lag 1
+    quarters stamped on/after the start 89, span 22.47 yr, transitions 68 -> 3.026/yr, spell median 1.0 max 3
+    P(same as last quarter) 0.2273 over 88 pairs (0.2247 dividing by n, the draft); independent draws 0.2627
+    quarters per cell   16 /   30 /   21 /   22  shares 0.180 / 0.337 / 0.236 / 0.247
+    sessions labelled 5938 from 2003-12-05; per cell 1015 / 1906 / 1525 / 1492  shares 0.171 / 0.321 / 0.257 / 0.251
+    session grid: 69 changes over 22.77 yr -> 3.031/yr
+  sessions labelled differently from the declared object: 931 of 5938
+  (the missing 2025Q3/2025Q4 quarters extend the previous label; that is a choice
+   the lock must make if this candidate is adopted)
+
+====================================================================================================
+5. Cell composition by decade, declared object (killer 6), labels only
+====================================================================================================
+  sessions:
+           (growth-, inflation-)  (growth-, inflation+)  (growth+, inflation-)  (growth+, inflation+)
+    group                                                                                            
+    2000s                    196                    715                    254                    420
+    2010s                    486                    587                    852                    683
+    2020s                    131                    475                    543                    596
+  quarters (by stamp date):
+           (growth-, inflation-)  (growth-, inflation+)  (growth+, inflation-)  (growth+, inflation+)
+    group                                                                                            
+    2000s                      3                     11                      4                      6
+    2010s                      8                      9                     13                     10
+    2020s                      2                      8                      8                      9
+  sessions by equal fifths of the sample (a provisional fold cut, not the lock's):
+                              (growth-, inflation-)  (growth-, inflation+)  (growth+, inflation-)  (growth+, inflation+)
+    fifth 1 2003-12->2008-06                    131                    551                    254                    252
+    fifth 2 2008-06->2013-01                    261                    359                     65                    503
+    fifth 3 2013-01->2017-08                    255                    319                    464                    149
+    fifth 4 2017-08->2022-02                    166                    203                    356                    463
+    fifth 5 2022-02->2026-09                      0                    345                    510                    332
+  (growth-, inflation-) sessions by year: {2006: 99, 2007: 32, 2009: 65, 2010: 66, 2012: 130, 2013: 60, 2015: 65, 2016: 130, 2019: 35, 2020: 131}
+
+====================================================================================================
+6a. Level quadrant (yoy vs expanding median), macro PIT store, quarterly grid
+====================================================================================================
+  123 quarters, 37 transitions -> 1.20/yr (quarters/4, the draft's denominator); P(same) 0.691 (dividing by n)
+
+====================================================================================================
+6b. H3 AR-proxy quadrant (committed chantiers/macro-momentum code), 63-day kernel
+====================================================================================================
+  with claims     start 2009-05-28: daily 141 changes over 17.9 yr -> 7.88/yr; quarterly grid 39 over 70 quarters -> 2.23/yr
+  without claims  start 2003-03-26: daily 172 changes over 24.3 yr -> 7.08/yr; quarterly grid 54 over 95 quarters -> 2.27/yr
+
+====================================================================================================
+7. B1 candidates: T10YIE (inflation) and -BAA spread (growth), labels only
+====================================================================================================
+  T10YIE 2003-01-02 -> 2026-09-23 (5,936 rows); BAA 1990-01-02 -> 2026-09-08
+  candidate                                   first     n  /yr d spell d  /yr q P(same)q  indep  occupancy (sessions)
+  change over 21 sessions                2003-12-05  5938  41.55       3   3.26    0.187  0.260  0.315 / 0.158 / 0.187 / 0.341
+  change over 63 sessions                2003-12-05  5938  21.35       3   2.91    0.275  0.306  0.292 / 0.131 / 0.177 / 0.400
+  change over 126 sessions               2003-12-05  5938  19.33       3   2.42    0.396  0.303  0.302 / 0.123 / 0.186 / 0.390
+  change over 252 sessions               2003-12-24  5925  12.42       4   1.85    0.538  0.306  0.314 / 0.115 / 0.209 / 0.362
+  level vs expanding median (min 252)    2003-12-23  5926   8.06       3   1.37    0.659  0.308  0.250 / 0.053 / 0.323 / 0.374
+  ties (unchanged value, counted negative) at  21: growth 193, inflation 189 sessions
+  ties (unchanged value, counted negative) at  63: growth 93, inflation 100 sessions
+  ties (unchanged value, counted negative) at 126: growth 65, inflation 113 sessions
+  ties (unchanged value, counted negative) at 252: growth 31, inflation 63 sessions
+  '/yr d' session-grid transitions per calendar year; 'spell d' median spell in
+  sessions; '/yr q' and 'P(same)q' on the label at each calendar quarter's last
+  session; 'indep' = sum of squared quarterly occupancies.
+
+====================================================================================================
+Disclosed figures against the re-measurement
+====================================================================================================
+  usable quarters                             disclosed        180  measured        180  ok
+  first usable quarter                        disclosed     1981Q3  measured     1981Q3  ok
+  last usable quarter                         disclosed     2026Q2  measured     2026Q2  ok
+  growth surprise sd                          disclosed     35.481  measured     35.481  ok
+  inflation surprise sd                       disclosed      1.333  measured      1.333  ok
+  full-history transitions/yr                 disclosed       2.95  measured       2.95  ok
+  full-history span (years)                   disclosed       44.7  measured       44.7  ok
+  asset-sample sessions                       disclosed       5938  measured       5938  ok
+  asset-sample quarters                       disclosed         91  measured         91  ok
+  asset-sample span (years)                   disclosed       22.5  measured       22.5  ok
+  transitions (asset)                         disclosed         70  measured         70  ok
+  transitions/yr (asset)                      disclosed       3.11  measured       3.11  ok
+  median spell (quarters)                     disclosed        1.0  measured        1.0  ok
+  max spell (quarters)                        disclosed          3  measured          3  ok
+  P(same) as disclosed                        disclosed      0.220  measured      0.220  ok
+  P(same) independent                         disclosed      0.266  measured      0.266  ok
+  sessions (growth-, inflation-)              disclosed        841  measured        841  ok
+  sessions (growth-, inflation+)              disclosed       1792  measured       1792  ok
+  sessions (growth+, inflation-)              disclosed       1630  measured       1630  ok
+  sessions (growth+, inflation+)              disclosed       1675  measured       1675  ok
+  session share % (growth-, inflation-)       disclosed       14.2  measured       14.2  ok
+  session share % (growth-, inflation+)       disclosed       30.2  measured       30.2  ok
+  session share % (growth+, inflation-)       disclosed       27.5  measured       27.5  ok
+  session share % (growth+, inflation+)       disclosed       28.2  measured       28.2  ok
+  quarters (growth-, inflation-)              disclosed         13  measured         13  ok
+  quarters (growth-, inflation+)              disclosed         28  measured         28  ok
+  quarters (growth+, inflation-)              disclosed         25  measured         25  ok
+  quarters (growth+, inflation+)              disclosed         25  measured         25  ok
+  P1 occupancy (growth-, inflation-)          disclosed      0.143  measured      0.143  ok
+  P1 occupancy (growth-, inflation+)          disclosed      0.308  measured      0.308  ok
+  P1 occupancy (growth+, inflation-)          disclosed      0.275  measured      0.275  ok
+  P1 occupancy (growth+, inflation+)          disclosed      0.275  measured      0.275  ok
+  (g-,i-) years                               disclosed       3.34  measured       3.34  ok
+  quarters per fold at 5 folds                disclosed       18.2  measured       18.2  ok
+  sessions per fold at 5 folds                disclosed       1187  measured       1187  ok
+  TIP start                                   disclosed 2003-12-05  measured 2003-12-05  ok
+  level quadrant transitions/yr (quarterly)   disclosed       1.20  measured       1.20  ok
+  H3 AR-proxy quarterly grid /yr (no claims)  disclosed       2.27  measured       2.27  ok
+  H3 AR-proxy daily grid /yr (no claims)      disclosed       7.08  measured       7.08  ok
+
+  39 of 39 reproduce
