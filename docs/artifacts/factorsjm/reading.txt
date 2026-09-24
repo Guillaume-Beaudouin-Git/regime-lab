@@ -1,0 +1,296 @@
+====================================================================================
+ONE SPARSE JUMP MODEL PER FACTOR — INSTRUMENT (no conditioned return is printed)
+====================================================================================
+
+0.  INPUTS (SHA-256)
+
+   f5fff1d98f4a69f7  data/raw/factorsjm/factors_5_full.parquet
+   302303df13aee16d  data/raw/crisis/french_umd.parquet
+   5862e06942a64ffe  data/raw/factorsjm/dgs1.parquet
+   4290d7ba675cb581  data/raw/factorsjm/dgs10.parquet
+
+0b. DATA CHECKS
+
+   max |full file - 1990 file| on 9,212 common sessions: 0.0000 (percent)
+   five-factor sessions without a UMD value: 0
+
+1.  SAMPLES
+
+   factors 1963-07-01 -> 2026-07-31, 15,876 sessions
+   out of sample (every leg finite) 1978-01-05 -> 2026-07-31, 12,243 sessions, 48.6 years
+   paper window 2007-01-03 -> 2024-06-28, 4,402 sessions
+
+2.  TUNING — the penalty chosen every six months (count of choices), features kept
+
+   factor      10     20     50    100    200    500   none  features
+   mkt          2     21      8      1     30     36      0      14.7
+   smb         46      8      5      4     23     12      0      15.2
+   hml         51     12     11      4     18      2      0      13.9
+   rmw         48      9     11      4     10     16      0      14.3
+   cma         30     31     11     20      2      4      0      14.6
+   umd         24     17      8     16      2     31      0      15.4
+
+3.  THE FOUR AXES OF THE RULE (docs, CLAUDE.md), measured before any reading
+
+   axis 2 — transitions a year, out of sample; share of sessions in bull
+   mkt     1.98/yr   2007-2024  1.26/yr   fixed-50  2.80/yr   bull  74.0%
+   smb     3.46/yr   2007-2024  3.26/yr   fixed-50  2.92/yr   bull  47.0%   paper Size 2.57
+   hml     4.49/yr   2007-2024  4.81/yr   fixed-50  3.07/yr   bull  45.2%   paper Value 3.16
+   rmw     4.65/yr   2007-2024  4.12/yr   fixed-50  3.31/yr   bull  48.4%   paper Quality 0.64
+   cma     3.75/yr   2007-2024  2.98/yr   fixed-50  2.98/yr   bull  40.8%
+   umd     4.03/yr   2007-2024  2.35/yr   fixed-50  2.88/yr   bull  60.7%   paper Momentum 3.66
+   book: 22.35 factor-state changes a year in all
+
+   axis 1 — is each latent a volatility rule, or a trailing-return rule?
+   kappa of the bear state with: own 21-session vol above its expanding median;
+   above its 80th percentile; the market's median rule; the factor's 252-session
+   return negative. Last column: correlation of bear with log market RV21.
+   mkt   own med +0.14   own 80th +0.31   market med +0.14   trend +0.56   corr(RV) +0.34
+   smb   own med +0.08   own 80th +0.15   market med +0.04   trend +0.42   corr(RV) +0.12
+   hml   own med -0.05   own 80th -0.08   market med +0.04   trend +0.38   corr(RV) +0.01
+   rmw   own med +0.01   own 80th -0.01   market med -0.09   trend +0.26   corr(RV) -0.10
+   cma   own med -0.05   own 80th -0.11   market med -0.09   trend +0.39   corr(RV) -0.09
+   umd   own med -0.06   own 80th +0.03   market med +0.10   trend +0.19   corr(RV) +0.07
+
+   axis 4 — participation ratio (effective dimension), of 6
+   raw factors 1990-2026 (advisor: 4.71)          4.71
+   raw factors, out of sample                     4.78
+   volatility-targeted sleeves, out of sample     4.89
+   on/off exposures (held), out of sample         5.30
+   paper exposures (held), out of sample          5.21
+   mean pairwise correlation of the on/off exposures -0.02 (min -0.22, max +0.40)
+   axis 3 — usage: an allocation across six factors, not a switch on one book
+
+4.  MINIMUM DETECTABLE EFFECT — demeaned legs, alpha 0.05/8 = 0.0063, blocks 21 / 63 / 126, the largest
+
+   B1_book_onoff              primary      MDE 0.506 / 0.488 / 0.495 -> 0.506   NaN 0
+   B2_book_paper              test         MDE 0.781 / 0.809 / 0.847 -> 0.847   NaN 0
+   F_mkt_paper                test         MDE 0.542 / 0.542 / 0.542 -> 0.542   NaN 0
+   F_smb_paper                test         MDE 0.757 / 0.796 / 0.803 -> 0.803   NaN 0
+   F_hml_paper                test         MDE 0.946 / 0.997 / 1.033 -> 1.033   NaN 0
+   F_rmw_paper                test         MDE 0.782 / 0.809 / 0.830 -> 0.830   NaN 0
+   F_cma_paper                test         MDE 0.883 / 0.889 / 0.885 -> 0.889   NaN 0
+   F_umd_paper                test         MDE 0.620 / 0.633 / 0.641 -> 0.641   NaN 0
+   S1_book_onoff_fixed50      sensitivity  MDE 0.512 / 0.510 / 0.516 -> 0.516   NaN 0
+   S2_book_paper_fixed50      sensitivity  MDE 0.803 / 0.832 / 0.865 -> 0.865   NaN 0
+   S3_book_onoff_mkt_held     sensitivity  MDE 0.503 / 0.485 / 0.477 -> 0.503   NaN 0
+   S4_book_paper_mkt_held     sensitivity  MDE 0.782 / 0.811 / 0.839 -> 0.839   NaN 0
+
+====================================================================================
+B1_book_onoff  [primary]  factors mkt, smb, hml, rmw, cma, umd   1978-01-05 -> 2026-07-31, zero cost, excess of cash
+
+   arm                         Sharpe   return     vol   max DD  turnover  gross
+   alone (always held)          +1.51    +5.7%    3.8%   -14.1%       0.0   1.00
+   regime (sjm_onoff)           +1.39    +4.8%    3.4%    -6.4%       3.7   0.53
+   volmed_onoff                 +0.87    +1.9%    2.1%   -15.8%       8.1   0.29
+   vol80_onoff                  +1.49    +4.7%    3.2%    -9.2%       7.1   0.63
+   trend_onoff                  +1.53    +5.8%    3.8%    -6.9%       5.0   0.66
+
+   delta -0.126   MDE 0.506   t (scaled legs, HAC 6) -0.97   placebo pct 99.5% (median -0.454, p95 -0.250)
+   one-line rules, delta: volmed_onoff -0.646, vol80_onoff -0.021, trend_onoff +0.020
+   folds (5, descriptive): -0.34 -1.17 -0.15 +0.32 +0.10   positive 40%
+   descriptive: 2007-2024 delta +0.291; before 1990 -0.634, after -0.007; IR of (regime - alone) -0.32, 2007-2024 +0.24
+   => NOT USEFUL — the regime does not raise the Sharpe
+
+====================================================================================
+B2_book_paper  [test]  factors mkt, smb, hml, rmw, cma, umd   1978-01-05 -> 2026-07-31, zero cost, excess of cash
+
+   arm                         Sharpe   return     vol   max DD  turnover  gross
+   alone (always held)          +1.51    +5.7%    3.8%   -14.1%       0.0   1.00
+   regime (sjm_paper)           +0.86    +4.5%    5.2%   -13.1%       7.3   0.97
+   volmed_paper                 +1.13    +4.2%    3.7%   -15.0%       4.5   0.80
+   vol80_paper                  +0.86    +3.4%    3.9%   -21.3%       6.6   0.81
+   trend_paper                  +1.13    +6.1%    5.4%   -14.2%       9.3   0.98
+   static_paper                 +1.31    +4.8%    3.7%   -13.6%       0.1   0.81
+
+   delta -0.652   MDE 0.847   t (scaled legs, HAC 6) -3.29   placebo pct 100.0% (median -1.230, p95 -0.960)
+   one-line rules, delta: volmed_paper -0.384, vol80_paper -0.649, trend_paper -0.387, static_paper -0.206
+   folds (5, descriptive): -1.33 -2.17 -0.42 +0.08 -0.10   positive 20%
+   descriptive: 2007-2024 delta +0.134; before 1990 -1.597, after -0.393; IR of (regime - alone) -0.21, 2007-2024 +0.19
+   => NOT USEFUL — the regime does not raise the Sharpe
+
+====================================================================================
+F_mkt_paper  [test]  factors mkt   1978-01-05 -> 2026-07-31, zero cost, excess of cash
+
+   arm                         Sharpe   return     vol   max DD  turnover  gross
+   alone (always held)          +0.58    +6.2%   10.7%   -33.1%       0.0   1.00
+   regime (sjm_paper)           +0.31    +3.3%   10.7%   -58.9%       4.0   1.00
+   volmed_paper                 +0.39    +3.3%    8.5%   -29.7%       5.9   0.72
+   vol80_paper                  +0.29    +2.7%    9.3%   -49.8%       6.4   0.82
+   trend_paper                  +0.42    +4.5%   10.7%   -32.2%       7.3   1.00
+   static_paper                 +0.48    +4.4%    9.1%   -33.1%       0.1   0.77
+
+   delta -0.270   MDE 0.542   t (scaled legs, HAC 6) -1.81   placebo pct 57.2% (median -0.296, p95 -0.093)
+   one-line rules, delta: volmed_paper -0.191, vol80_paper -0.288, trend_paper -0.157, static_paper -0.099
+   folds (5, descriptive): -0.58 -0.79 +0.32 +0.22 -0.49   positive 40%
+   descriptive: 2007-2024 delta -0.090; before 1990 -0.662, after -0.139; IR of (regime - alone) -0.27, 2007-2024 -0.11
+   => NOT USEFUL — the regime does not raise the Sharpe
+
+====================================================================================
+F_smb_paper  [test]  factors smb   1978-01-05 -> 2026-07-31, zero cost, excess of cash
+
+   arm                         Sharpe   return     vol   max DD  turnover  gross
+   alone (always held)          +0.06    +0.7%   10.6%   -72.6%       0.0   1.00
+   regime (sjm_paper)           +0.39    +4.0%   10.5%   -58.7%       6.9   0.99
+   volmed_paper                 -0.11    -0.8%    7.8%   -59.7%       5.4   0.66
+   vol80_paper                  -0.12    -1.1%    8.9%   -75.2%      13.3   0.79
+   trend_paper                  +0.38    +4.0%   10.5%   -55.9%      13.1   0.99
+   static_paper                 -0.00    -0.0%    7.5%   -57.6%       0.3   0.64
+
+   delta +0.324   MDE 0.803   t (scaled legs, HAC 6) +1.56   placebo pct 98.2% (median -0.074, p95 +0.213)
+   one-line rules, delta: volmed_paper -0.166, vol80_paper -0.185, trend_paper +0.315, static_paper -0.066
+   folds (5, descriptive): +0.62 +1.21 +0.06 -0.50 +0.13   positive 80%
+   descriptive: 2007-2024 delta -0.090; before 1990 +0.715, after +0.186; IR of (regime - alone) +0.22, 2007-2024 -0.06
+   => UNDERPOWERED — positive, below the MDE, never useful
+
+====================================================================================
+F_hml_paper  [test]  factors hml   1978-01-05 -> 2026-07-31, zero cost, excess of cash
+
+   arm                         Sharpe   return     vol   max DD  turnover  gross
+   alone (always held)          +0.28    +3.0%   10.6%   -67.9%       0.0   1.00
+   regime (sjm_paper)           +0.56    +5.9%   10.6%   -44.3%       9.0   1.00
+   volmed_paper                 +0.20    +1.9%    9.1%   -57.5%       4.8   0.80
+   vol80_paper                  +0.17    +1.6%    9.0%   -53.5%       5.6   0.78
+   trend_paper                  +0.62    +6.6%   10.6%   -38.1%       9.6   1.00
+   static_paper                 +0.27    +2.5%    9.3%   -47.8%       0.2   0.84
+
+   delta +0.278   MDE 1.033   t (scaled legs, HAC 6) +1.16   placebo pct 99.2% (median -0.337, p95 +0.128)
+   one-line rules, delta: volmed_paper -0.075, vol80_paper -0.104, trend_paper +0.346, static_paper -0.011
+   folds (5, descriptive): +0.61 -0.43 -0.12 +1.09 +0.23   positive 60%
+   descriptive: 2007-2024 delta +0.962; before 1990 +0.382, after +0.244; IR of (regime - alone) +0.19, 2007-2024 +0.60
+   => UNDERPOWERED — positive, below the MDE, never useful
+
+====================================================================================
+F_rmw_paper  [test]  factors rmw   1978-01-05 -> 2026-07-31, zero cost, excess of cash
+
+   arm                         Sharpe   return     vol   max DD  turnover  gross
+   alone (always held)          +0.75    +7.6%   10.1%   -47.5%       0.0   1.00
+   regime (sjm_paper)           +0.57    +5.5%    9.6%   -47.5%       8.9   0.91
+   volmed_paper                 +0.59    +5.5%    9.3%   -47.5%       4.1   0.89
+   vol80_paper                  +0.32    +2.6%    8.3%   -47.7%       4.2   0.74
+   trend_paper                  +0.66    +6.7%   10.1%   -49.9%      10.7   0.99
+   static_paper                 +0.59    +5.2%    8.7%   -47.5%       0.2   0.81
+
+   delta -0.172   MDE 0.830   t (scaled legs, HAC 6) -0.86   placebo pct 98.8% (median -0.616, p95 -0.286)
+   one-line rules, delta: volmed_paper -0.153, vol80_paper -0.428, trend_paper -0.082, static_paper -0.154
+   folds (5, descriptive): -0.86 -0.49 +0.75 -0.07 -0.45   positive 20%
+   descriptive: 2007-2024 delta -0.323; before 1990 -0.852, after +0.036; IR of (regime - alone) -0.17, 2007-2024 -0.28
+   => NOT USEFUL — the regime does not raise the Sharpe
+
+====================================================================================
+F_cma_paper  [test]  factors cma   1978-01-05 -> 2026-07-31, zero cost, excess of cash
+
+   arm                         Sharpe   return     vol   max DD  turnover  gross
+   alone (always held)          +0.44    +4.5%   10.3%   -53.3%       0.0   1.00
+   regime (sjm_paper)           +0.45    +4.4%    9.9%   -45.4%       7.3   0.94
+   volmed_paper                 +0.46    +4.0%    8.7%   -32.9%       6.0   0.79
+   vol80_paper                  +0.40    +3.4%    8.6%   -54.9%       2.5   0.79
+   trend_paper                  +0.54    +5.5%   10.1%   -26.8%       9.2   0.98
+   static_paper                 +0.53    +4.8%    9.1%   -37.1%       0.1   0.82
+
+   delta +0.010   MDE 0.889   t (scaled legs, HAC 6) +0.04   placebo pct 100.0% (median -0.499, p95 -0.182)
+   one-line rules, delta: volmed_paper +0.025, vol80_paper -0.042, trend_paper +0.104, static_paper +0.089
+   folds (5, descriptive): -0.14 -0.84 +0.01 +0.39 +0.64   positive 60%
+   descriptive: 2007-2024 delta +0.646; before 1990 -0.622, after +0.216; IR of (regime - alone) -0.01, 2007-2024 +0.40
+   => UNDERPOWERED — positive, below the MDE, never useful
+
+====================================================================================
+F_umd_paper  [test]  factors umd   1978-01-05 -> 2026-07-31, zero cost, excess of cash
+
+   arm                         Sharpe   return     vol   max DD  turnover  gross
+   alone (always held)          +1.15   +12.4%   10.8%   -26.3%       0.0   1.00
+   regime (sjm_paper)           +0.36    +3.9%   10.7%   -57.6%       8.0   0.99
+   volmed_paper                 +1.13   +11.5%   10.1%   -26.3%       0.7   0.93
+   vol80_paper                  +1.10   +11.2%   10.2%   -26.2%       7.9   0.92
+   trend_paper                  +0.89    +9.1%   10.1%   -27.6%       5.7   0.90
+   static_paper                 +1.16   +12.3%   10.7%   -26.3%       0.0   0.99
+
+   delta -0.788   MDE 0.641   t (scaled legs, HAC 6) -4.58   placebo pct 33.2% (median -0.704, p95 -0.393)
+   one-line rules, delta: volmed_paper -0.020, vol80_paper -0.048, trend_paper -0.259, static_paper +0.004
+   folds (5, descriptive): -0.94 -1.29 -0.96 -0.53 -0.22   positive 0%
+   descriptive: 2007-2024 delta -0.427; before 1990 -0.943, after -0.737; IR of (regime - alone) -0.80, 2007-2024 -0.58
+   => NOT USEFUL — negative beyond the MDE, not confirmed by the t or the placebo
+
+====================================================================================
+S1_book_onoff_fixed50  [sensitivity]  factors mkt, smb, hml, rmw, cma, umd   1978-01-05 -> 2026-07-31, zero cost, excess of cash
+
+   arm                         Sharpe   return     vol   max DD  turnover  gross
+   alone (always held)          +1.51    +5.7%    3.8%   -14.1%       0.0   1.00
+   regime (fixed_onoff)         +1.36    +4.9%    3.6%    -6.3%       3.0   0.52
+   volmed_onoff                 +0.87    +1.9%    2.1%   -15.8%       8.1   0.29
+   vol80_onoff                  +1.49    +4.7%    3.2%    -9.2%       7.1   0.63
+   trend_onoff                  +1.53    +5.8%    3.8%    -6.9%       5.0   0.66
+
+   delta -0.150   MDE 0.516   t (scaled legs, HAC 6) -1.13   placebo pct 98.2% (median -0.475, p95 -0.217)
+   one-line rules, delta: volmed_onoff -0.646, vol80_onoff -0.021, trend_onoff +0.020
+   folds (5, descriptive): -0.49 -0.97 -0.18 +0.16 +0.16   positive 40%
+   descriptive: 2007-2024 delta +0.268; before 1990 -0.681, after -0.014; IR of (regime - alone) -0.27, 2007-2024 +0.22
+   => SENSITIVITY, never deciding — NOT USEFUL — the regime does not raise the Sharpe
+
+====================================================================================
+S2_book_paper_fixed50  [sensitivity]  factors mkt, smb, hml, rmw, cma, umd   1978-01-05 -> 2026-07-31, zero cost, excess of cash
+
+   arm                         Sharpe   return     vol   max DD  turnover  gross
+   alone (always held)          +1.51    +5.7%    3.8%   -14.1%       0.0   1.00
+   regime (fixed_paper)         +0.79    +4.3%    5.5%   -13.6%       5.9   0.99
+   volmed_paper                 +1.13    +4.2%    3.7%   -15.0%       4.5   0.80
+   vol80_paper                  +0.86    +3.4%    3.9%   -21.3%       6.6   0.81
+   trend_paper                  +1.13    +6.1%    5.4%   -14.2%       9.3   0.98
+   static_paper                 +1.31    +4.8%    3.7%   -13.6%       0.1   0.81
+
+   delta -0.728   MDE 0.865   t (scaled legs, HAC 6) -3.56   placebo pct 100.0% (median -1.384, p95 -1.074)
+   one-line rules, delta: volmed_paper -0.384, vol80_paper -0.649, trend_paper -0.387, static_paper -0.206
+   folds (5, descriptive): -1.63 -2.16 -0.60 +0.06 +0.03   positive 40%
+   descriptive: 2007-2024 delta +0.200; before 1990 -1.825, after -0.418; IR of (regime - alone) -0.23, 2007-2024 +0.25
+   => SENSITIVITY, never deciding — NOT USEFUL — the regime does not raise the Sharpe
+
+====================================================================================
+S3_book_onoff_mkt_held  [sensitivity]  factors mkt, smb, hml, rmw, cma, umd   1978-01-05 -> 2026-07-31, zero cost, excess of cash
+
+   arm                         Sharpe   return     vol   max DD  turnover  gross
+   alone (always held)          +1.51    +5.7%    3.8%   -14.1%       0.0   1.00
+   regime (sjm_onoff_mkt_held)   +1.52    +5.0%    3.3%    -6.0%       3.4   0.57
+   volmed_onoff                 +1.00    +2.6%    2.6%   -11.2%       6.3   0.40
+   vol80_onoff                  +1.51    +5.0%    3.3%    -9.9%       5.9   0.68
+   trend_onoff                  +1.64    +6.0%    3.6%    -6.6%       4.4   0.70
+
+   delta +0.004   MDE 0.503   t (scaled legs, HAC 6) +0.03   placebo pct 100.0% (median -0.381, p95 -0.178)
+   one-line rules, delta: volmed_onoff -0.511, vol80_onoff -0.005, trend_onoff +0.128
+   folds (5, descriptive): -0.00 -0.89 -0.13 +0.27 +0.25   positive 40%
+   descriptive: 2007-2024 delta +0.329; before 1990 -0.295, after +0.067; IR of (regime - alone) -0.24, 2007-2024 +0.27
+   => SENSITIVITY, never deciding — UNDERPOWERED — positive, below the MDE, never useful
+
+====================================================================================
+S4_book_paper_mkt_held  [sensitivity]  factors mkt, smb, hml, rmw, cma, umd   1978-01-05 -> 2026-07-31, zero cost, excess of cash
+
+   arm                         Sharpe   return     vol   max DD  turnover  gross
+   alone (always held)          +1.51    +5.7%    3.8%   -14.1%       0.0   1.00
+   regime (sjm_paper_mkt_held)   +1.00    +5.0%    5.0%   -10.7%       6.7   0.97
+   volmed_paper                 +1.28    +4.7%    3.7%   -14.6%       3.5   0.84
+   vol80_paper                  +1.05    +4.0%    3.8%   -18.8%       5.6   0.84
+   trend_paper                  +1.25    +6.3%    5.0%   -12.3%       8.1   0.98
+   static_paper                 +1.41    +5.1%    3.7%   -13.6%       0.1   0.85
+
+   delta -0.514   MDE 0.839   t (scaled legs, HAC 6) -2.55   placebo pct 100.0% (median -1.111, p95 -0.829)
+   one-line rules, delta: volmed_paper -0.233, vol80_paper -0.466, trend_paper -0.258, static_paper -0.104
+   folds (5, descriptive): -1.02 -1.88 -0.42 +0.03 +0.09   positive 40%
+   descriptive: 2007-2024 delta +0.191; before 1990 -1.282, after -0.309; IR of (regime - alone) -0.13, 2007-2024 +0.22
+   => SENSITIVITY, never deciding — NOT USEFUL — the regime does not raise the Sharpe
+
+====================================================================================
+REPLICATION — the paper's single-factor long-short strategy, raw factor, no volatility target,
+zero cost, 2007-01-03 -> 2024-06-28 (17.5 years)
+
+   factor    ours      t   paper  shifts ours  paper  long always  full OOS   verdict
+   mkt      +0.37  +1.51       —         1.26      —        +0.52     +0.25   no counterpart in the paper (descriptive)
+   smb      -0.29  -1.19    0.20         3.26   2.57        -0.06     +0.24   SIGN NOT REPRODUCED, NOT compatible with 0.20 (Size)
+   hml      +0.32  +1.30    0.39         4.81   3.16        -0.15     +0.37   SIGN REPRODUCED, compatible with 0.39 (Value)
+   rmw      +0.19  +0.80    0.21         4.12   0.64        +0.57     +0.40   SIGN REPRODUCED, compatible with 0.21 (Quality)
+   cma      +0.50  +1.96       —         2.98      —        -0.01     +0.41   no counterpart in the paper (descriptive)
+   umd      -0.21  -0.85    0.16         2.35   3.66        +0.07     +0.05   SIGN NOT REPRODUCED, compatible with 0.16 (Momentum)
+
+   overall, the four factors with a counterpart: PARTIALLY REPRODUCED in sign (2 of 4)
+   pairwise correlation of the six strategies, 2007-2024: mean +0.13, min +0.05, max +0.35 (paper: 0.05 to 0.48)
+
+   logged (502 distinct configurations in the register)
+====================================================================================
