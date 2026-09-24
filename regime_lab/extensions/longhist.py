@@ -25,6 +25,7 @@ import numpy as np
 import pandas as pd
 from sklearn.metrics import cohen_kappa_score
 
+from regime_lab.analysis.bootstrap import stationary_indices
 from regime_lab.data import store
 from regime_lab.features import asymmetry, market
 from regime_lab.features.standardise import expanding_zscore, winsorise
@@ -433,11 +434,11 @@ def kappa_difference_ci(
     seed: int = 0,
     level: float = 0.95,
 ) -> dict[str, float]:
-    """Moving-block bootstrap of kappa_NBER(a) - kappa_NBER(b), paired by session.
+    """Stationary block bootstrap of kappa_NBER(a) - kappa_NBER(b), paired by session.
 
-    Blocks of ``block`` consecutive sessions are drawn with replacement until the
-    sample length is reached; the same draw serves both labels, so the interval is
-    that of the paired difference.
+    The programme's bootstrap (`analysis.bootstrap.stationary_indices`), mean block
+    ``block`` sessions; the same index path serves both labels and the reference, so
+    the interval is that of the paired difference.
     """
     frame = pd.concat([a.rename("a"), b.rename("b"), reference.rename("r")], axis=1).dropna()
     n = len(frame)
@@ -454,11 +455,9 @@ def kappa_difference_ci(
 
     delta = k(ra, rr) - k(rb, rr)
     rng = np.random.default_rng(seed)
-    starts_count = int(np.ceil(n / block))
     out = np.empty(draws)
     for i in range(draws):
-        starts = rng.integers(0, n - block + 1, size=starts_count)
-        idx = (starts[:, None] + np.arange(block)[None, :]).ravel()[:n]
+        idx = stationary_indices(n, block, rng)
         out[i] = k(ra[idx], rr[idx]) - k(rb[idx], rr[idx])
     tail = (1.0 - level) / 2.0
     return {"delta": float(delta), "low": float(np.nanquantile(out, tail)),
