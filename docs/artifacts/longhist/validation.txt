@@ -1,0 +1,167 @@
+==============================================================================
+LONGHIST PHASE A — the reduced SJM as a classifier, 1937-2026, no return read
+==============================================================================
+
+0.  INPUTS (SHA-256)
+
+   87f4d694a996e411  raw/longhist/ff3_daily.parquet
+   cd0f4aca1f918e7b  raw/longhist/usrec.parquet
+   94ac5b93d78bccdb  cache/longhist_states.parquet
+   0493d064901f2d3a  cache/longhist_refits.parquet
+   0622c72fa75115cb  cache/states.parquet
+
+   out of sample 1937-01-02 -> 2026-07-31, 23,171 sessions; 14 NBER recessions, 3,141 recession sessions (13.6%)
+   missing values per label: {'SJM long': 0, 'asymmetric exit k=10': 0, 'asymmetric exit k=5': 0, 'median rule': 0, '80th rule': 0, 'DM panic': 0, 'bear 24m': 0}
+
+==============================================================================
+1.  EVERY LABEL AGAINST NBER (stress = recession), whole window
+
+   label                   bal.acc  kappa  recall  precis.  detected  latency  tr/yr  stress
+   SJM long                  57.5%   0.16   25.2%    27.9%    6/14       -81d   2.05   12.2%
+   asymmetric exit k=10      55.7%   0.14   18.1%    29.6%    6/14       -81d   1.96    8.3%
+   asymmetric exit k=5       54.9%   0.12   15.7%    29.3%    6/14       -81d   2.05    7.3%
+   median rule               61.8%   0.11   67.9%    19.4%   11/14      -181d   8.85   47.5%
+   80th rule                 60.4%   0.19   34.0%    28.8%    9/14      -151d   3.55   16.0%
+   DM panic                  64.6%   0.31   36.5%    43.9%    6/14        28d   1.74   11.3%
+   bear 24m                  62.8%   0.24   37.5%    33.1%    6/14        28d   2.26   15.3%
+
+   latency: median over detected recessions of (first stress session in
+   [first recession month - 183 days, trough]) - first day of the first
+   recession month, calendar days; negative = ahead of the NBER month
+
+==============================================================================
+2.  PASS-A (§5.2) — the long SJM
+
+   balanced accuracy >= 85%                0.575   NO
+   kappa >= 0.40                           0.156   NO
+   recessions detected >= 12 of 14             6   NO
+
+   => FAIL-A — missing: balanced accuracy >= 85%; kappa >= 0.40; recessions detected >= 12 of 14
+
+==============================================================================
+3.  A2 — kappa against NBER, long SJM minus a one-line rule, paired
+    stationary block bootstrap, mean block 252, 2000 draws, 95% interval
+
+   vs 80th rule              delta kappa -0.037  [-0.123, +0.034]  => INDISTINGUISHABLE  (decides A2)
+   vs median rule            delta kappa +0.042  [-0.087, +0.167]  => INDISTINGUISHABLE  (reported)
+   vs DM panic               delta kappa -0.158  [-0.364, +0.029]  => INDISTINGUISHABLE  (reported)
+   vs asymmetric exit k=10   delta kappa +0.021  [-0.027, +0.073]  => INDISTINGUISHABLE  (reported)
+
+==============================================================================
+4.  RECESSION BY RECESSION — stress sessions inside / sessions, latency
+
+   first month  last month               SJM long    asymmetric exit k=             80th rule              DM panic
+   1937-06      1938-06          0/326          -       0/326          -     108/326  *   +105d     197/326  *   +139d  
+   1945-03      1945-10          0/191          -       0/191          -       0/191          -       0/191          -  
+   1948-12      1949-10          0/260          -       0/260          -       0/260       -22d       0/260          -  
+   1953-08      1954-05          0/206          -       0/206          -       0/206          -       0/206          -  
+   1957-09      1958-04          0/167          -       0/167          -      19/167       +52d      68/167  *    +72d  
+   1960-05      1961-02          0/209          -       0/209          -       0/209          -       0/209          -  
+   1970-01      1970-11         20/232      +155d      20/232      +155d      42/232  *   -153d     167/232  *    -15d  
+   1973-12      1975-03        107/334  *   +317d      37/334  *   +317d     192/334  *   -183d     334/334  *   -180d  
+   1980-02      1980-07          0/126          -       0/126          -      35/126  *   -114d       0/126          -  
+   1981-08      1982-11         71/337  *   +382d      66/337  *   +382d      83/337  *    +58d      14/337      +362d  
+   1990-08      1991-03         90/167  *   -183d      74/167  *   -183d      80/167  *     +7d       0/167          -  
+   2001-04      2001-11        122/166  *   -178d      89/166  *   -178d     121/166  *   -172d     154/166  *    -20d  
+   2008-01      2009-06        337/377  *   -159d     241/377  *   -159d     345/377  *   -151d     200/377  *   +252d  
+   2020-03      2020-04         43/43   *     -3d      42/43   *     -3d      43/43   *   -180d      13/43        +11d  
+
+   * = detected (at least 21 stress sessions inside the NBER months)
+
+==============================================================================
+5.  FIVE CONSECUTIVE FOLDS, descriptive (NBER balanced accuracy / kappa)
+
+   fold                      rec. share              SJM long    asymmetric exit k=             80th rule              DM panic
+   1: 1937-01 -> 1952-12         16.8%        nan% /   nan        nan% /   nan       54.8% /  0.13       58.6% /  0.20
+   2: 1952-12 -> 1971-06         17.6%       51.1% /  0.04       51.1% /  0.04       52.5% /  0.07       63.7% /  0.37
+   3: 1971-06 -> 1989-10         17.2%       59.1% /  0.24       55.5% /  0.16       65.2% /  0.33       69.6% /  0.45
+   4: 1989-10 -> 2008-02          8.0%       71.5% /  0.20       67.5% /  0.21       70.6% /  0.20       65.2% /  0.23
+   5: 2008-02 -> 2026-07          8.2%       85.0% /  0.36       76.7% /  0.36       83.5% /  0.30       72.7% /  0.34
+
+==============================================================================
+6.  AGREEMENT BETWEEN LABELS (kappa), THE AXIS-1 GATE, AXIS 2
+
+                             SJM long asymmetric  asymmetric  median rule   80th rule    DM panic    bear 24m
+   SJM long                         -       +0.79       +0.72       +0.23       +0.58       +0.21       +0.14
+   asymmetric exit k=10         +0.79           -       +0.93       +0.17       +0.50       +0.14       +0.09
+   asymmetric exit k=5          +0.72       +0.93           -       +0.15       +0.47       +0.13       +0.07
+   median rule                  +0.23       +0.17       +0.15           -       +0.35       +0.19       +0.14
+   80th rule                    +0.58       +0.50       +0.47       +0.35           -       +0.27       +0.20
+   DM panic                     +0.21       +0.14       +0.13       +0.19       +0.27           -       +0.82
+   bear 24m                     +0.14       +0.09       +0.07       +0.14       +0.20       +0.82           -
+
+   axis 1: kappa(SJM long, bear) +0.145 - kappa(80th rule, bear) +0.195 = -0.051  (gate 0.10)
+   => BELOW THE GATE — Phase B is declared a seventh device before it is read; the written prediction for B3 becomes: not useful
+   same measure for the asymmetric exit k=10: -0.109
+   axis 2: the long SJM changes state 2.05 times a year (above ~2); the asymmetric exit k=10 1.96, k=5 2.05
+
+==============================================================================
+7.  THE 50-FEATURE A' ON THE COMMON PERIOD, 2002-04-01 -> 2026-07-31 (§5.3)
+
+   label                   bal.acc  kappa  recall  precis.  detected  latency  tr/yr  stress
+   A' (50 features)          93.2%   0.53   96.4%    41.4%    2/2        -14d   0.53   16.0%
+   SJM long (30)             85.4%   0.32   90.5%    25.3%    2/2        -81d   2.63   24.5%
+   asymmetric exit k=10      77.0%   0.32   67.4%    26.9%    2/2        -81d   2.96   17.2%
+   80th rule                 84.1%   0.27   92.4%    22.0%    2/2       -166d   4.77   28.8%
+
+   kappa(A', SJM long) on the common period: +0.448; 6,124 sessions, 2 recessions — descriptive, decides nothing
+   A' is taken as known at each session: its last state stamped at or before it
+
+==============================================================================
+8.  THE MODEL — penalty path and feature weights (training windows only)
+
+   180 refits; penalty at each change: 1936-12 30, 1938-12 1, 1942-12 3, 1944-12 30, 1950-12 3, 1954-12 1, 1956-12 3, 1958-12 1, 1964-12 20, 1976-12 1, 1978-12 20, 1980-12 1, 1982-12 20, 1984-12 1, 2004-12 10, 2006-12 1, 2008-12 3, 2010-12 1, 2016-12 3, 2018-12 1, 2020-12 3
+   penalty counts: 1: 92, 3: 36, 10: 4, 20: 32, 30: 16
+
+   feature                   mean weight  share of refits > 0
+   cre_quality                     0.576                 100%
+   vol_rv_63                       0.560                 100%
+   asy_drawdown_252                0.534                 100%
+   xs_dispersion_szbm              0.510                 100%
+   vol_rv_21                       0.499                 100%
+   xs_dispersion_ind               0.485                 100%
+   xs_breadth_63                   0.423                 100%
+   vol_rv_5                        0.389                 100%
+   vol_of_vol                      0.375                 100%
+   xs_avg_corr                     0.351                 100%
+   mom_eq_252                      0.339                 100%
+   xs_absorption                   0.272                 100%
+   mom_eq_63                       0.270                 100%
+   rat_slope_term                  0.186                  90%
+   cre_quality_chg63               0.171                  76%
+   asy_skew_63                     0.155                  76%
+   vol_semi_ratio                  0.140                  65%
+   mom_eq_21                       0.115                  62%
+   xs_absorption_chg               0.091                  61%
+   xs_ff_smb_63                    0.080                  28%
+   rat_cash_chg12m                 0.075                  71%
+   vol_jump_share                  0.056                  63%
+   mom_eq_accel                    0.054                  28%
+   asy_hurst                       0.051                  61%
+   asy_kurt_63                     0.027                  32%
+   asy_vr_20                       0.027                  38%
+   vol_term                        0.019                  26%
+   asy_vr_5                        0.012                  32%
+   rat_slope_term_chg63            0.011                  33%
+   xs_ff_hml_63                    0.006                  26%
+
+==============================================================================
+9.  SENSITIVITY — the same model with INDPRO (revised, partly circular)
+
+   not run (no longhist_states_indpro.parquet)
+
+==============================================================================
+10. DESCRIPTIVE, ADDED AFTER SECTIONS 1-9 WERE SEEN — where the stress state
+    lives. No verdict changes; this checks a cause instead of asserting it.
+
+   out-of-sample stress share by decade:
+   1930s  0.0%  1940s  0.0%  1950s  0.0%  1960s  0.3%  1970s  5.0%  1980s  9.1%  1990s 27.9%  2000s 37.3%  2010s 14.2%  2020s 28.0%
+   first stress run of at least 21 sessions starts 1974-10-14
+
+   refit 1936-12-31 (penalty 30), training 1928 -> 1936: stress on 36.2% of training sessions; market vol in stress 34.2%, in calm 25.0%
+   training years with more than 5% stress sessions: 1928 34%, 1929 32%, 1930 92%, 1931 100%, 1932 66%
+
+   refit 1969-12-31 (penalty 20), training 1928 -> 1969: stress on 14.7% of training sessions; market vol in stress 34.6%, in calm 12.8%
+   training years with more than 5% stress sessions: 1928 46%, 1929 100%, 1930 94%, 1931 100%, 1932 100%, 1933 97%, 1937 19%, 1938 26%
+
+==============================================================================
