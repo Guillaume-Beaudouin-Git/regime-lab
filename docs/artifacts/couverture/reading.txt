@@ -1,0 +1,138 @@
+==============================================================================
+WHICH HEDGE, NOT ONLY WHEN — THE STOCK-BOND CORRELATION REGIME — INSTRUMENT
+==============================================================================
+
+0.  INPUTS (SHA-256)
+
+   570bb4c9f31732e0  raw/prices/cross_asset.parquet
+   690046e548a434c2  raw/panels/factors_5.parquet
+   700f606051109195  cache/trend_universe_m1.parquet
+   87e2d3b7c7912a48  raw/macro/rate_cash_3m.parquet
+   0622c72fa75115cb  cache/states.parquet
+
+==============================================================================
+1.  THE LABEL — a property of the label, no return, no variance read
+
+   ^GSPC sessions 9,238; of which without a 10-year yield (bond holidays) 31
+   correlation defined on 9,113 sessions (1990-04-04 -> 2026-09-08); the advisor's align-then-roll construction kept 7,710
+   positive share: level 40.3%, label 40.5%
+   transitions per year: raw sign 3.46, label (hysteresis 21) 0.93
+   label share positive, by year:
+     1990:100% 1991:100% 1992:100% 1993:100% 1994:100% 1995:100% 1996:100% 1997:94% 1998:25% 1999:67%
+     2000:35% 2001:0% 2002:0% 2003:16% 2004:30% 2005:67% 2006:65% 2007:34% 2008:0% 2009:0%
+     2010:0% 2011:0% 2012:0% 2013:40% 2014:11% 2015:12% 2016:13% 2017:0% 2018:0% 2019:0%
+     2020:0% 2021:38% 2022:48% 2023:62% 2024:70% 2025:25% 2026:85%
+
+==============================================================================
+2.  THE OPPOSABLE RULE — the four axes, measured before any reading
+
+   axis 1, the latent (Spearman, 1990-2026, same session):
+     rho    with ^GSPC RV21 -0.27   with the VIX -0.23
+     label  with ^GSPC RV21 -0.23   with the VIX -0.23
+     A' state with ^GSPC RV21 -0.49   with the VIX -0.53   (2002-2026, 1 = calm)
+   agreement of the lagged label with each selector, Cohen's kappa on the hedge window (2002-10-28 -> 2026-07-31;
+   every label oriented 1 -> gold, 0 -> bonds; the sparse jump state 1 = calm):
+     median  kappa +0.08   share 1: 52.3%
+     80th    kappa +0.09   share 1: 79.5%
+     vix     kappa +0.09   share 1: 58.5%
+     state   kappa +0.10   share 1: 86.1%
+   axis 2, the clock: 0.93 transitions per year (not crossed: under ~2)
+   axis 3, the usage: P chooses between two hedges; W chooses inside a stress switch; V is a forecast input
+   axis 4, the object: participation ratio of EQ, TLT, GOLD (sized, unconditional) 2.82 of 3 (not crossed)
+
+   where the label can act (label only):
+     P: sessions on gold 24.3% of 5,977; label changes in the window 27
+     W: stress sessions 832; of which on gold 1 (0.1%)
+       stress run 2002-10-28 -> 2003-05-28   146 sessions, gold    0
+       stress run 2007-11-26 -> 2007-12-13    14 sessions, gold    0
+       stress run 2008-01-15 -> 2009-09-17   423 sessions, gold    0
+       stress run 2009-10-02 -> 2009-11-11    29 sessions, gold    0
+       stress run 2020-03-12 -> 2020-08-05   102 sessions, gold    0
+       stress run 2020-10-02 -> 2021-03-22   117 sessions, gold    0
+       stress run 2021-04-05 -> 2021-04-05     1 sessions, gold    1
+
+==============================================================================
+3.  QUESTION V — design and blinded detection threshold, alpha 0.05/5 = 0.0100, |t| >= 2.58
+
+   V1_6040        1991-01-29 -> 2026-08-07  n 8,945  label positive 39.3%  NaN 0
+                  detectable coefficient 0.170 log points, incremental R2 0.72 pt (80 % power); out of sample from 2001-01-19
+   V2_equal_risk  1991-01-29 -> 2026-08-07  n 8,945  label positive 39.3%  NaN 0
+                  detectable coefficient 0.176 log points, incremental R2 1.40 pt (80 % power); out of sample from 2001-01-19
+
+==============================================================================
+4.  QUESTION S — sample and blinded MDE, demeaned legs, alpha 0.05/5
+
+   2002-10-28 -> 2026-07-31, 5,977 sessions, not ready inside the window: 0
+   EQ    weight p50 0.74  p95 1.24  at cap 0.0%
+   TLT   weight p50 0.80  p95 1.31  at cap 0.0%
+   GOLD  weight p50 0.66  p95 1.02  at cap 0.0%
+   P_TLT   MDE 0.356 / 0.345 / 0.333  ->  threshold 0.356
+   P_GOLD  MDE 0.549 / 0.568 / 0.577  ->  threshold 0.577
+   P_MIX   MDE 0.359 / 0.361 / 0.356  ->  threshold 0.361
+
+==============================================================================
+QUESTION V — does the correlation regime forecast a stock-bond portfolio's risk beyond volatility and the VIX?
+
+   V1_6040 — frozen 60/40, n 8,945, R2 base 53.7%
+     label: coef +0.192  t HAC21 +3.88  incremental R2 0.94 pt  (detectable 0.72 pt)  placebo pct 92.8% (p95 1.05 pt)
+     out of sample (6,425 rows): R2 gain +2.21 pt  Clark-West t +3.28
+     + 63-session variance in the base: coef +0.193  t +3.91  incremental 0.95 pt  OOS gain +2.26 pt  -> beyond it: yes
+     sensitivity, every 21st session, HAC 6: coef +0.185  t +3.02  n 426
+     descriptive, the continuous correlation instead of the label: coef +0.290  t +4.43  incremental 1.23 pt
+     2002-2026 (6,129 rows): A' state beyond the same base 0.08 pt (t -0.88); label 0.39 pt (t +2.20); label beyond base + state 0.47 pt (t +2.41)
+     => NOT SHOWN — significant, fails the placebo or the out-of-sample gain
+   V2_equal_risk — equal-risk stock-bond, n 8,945, R2 base 31.8%
+     label: coef +0.284  t HAC21 +5.50  incremental R2 3.10 pt  (detectable 1.40 pt)  placebo pct 95.0% (p95 3.05 pt)
+     out of sample (6,425 rows): R2 gain +5.48 pt  Clark-West t +4.81
+     + 63-session variance in the base: coef +0.317  t +5.30  incremental 2.99 pt  OOS gain +4.37 pt  -> beyond it: yes
+     sensitivity, every 21st session, HAC 6: coef +0.272  t +4.33  n 426
+     descriptive, the continuous correlation instead of the label: coef +0.559  t +6.82  incremental 5.49 pt
+     2002-2026 (6,129 rows): A' state beyond the same base 0.05 pt (t +0.47); label 1.34 pt (t +3.03); label beyond base + state 1.31 pt (t +3.04)
+     => PREDICTS — beyond volatility and the VIX, in and out of sample
+
+==============================================================================
+QUESTION S — 2002-10-28 -> 2026-07-31, zero cost, excess of cash
+
+   arm                 sharpeann_return  ann_vol   max_ddworst_month turnover      GFC    REB09    FEB18    COVID    REB20     2022
+   EQ alone             +0.64    +6.8%    10.7%   -24.9%    -9.5%      2.4   -22.9%   +20.3%   -10.0%   -17.0%   +19.2%   -13.3%
+   P corr               +0.78    +5.1%     6.6%   -16.0%    -6.6%      3.2    -3.9%    +6.3%    -7.0%    -4.2%    +7.7%   -14.4%
+   P TLT                +0.72    +4.6%     6.4%   -21.1%    -6.6%      2.4    -3.9%    +6.3%    -7.0%    -4.2%    +7.7%   -16.0%
+   P GOLD               +0.92    +7.0%     7.6%   -12.8%    -5.2%      2.3    -6.7%   +17.0%    -6.7%    -9.4%   +14.6%    -9.6%
+   P MIX                +0.95    +5.8%     6.1%   -14.1%    -5.2%      2.4    -5.2%   +11.6%    -6.9%    -6.8%   +11.2%   -12.8%
+   W corr               +0.57    +6.1%    10.7%   -24.5%    -9.5%      3.2    +0.1%    -6.3%   -10.0%   -11.3%    +1.4%   -13.3%
+   W TLT                +0.57    +6.1%    10.7%   -24.7%    -9.5%      3.2    +0.1%    -6.3%   -10.0%   -11.3%    +1.4%   -13.3%
+   W GOLD               +0.68    +7.3%    10.7%   -18.5%    -9.5%      3.1    -9.0%   +14.2%   -10.0%   -15.7%   +16.0%   -13.3%
+   W MIX                +0.64    +6.7%    10.4%   -18.0%    -9.5%      3.1    -4.2%    +3.6%   -10.0%   -13.5%    +8.6%   -13.3%
+   P median             +0.79    +5.4%     6.9%   -20.1%    -5.2%      7.4    -4.4%    +6.6%    -6.9%    -4.2%    +7.9%   -16.0%
+   P 80th               +0.93    +6.8%     7.2%   -15.7%    -5.2%      5.2    -0.1%   +11.9%    -6.7%    -4.1%   +13.5%   -13.4%
+   P vix                +0.75    +5.2%     6.9%   -16.9%    -4.9%     13.5    -2.0%    +6.3%    -6.9%    -3.2%    +7.7%   -15.1%
+   P TLT/cash ref.      +0.74    +4.4%     5.9%   -15.8%    -6.6%      2.6    -3.9%    +6.3%    -7.0%    -4.2%    +7.7%   -13.0%
+
+   each leg alone, by lagged label (descriptive; 0 = negative regime, bonds):
+     EQ    label 1 Sharpe +0.50 (+5.4%/yr, 1,454 sessions)   label 0 Sharpe +0.69 (+7.3%/yr)
+     TLT   label 1 Sharpe +0.22 (+2.3%/yr, 1,454 sessions)   label 0 Sharpe +0.24 (+2.5%/yr)
+     GOLD  label 1 Sharpe +0.60 (+6.4%/yr, 1,454 sessions)   label 0 Sharpe +0.69 (+7.5%/yr)
+
+   the advisor's draft statistic, reported, not deciding: the 15 worst months of EQ (5%)
+     P corr  mean -1.65%  std 2.48%
+     P TLT   mean -1.99%  std 2.44%
+     P GOLD  mean -2.34%  std 2.06%
+     P MIX   mean -2.16%  std 1.95%
+     variance ratio P corr / P MIX 1.623; share of rotations below it 74.0% (400 rotations; the draft asked <= 5 %)
+
+   decision:
+   P_TLT   delta +0.061  MDE 0.356  t +0.74  placebo pct 54.2% (p5 -0.123, p95 +0.179)
+           witnesses: median +0.067, 80th +0.214, VIX +0.031   change in max DD +5.1%
+           => UNDERPOWERED — positive, below the MDE, never useful
+   P_GOLD  delta -0.139  MDE 0.577  t -1.60  placebo pct 54.2% (p5 -0.323, p95 -0.021)
+           witnesses: median -0.134, 80th +0.013, VIX -0.169   change in max DD -3.3%
+           => NOT USEFUL — the coupling does not raise the Sharpe
+   P_MIX   delta -0.166  MDE 0.361  t -1.02  placebo pct 54.2% (p5 -0.350, p95 -0.048)
+           witnesses: median -0.161, 80th -0.014, VIX -0.196   change in max DD -1.9%
+           => NOT USEFUL — the coupling does not raise the Sharpe
+
+   W, reference, not a test: the label picks gold on 1 of 832 stress sessions
+     Sharpe W corr +0.57   W TLT +0.57   W GOLD +0.68   W MIX +0.64
+
+   logged to data/trials.parquet (174 distinct)
+==============================================================================
