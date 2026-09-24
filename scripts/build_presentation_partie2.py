@@ -73,6 +73,13 @@ CRYPTO_ROWS = {
     "Obligations (TLT)": (0.79, 8.6, 10.9, -27.3, -7.2, -1.6, 1.0),
     "Options": (0.71, 7.7, 10.9, -34.8, -5.7, -17.7, 1.0),
 }
+# Δ Sharpe computed before rounding (tests, or the checked recomputation for ° rows); the
+# 10-minute deck shows the same values. Order: stop, halve, switch, gold, Treasuries, options.
+DELTAS = {
+    "Momentum actions": (0.23, 0.12, None, 0.30, 0.19, 0.00),
+    "Rebond obligataire": (0.01, 0.02, -0.04, 0.04, -0.10, -0.16),
+    "Tendance crypto": (-0.24, -0.11, -0.21, -0.20, -0.34, -0.43),
+}
 STRESS_CALM = {  # Sharpe of the strategy alone, by lagged state (descriptive, haven reading)
     "Momentum actions": (-1.13, 0.75),
     "Rebond obligataire": (0.41, 0.92),
@@ -444,7 +451,7 @@ def matrix(extra: dict[str, float]) -> str:
             if v is None:
                 cells.append('<td class="num cell na">non testé</td>')
                 continue
-            d = v - base[s]
+            d = DELTAS[s][methods.index(m)]
             cls = "pos" if d >= 0.05 else ("neg" if d <= -0.05 else "flat")
             cells.append(f'<td class="num cell {cls}"><b>{fr(d, "+.2f")}</b><span class="lvl">{fr(v, ".2f")}</span></td>')
         body.append("<tr>" + "".join(cells) + "</tr>")
@@ -634,7 +641,7 @@ def build_html() -> str:
             <b>les options</b> détruisent partout sauf sur le momentum.</p>
             <p class="callout">Aucune case n'est un résultat démontré&nbsp;: les meilleures sont sous le seuil de
             détection, et une règle de volatilité fait aussi bien.</p></div>
-        </div>""", "lectures_trois_strategies.txt ; cases « Réduire » et « Basculer » recalculées ; en gras le Δ, en petit le Sharpe"))
+        </div>""", "lectures_trois_strategies.txt ; en gras le Δ, calculé avant arrondi ; en petit le Sharpe"))
 
     s.append(slide(12, "Pourquoi le filtre ne paie pas", "Le modèle alerte tard et reste en crise pendant la reprise",
         f"""<div class="two chart-left">

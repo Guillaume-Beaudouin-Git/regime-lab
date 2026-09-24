@@ -229,6 +229,13 @@ d'essais compte 84 configurations distinctes (`data/trials.parquet`).
   (le script refuse de dessiner en cas d'écart). La crypto n'apparaît qu'en chiffres
   agrégés.
 
+- **Le deck de l'oral de 10 minutes** (10 diapositives, format entreprise, notes orales
+  minutées sous chaque diapositive) existe comme présentation Claude, téléchargeable en
+  PowerPoint ou en PDF : https://claude.ai/artifact/Bpg2cRahCG2bsy3YAqbBh6 (privé, à
+  partager depuis la page). Ses chiffres sont ceux des deux PDF. Les écarts de Sharpe du
+  tableau des méthodes sont calculés avant arrondi, et identiques dans le deck et dans le
+  PDF de la partie 2.
+
 ### Le 24 septembre : les cinq pistes du conseiller, lancées en parallèle
 
 Guillaume a dit « lance tout ». Cinq études, chacune pré-enregistrée, une lecture chacune,
