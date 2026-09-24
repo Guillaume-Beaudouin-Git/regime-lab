@@ -189,8 +189,9 @@ au sens du critère).
    une baisse de risque, pas un gain de rendement. Le « meilleur cas » du programme
    était surtout un effet de 2002-2026 (+0,145 sur cette sous-période, −0,008 sur
    1937-1962).
-4. **Le générique fait mieux.** La règle publiée de Daniel et Moskowitz (marché baissier
-   × forte volatilité) coupe le momentum mieux que notre modèle (+0,106 contre +0,045).
+4. **Le générique fait au moins aussi bien.** La règle publiée de Daniel et Moskowitz
+   (marché baissier × forte volatilité) coupe le momentum mieux que notre modèle en
+   point (+0,106 contre +0,045). L'écart n'est pas testé : c'était un témoin.
 
 À ne jamais dire : « le modèle protège le momentum depuis 1937 » ; les Sharpe de 1,1 à
 1,2 comme des performances investissables (UMD à coût nul, non investissable tel quel) ;
@@ -204,9 +205,10 @@ au sens du critère).
   (Barroso et Santa-Clara 2015). C'est un socle, pas un résultat de régime. Il faudrait
   le mesurer avec un véhicule investissable (futures ou ETF factoriels) et des coûts
   institutionnels.
-- **La règle de panique de Daniel et Moskowitz** est la seule sortie qui ait amélioré à
-  la fois le Sharpe et la perte maximale. Elle mérite un pré-enregistrement propre,
-  comme hypothèse et non comme témoin. Ce serait une piste neuve, pas une
+- **La règle de panique de Daniel et Moskowitz** est la sortie qui améliore le plus le
+  Sharpe (+0,106) et la perte maximale (−37 % → −27 %). La règle du 80ᵉ centile fait
+  +0,019 et −34 %. Ce sont des chiffres de témoins, sans verdict. Elle mérite un
+  pré-enregistrement propre, comme hypothèse et non comme témoin. Ce serait une piste neuve, pas une
   modification de celle-ci.
 - **Une piste de méthode, non testée** : un état de stress défini par rapport à un
   passé récent (fenêtre glissante, ou volatilité rapportée à son niveau des dix
