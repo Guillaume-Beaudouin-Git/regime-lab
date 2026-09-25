@@ -229,10 +229,14 @@ d'essais compte 84 configurations distinctes (`data/trials.parquet`).
   (le script refuse de dessiner en cas d'écart). La crypto n'apparaît qu'en chiffres
   agrégés.
 
-- **Le deck de l'oral de 10 minutes** (10 diapositives, format entreprise, notes orales
-  minutées sous chaque diapositive) existe comme présentation Claude, téléchargeable en
-  PowerPoint ou en PDF : https://claude.ai/artifact/Bpg2cRahCG2bsy3YAqbBh6 (privé, à
-  partager depuis la page). Ses chiffres sont ceux des deux PDF. Les écarts de Sharpe du
+- **Le deck de l'oral de 10 minutes** (13 diapositives depuis le 25/09, structure fixée
+  par Guillaume : intro, données, Markov, Sparse Jump Model et ses papiers, crises, risque
+  contre direction, partie 2, stratégies, cinq méthodes avec le ratio de Sharpe, limites,
+  conclusion, ouverture ; notes orales minutées) existe en deux styles, comme présentations
+  Claude téléchargeables en PowerPoint ou en PDF (privées, à partager depuis la page) :
+  style clair https://claude.ai/artifact/Bpg2cRahCG2bsy3YAqbBh6 et style éditorial sombre
+  https://claude.ai/artifact/HhFYhrryrYGZqV1s3KqoQJ. Noms : Guillaume Beaudouin et Gabriel
+  Golivet ; date indiquée : 25 septembre 2026, à changer si l'oral a lieu un autre jour. Ses chiffres sont ceux des deux PDF. Les écarts de Sharpe du
   tableau des méthodes sont calculés avant arrondi, et identiques dans le deck et dans le
   PDF de la partie 2.
 
