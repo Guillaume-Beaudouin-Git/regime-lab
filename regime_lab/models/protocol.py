@@ -13,10 +13,11 @@ in method. Pairing the schedule is what makes the stability test mean anything.
 **Online prediction between refits.** States are produced by filtering forward,
 never by smoothing over a window that contains the future.
 
-**One feature subset, chosen on training data.** The sparse jump model selects
-features on each training window; every family then receives that same subset.
-Letting each family pick its own on the full sample would compare selections,
-not models.
+**The same features for every family, not the same subset.** The charter asked
+for one subset chosen by the sparse jump model on each training window and then
+handed to every family. That was never implemented: every family receives the
+same 50 standardised features (C' its HAR terms), and only the sparse jump model
+selects among them, inside its own fit. Declared in docs/PROTOCOL_FREEZE.md.
 """
 
 from __future__ import annotations
