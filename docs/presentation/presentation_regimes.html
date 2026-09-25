@@ -130,7 +130,7 @@ code { font: 11.5pt Menlo, monospace; background: #f1f2f4; padding: 0 0.04in; bo
 <section class="slide ">
   <div class="eyebrow">Synthèse</div>
   <h1>Le classifieur fonctionne&nbsp;; il prédit le risque, pas le sens</h1>
-  <div class="body"><div class="kpis"><div class="kpi"><div class="kv">93,2 %</div><div class="kl">des récessions officielles reconnues</div><div class="kd">exactitude équilibrée contre le NBER, sans voir le futur ; 2 récessions dans la période (2008-09, 2020)</div></div><div class="kpi"><div class="kv">+3,93 pts</div><div class="kl">d'information sur le risque futur</div><div class="kd">au-delà d'une règle de volatilité passée ; mais +0,20 seulement au-delà du VIX</div></div><div class="kpi"><div class="kv">+0,03 pt</div><div class="kl">d'information sur la direction</div><div class="kd">R² incrémental sur les rendements futurs : statistiquement nul (t = 0,27)</div></div><div class="kpi"><div class="kv">0 / 63</div><div class="kl">usages du filtre utiles</div><div class="kd">arrêt, réduction, bascule, valeurs refuges et options, sur 13 stratégies : aucune amélioration démontrée</div></div></div>
+  <div class="body"><div class="kpis"><div class="kpi"><div class="kv">93,2 %</div><div class="kl">d'exactitude face aux récessions officielles</div><div class="kd">exactitude équilibrée contre le NBER, sans voir le futur ; 2 récessions dans la période (2008-09, 2020)</div></div><div class="kpi"><div class="kv">+3,93 pts</div><div class="kl">d'information sur le risque futur</div><div class="kd">au-delà d'une règle de volatilité passée ; un test à part le ramène à +0,20 une fois le VIX ajouté</div></div><div class="kpi"><div class="kv">+0,03 pt</div><div class="kl">d'information sur la direction</div><div class="kd">R² incrémental sur les rendements futurs : statistiquement nul (t = 0,27)</div></div><div class="kpi"><div class="kv">0 / 63</div><div class="kl">usages du filtre utiles</div><div class="kd">arrêt, réduction, bascule, valeurs refuges et options, sur 13 stratégies : aucune amélioration démontrée</div></div></div>
         <ol class="msgs">
           <li><b>Il reconnaît les crises sans voir le futur</b>, mais pas avant le marché&nbsp;: au
           Covid, il bascule le 11 mars 2020, quand le VIX est déjà passé de 14 à 54.</li>
@@ -161,7 +161,7 @@ code { font: 11.5pt Menlo, monospace; background: #f1f2f4; padding: 0 0.04in; bo
           <div><b>6 377</b><span>séances hors échantillon, avril 2002 – septembre 2026</span></div>
           <div><b>49</b><span>réestimations de chaque modèle, sur le passé seul</span></div>
           <div><b>5</b><span>modèles comparés sous un protocole identique</span></div>
-          <div><b>168</b><span>configurations testées dans le programme, toutes journalisées</span></div>
+          <div><b>758</b><span>configurations testées dans le programme, toutes journalisées</span></div>
         </div></div>
   <footer><div class="src">Source : docs/CHARTER.html, docs/PROTOCOL_FREEZE.md, data/trials.parquet</div><div class="brand">Régimes de marché · Projet Big Data M2</div>
   <div class="pn">3</div></footer>
@@ -189,16 +189,16 @@ code { font: 11.5pt Menlo, monospace; background: #f1f2f4; padding: 0 0.04in; bo
           <div class="card"><h3>Couche 3 — Portefeuille</h3><p>Un portefeuille 60/40 piloté par
           l'état (tout ou rien, ou taille) fait-il mieux que le 60/40 seul&nbsp;?</p></div>
         </div>
-        <div class="note">Équité entre modèles&nbsp;: même calendrier de réestimation, même
-        sous-ensemble de variables (choisi par le Sparse Jump Model sur le passé seul), même règle
-        de position fixée d'avance, deux états ordonnés par la volatilité d'entraînement.</div></div>
+        <div class="note">Équité entre modèles&nbsp;: même calendrier de réestimation, mêmes 50
+        variables (C′&nbsp;: ses trois termes HAR), même règle de position fixée d'avance, deux
+        états ordonnés par la volatilité d'entraînement.</div></div>
   <footer><div class="src">Source : regime_lab/models/protocol.py, docs/CHARTER.html</div><div class="brand">Régimes de marché · Projet Big Data M2</div>
   <div class="pn">5</div></footer>
 </section>
 <section class="slide ">
   <div class="eyebrow">Les cinq modèles</div>
   <h1>Deux familles à états cachés, deux prédicteurs directs</h1>
-  <div class="body"><table class="wide"><thead><tr><th class="">Modèle</th><th class="">Comment ça marche</th><th class="">Réglages</th><th class="">Rôle</th></tr></thead><tbody><tr class="hl"><td class=""><b>A′ Sparse Jump Model</b></td><td class="">Regroupe les jours semblables et <b>fait payer chaque changement d'état</b>&nbsp;; sélectionne lui-même ses variables</td><td class="">2 états, pénalité λ choisie à chaque réestimation, ≈ 10 variables effectives</td><td class="">Modèle principal</td></tr><tr><td class="">A Jump model</td><td class="">Même principe, sans sélection de variables</td><td class="">2 états, λ choisie à chaque réestimation</td><td class="">Variante</td></tr><tr><td class="">B HMM gaussien</td><td class="">Chaîne de Markov cachée, lois gaussiennes par état, probabilité <b>filtrée</b></td><td class="">2 états, matrice de transition</td><td class="">Référence classique</td></tr><tr><td class="">C Gradient boosting</td><td class="">Pas d'état caché&nbsp;: prédit la volatilité à 21 jours, puis la coupe à sa médiane</td><td class="">LightGBM, seuil appris sur le passé</td><td class="">Défi du machine learning</td></tr><tr><td class="">C′ HAR-RV</td><td class="">Modèle linéaire de volatilité (1, 5, 21 jours), coupé de même</td><td class="">Régression à 3 termes</td><td class="">Référence de la littérature</td></tr></tbody></table><div class="note">C et C′ sont <b>supervisés</b>&nbsp;: ils apprennent, sur le passé,
+  <div class="body"><table class="wide"><thead><tr><th class="">Modèle</th><th class="">Comment ça marche</th><th class="">Réglages</th><th class="">Rôle</th></tr></thead><tbody><tr class="hl"><td class=""><b>A′ Sparse Jump Model</b></td><td class="">Regroupe les jours semblables et <b>fait payer chaque changement d'état</b>&nbsp;; sélectionne lui-même ses variables</td><td class="">2 états, pénalité λ recalibrée toutes les 4 réestimations, au plus 10 variables</td><td class="">Modèle principal</td></tr><tr><td class="">A Jump model</td><td class="">Même principe, sans sélection de variables</td><td class="">2 états, λ recalibrée toutes les 4 réestimations</td><td class="">Variante</td></tr><tr><td class="">B HMM gaussien</td><td class="">Chaîne de Markov cachée, lois gaussiennes par état, probabilité <b>filtrée</b></td><td class="">2 états, matrice de transition</td><td class="">Référence classique</td></tr><tr><td class="">C Gradient boosting</td><td class="">Pas d'état caché&nbsp;: prédit la volatilité à 21 jours, puis la coupe à sa médiane</td><td class="">LightGBM, seuil appris sur le passé</td><td class="">Défi du machine learning</td></tr><tr><td class="">C′ HAR-RV</td><td class="">Modèle linéaire de volatilité (1, 5, 21 jours), coupé de même</td><td class="">Régression à 3 termes</td><td class="">Référence de la littérature</td></tr></tbody></table><div class="note">C et C′ sont <b>supervisés</b>&nbsp;: ils apprennent, sur le passé,
         à prédire directement la volatilité future. A, A′ et B ne voient jamais cette cible. Les
         premiers sont donc avantagés sur la prévision de volatilité&nbsp;: c'est voulu, pour
         vérifier si la notion d'«&nbsp;état caché&nbsp;» apporte quelque chose.</div></div>
@@ -214,7 +214,7 @@ code { font: 11.5pt Menlo, monospace; background: #f1f2f4; padding: 0 0.04in; bo
             Σ<sub>t</sub> ‖ x<sub>t</sub> − μ<sub>s<sub>t</sub></sub> ‖<sup>2</sup><sub>w</sub>
             &nbsp;+&nbsp; <b>λ</b> · Σ<sub>t</sub> 1{ s<sub>t</sub> ≠ s<sub>t−1</sub> }</div>
             <div class="formula-caption">avec des poids de variables <i>w</i> contraints en
-            norme L1&nbsp;: une dizaine de variables seulement comptent réellement.</div>
+            norme L1&nbsp;: au plus 10 variables sur 50 reçoivent un poids.</div>
             <ol class="steps3">
               <li><b>Regrouper.</b> Comme un k-moyennes, il affecte chaque jour à l'état dont le
               profil (centre μ) lui ressemble le plus.</li>
@@ -228,9 +228,9 @@ code { font: 11.5pt Menlo, monospace; background: #f1f2f4; padding: 0 0.04in; bo
             <h3>Réglages retenus</h3>
             <ul class="kvlist">
               <li><span>États</span><b>2 (stress, calme)</b></li>
-              <li><span>Pénalité λ</span><b>choisie dans {1, 3, 10, 30, 100, 300} à chaque
-              réestimation</b></li>
-              <li><span>Variables</span><b>≈ 10 effectives sur 50</b></li>
+              <li><span>Pénalité λ</span><b>choisie dans {1, 3, 10, 30, 100, 300} toutes les 4
+              réestimations&nbsp;; repli à 20 depuis 2022</b></li>
+              <li><span>Variables</span><b>au plus 10 sur 50</b></li>
               <li><span>Réestimation</span><b>tous les 6 mois, passé seul</b></li>
               <li><span>Ordre des états</span><b>par la volatilité d'entraînement</b></li>
             </ul>
@@ -244,7 +244,7 @@ code { font: 11.5pt Menlo, monospace; background: #f1f2f4; padding: 0 0.04in; bo
 </section>
 <section class="slide ">
   <div class="eyebrow">Résultat 1 — Qualité de classification</div>
-  <h1>93&nbsp;% des récessions reconnues, en temps réel</h1>
+  <h1>93&nbsp;% d'exactitude face aux récessions, sans voir le futur</h1>
   <div class="body"><div class="two chart-left">
           <div><div class="chart-title">Exactitude équilibrée contre les récessions NBER
           — pointillé&nbsp;: hasard (50&nbsp;%)</div><svg viewBox="0 0 600 344" width="100%" role="img"><line x1="170.0" y1="4" x2="170.0" y2="316" stroke="#c3c2b7" stroke-width="1.5"/><text x="170.0" y="332.0" font-size="12" fill="#898781" font-weight="400" text-anchor="middle" dominant-baseline="middle">0 %</text><line x1="240.0" y1="4" x2="240.0" y2="316" stroke="#e1e0d9" stroke-width="1"/><text x="240.0" y="332.0" font-size="12" fill="#898781" font-weight="400" text-anchor="middle" dominant-baseline="middle">25 %</text><line x1="310.0" y1="4" x2="310.0" y2="316" stroke="#e1e0d9" stroke-width="1"/><text x="310.0" y="332.0" font-size="12" fill="#898781" font-weight="400" text-anchor="middle" dominant-baseline="middle">50 %</text><line x1="380.0" y1="4" x2="380.0" y2="316" stroke="#e1e0d9" stroke-width="1"/><text x="380.0" y="332.0" font-size="12" fill="#898781" font-weight="400" text-anchor="middle" dominant-baseline="middle">75 %</text><line x1="450.0" y1="4" x2="450.0" y2="316" stroke="#e1e0d9" stroke-width="1"/><text x="450.0" y="332.0" font-size="12" fill="#898781" font-weight="400" text-anchor="middle" dominant-baseline="middle">100 %</text><line x1="310.0" y1="4" x2="310.0" y2="316" stroke="#898781" stroke-dasharray="4 4"/><text x="158.0" y="33.0" font-size="16" fill="#0b0b0b" font-weight="600" text-anchor="end" dominant-baseline="middle">A′ Sparse Jump</text><rect x="170" y="19.0" width="261.0" height="28" rx="4" fill="#2a78d6"/><text x="441.0" y="33.0" font-size="16" fill="#0b0b0b" font-weight="600" text-anchor="start" dominant-baseline="middle">93,2 %</text><text x="513.0" y="33.0" font-size="14" fill="#52514e" font-weight="400" text-anchor="start" dominant-baseline="middle">kappa 0,53</text><text x="158.0" y="95.0" font-size="16" fill="#0b0b0b" font-weight="400" text-anchor="end" dominant-baseline="middle">A Jump model</text><rect x="170" y="81.0" width="261.2" height="28" rx="4" fill="#c3c2b7"/><text x="441.2" y="95.0" font-size="16" fill="#0b0b0b" font-weight="400" text-anchor="start" dominant-baseline="middle">93,3 %</text><text x="513.2" y="95.0" font-size="14" fill="#52514e" font-weight="400" text-anchor="start" dominant-baseline="middle">kappa 0,49</text><text x="158.0" y="157.0" font-size="16" fill="#0b0b0b" font-weight="400" text-anchor="end" dominant-baseline="middle">B HMM filtré</text><rect x="170" y="143.0" width="237.2" height="28" rx="4" fill="#c3c2b7"/><text x="417.2" y="157.0" font-size="16" fill="#0b0b0b" font-weight="400" text-anchor="start" dominant-baseline="middle">84,7 %</text><text x="489.2" y="157.0" font-size="14" fill="#52514e" font-weight="400" text-anchor="start" dominant-baseline="middle">kappa 0,24</text><text x="158.0" y="219.0" font-size="16" fill="#0b0b0b" font-weight="400" text-anchor="end" dominant-baseline="middle">C′ HAR-RV</text><rect x="170" y="205.0" width="219.0" height="28" rx="4" fill="#c3c2b7"/><text x="399.0" y="219.0" font-size="16" fill="#0b0b0b" font-weight="400" text-anchor="start" dominant-baseline="middle">78,2 %</text><text x="471.0" y="219.0" font-size="14" fill="#52514e" font-weight="400" text-anchor="start" dominant-baseline="middle">kappa 0,17</text><text x="158.0" y="281.0" font-size="16" fill="#0b0b0b" font-weight="400" text-anchor="end" dominant-baseline="middle">C Gradient boosting</text><rect x="170" y="267.0" width="210.0" height="28" rx="4" fill="#c3c2b7"/><text x="390.0" y="281.0" font-size="16" fill="#0b0b0b" font-weight="400" text-anchor="start" dominant-baseline="middle">75,0 %</text><text x="462.0" y="281.0" font-size="14" fill="#52514e" font-weight="400" text-anchor="start" dominant-baseline="middle">kappa 0,12</text></svg></div>
@@ -254,8 +254,8 @@ code { font: 11.5pt Menlo, monospace; background: #f1f2f4; padding: 0 0.04in; bo
           connaissait la suite du semestre. Latence mesurée contre les pics NBER&nbsp;: 0 à 13
           jours.</div>
           <div class="note small"><b>À garder en tête&nbsp;:</b> la période de test ne contient que
-          <b>deux récessions</b> (2008-09 et 2020, 20 mois). «&nbsp;En temps réel&nbsp;» veut dire
-          sans voir le futur, pas avant le marché.</div>
+          <b>deux récessions</b> (2008-09 et 2020, 20 mois). «&nbsp;Sans voir le futur&nbsp;» ne veut
+          pas dire avant le marché&nbsp;: au Covid, le VIX était déjà passé de 14 à 54.</div>
           </div></div></div>
   <footer><div class="src">Source : docs/RESULTS_FINAL.md (couche 1), data/cache/states.parquet</div><div class="brand">Régimes de marché · Projet Big Data M2</div>
   <div class="pn">8</div></footer>
@@ -288,8 +288,9 @@ code { font: 11.5pt Menlo, monospace; background: #f1f2f4; padding: 0 0.04in; bo
             témoin rien du tout.</p>
             <p>Sur les <b>rendements</b>, aucun modèle n'ajoute quoi que ce soit (t entre −0,3 et
             0,5).</p>
-            <p class="callout"><b>Mais le VIX le savait déjà.</b> Une fois le VIX pris en compte,
-            le modèle n'ajoute que +0,20 point, non significatif.</p>
+            <p class="callout"><b>Mais le VIX le savait déjà.</b> Dans un test à part (test P),
+            l'état ajoute +4,48 points au-delà d'un rang de volatilité, mais +0,20 seulement
+            (t −1,34) une fois le VIX ajouté.</p>
           </div></div></div>
   <footer><div class="src">Source : docs/RESULTS_FINAL.md (couche 2), docs/RESULTS_CRISE.md (test P)</div><div class="brand">Régimes de marché · Projet Big Data M2</div>
   <div class="pn">10</div></footer>
@@ -326,8 +327,8 @@ code { font: 11.5pt Menlo, monospace; background: #f1f2f4; padding: 0 0.04in; bo
               récente sur les régimes (Nystrup et al., Aydınhan et al.).</li>
               <li><b>Persistance réglée explicitement</b> par λ&nbsp;: peu de changements, donc
               peu de rotation et peu de coûts.</li>
-              <li><b>Sélection de variables intégrée</b>&nbsp;: modèle lisible, et même
-              sous-ensemble fourni aux autres modèles pour une comparaison loyale.</li>
+              <li><b>Sélection de variables intégrée</b>&nbsp;: au plus 10 variables sur 50, donc un
+              modèle lisible.</li>
               <li>Pas d'hypothèse de loi explicite, contrairement au HMM gaussien.</li>
             </ul></div>
           <div class="card tall"><h3>Confirmé par les mesures</h3>
@@ -338,8 +339,8 @@ code { font: 11.5pt Menlo, monospace; background: #f1f2f4; padding: 0 0.04in; bo
               au-delà d'une règle de volatilité, t = −3,40 (mais +0,20 au-delà du VIX).</li>
               <li><b>Fiable en temps réel</b>&nbsp;: 0,6&nbsp;% d'étiquettes instables, 0 à 13
               jours de latence.</li>
-              <li>Les modèles plus réactifs (C, C′) changent d'état 14 à 18 fois par an mais ne
-              reconnaissent les récessions qu'à 75-78&nbsp;%.</li>
+              <li>Les modèles plus réactifs (C, C′) changent d'état 14 à 18 fois par an mais
+              n'atteignent que 75-78&nbsp;% d'exactitude face aux récessions.</li>
             </ul></div>
         </div>
         <div class="limit"><b>Sa limite, à assumer&nbsp;:</b> il ne prédit pas la direction du
@@ -376,8 +377,9 @@ code { font: 11.5pt Menlo, monospace; background: #f1f2f4; padding: 0 0.04in; bo
   <h1>Ce qu'il faut retenir</h1>
   <div class="body"><div class="concl">
           <div class="cl"><div class="cn">1</div><div><h3>La classification de régimes
-          fonctionne.</h3><p>Le Sparse Jump Model reconnaît les crises en temps réel (93&nbsp;%
-          contre le NBER), avec des états stables et lisibles.</p></div></div>
+          fonctionne.</h3><p>Le Sparse Jump Model reconnaît les crises sans voir le futur
+          (93&nbsp;% d'exactitude contre le NBER, sur deux récessions), avec des états stables et
+          lisibles.</p></div></div>
           <div class="cl"><div class="cn">2</div><div><h3>Elle mesure le risque, pas la
           direction.</h3><p>Il informe sur la volatilité future, pas sur les rendements, et le
           VIX en savait déjà presque autant.</p></div></div>
@@ -417,8 +419,8 @@ code { font: 11.5pt Menlo, monospace; background: #f1f2f4; padding: 0 0.04in; bo
   <div class="body"><ul class="ticks big">
           <li><b>Trois épisodes de stress et deux récessions seulement</b> en 24 ans&nbsp;: les
           93&nbsp;% et la plupart des conclusions reposent sur très peu de crises.</li>
-          <li><b>Le VIX sait déjà</b>&nbsp;: au-delà du VIX, le modèle n'ajoute que +0,20 point
-          sur la volatilité future.</li>
+          <li><b>Le VIX sait déjà</b>&nbsp;: dans le test P, l'apport de l'état passe de +4,48
+          à +0,20 point sur la volatilité future une fois le VIX ajouté.</li>
           <li><b>Calme continu depuis avril 2021</b>&nbsp;: la baisse de 2022 n'a pas été signalée,
           et les stratégies récentes ne voient qu'une crise, 2020.</li>
           <li><b>Couplages bruts de coûts</b>&nbsp;: les Sharpe des stratégies sont optimistes.</li>

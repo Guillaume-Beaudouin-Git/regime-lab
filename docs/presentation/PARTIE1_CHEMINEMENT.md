@@ -85,12 +85,13 @@ variables (le HAR-RV utilise ses propres termes), les mêmes règles et les mêm
 |---|---|---|---|---|
 | **Sparse Jump Model** | **93,2 %** | **0,53** | **0,5** | **oui, +3,93 pts** |
 | Jump Model | 93,3 % | 0,49 | 0,5 | oui, +3,47 pts |
-| HMM | 84,7 % | 0,24 | 1,9 | oui, +2,26 pts |
-| Gradient boosting | 75,0 % | 0,12 | 13,6 | oui, +2,13 pts |
-| HAR-RV | 78,2 % | 0,17 | 17,8 | presque pas, +0,19 pt |
+| HMM | 84,7 % | 0,24 | 2,0 | oui, +2,26 pts |
+| Gradient boosting | 75,0 % | 0,12 | 14,1 | oui, +2,13 pts |
+| HAR-RV | 78,2 % | 0,17 | 18,4 | presque pas, +0,19 pt |
 
 Sources : `docs/RESULTS_FINAL.md`, couches 1 et 2 ; les changements d'état sont comptés
-dans `data/cache/states.parquet` sur les 6 377 séances hors échantillon. L'exactitude est
+dans `data/cache/states.parquet` sur les 6 377 séances hors échantillon (24,4 années
+civiles). L'exactitude est
 l'exactitude équilibrée (§4). La dernière colonne donne le R² incrémental au-delà du
 témoin, sur la volatilité à 21 jours.
 
@@ -187,7 +188,7 @@ dépasse tel seuil et que le crédit se tend, alors… ». Au-dessus de la médi
 empiriques.
 
 **En vrai** : très réactif, mais nerveux. Il a changé d'avis **4 fois en février 2020**,
-et près de **14 fois par an** en moyenne.
+et environ **14 fois par an** en moyenne.
 
 ### Le HAR-RV
 
@@ -277,4 +278,4 @@ est nerveux, plus il voit tôt, mais plus il se trompe (fausses alertes).
 récessions reconnues ; le Sparse Jump Model garde au plus 10 variables, pas exactement
 10 ; le « retard » du HMM était une hypothèse du cadrage, que nos données démentent ; la
 phrase « investi 77 % du temps » venait d'une ligne retirée de la réplication de Shu le
-22/09 ; trois comptes de changements d'état sont recalculés sur `states.parquet`.*
+22/09 ; deux comptes de changements d'état sont recalculés sur `states.parquet`.*

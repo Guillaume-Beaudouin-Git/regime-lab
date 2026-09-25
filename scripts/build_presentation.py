@@ -254,10 +254,10 @@ def build_html() -> str:
   </div>
 </section>""")
 
-    kpis = [("93,2 %", "des récessions officielles reconnues", "exactitude équilibrée contre le "
-             "NBER, sans voir le futur ; 2 récessions dans la période (2008-09, 2020)"),
+    kpis = [("93,2 %", "d'exactitude face aux récessions officielles", "exactitude équilibrée "
+             "contre le NBER, sans voir le futur ; 2 récessions dans la période (2008-09, 2020)"),
             ("+3,93 pts", "d'information sur le risque futur", "au-delà d'une règle de volatilité "
-             "passée ; mais +0,20 seulement au-delà du VIX"),
+             "passée ; un test à part le ramène à +0,20 une fois le VIX ajouté"),
             ("+0,03 pt", "d'information sur la direction", "R² incrémental sur les rendements "
              "futurs : statistiquement nul (t = 0,27)"),
             ("0 / 63", "usages du filtre utiles", "arrêt, réduction, bascule, valeurs refuges et "
@@ -338,17 +338,17 @@ def build_html() -> str:
           <div class="card"><h3>Couche 3 — Portefeuille</h3><p>Un portefeuille 60/40 piloté par
           l'état (tout ou rien, ou taille) fait-il mieux que le 60/40 seul&nbsp;?</p></div>
         </div>
-        <div class="note">Équité entre modèles&nbsp;: même calendrier de réestimation, même
-        sous-ensemble de variables (choisi par le Sparse Jump Model sur le passé seul), même règle
-        de position fixée d'avance, deux états ordonnés par la volatilité d'entraînement.</div>""",
+        <div class="note">Équité entre modèles&nbsp;: même calendrier de réestimation, mêmes 50
+        variables (C′&nbsp;: ses trois termes HAR), même règle de position fixée d'avance, deux
+        états ordonnés par la volatilité d'entraînement.</div>""",
         "regime_lab/models/protocol.py, docs/CHARTER.html"))
 
     model_rows = [
         ["<b>A′ Sparse Jump Model</b>", "Regroupe les jours semblables et <b>fait payer chaque "
          "changement d'état</b>&nbsp;; sélectionne lui-même ses variables", "2 états, pénalité λ "
-         "choisie à chaque réestimation, ≈ 10 variables effectives", "Modèle principal"],
-        ["A Jump model", "Même principe, sans sélection de variables", "2 états, λ choisie à "
-         "chaque réestimation", "Variante"],
+         "recalibrée toutes les 4 réestimations, au plus 10 variables", "Modèle principal"],
+        ["A Jump model", "Même principe, sans sélection de variables", "2 états, λ recalibrée "
+         "toutes les 4 réestimations", "Variante"],
         ["B HMM gaussien", "Chaîne de Markov cachée, lois gaussiennes par état, probabilité "
          "<b>filtrée</b>", "2 états, matrice de transition", "Référence classique"],
         ["C Gradient boosting", "Pas d'état caché&nbsp;: prédit la volatilité à 21 jours, puis la "
@@ -371,7 +371,7 @@ def build_html() -> str:
             Σ<sub>t</sub> ‖ x<sub>t</sub> − μ<sub>s<sub>t</sub></sub> ‖<sup>2</sup><sub>w</sub>
             &nbsp;+&nbsp; <b>λ</b> · Σ<sub>t</sub> 1{ s<sub>t</sub> ≠ s<sub>t−1</sub> }</div>
             <div class="formula-caption">avec des poids de variables <i>w</i> contraints en
-            norme L1&nbsp;: une dizaine de variables seulement comptent réellement.</div>
+            norme L1&nbsp;: au plus 10 variables sur 50 reçoivent un poids.</div>
             <ol class="steps3">
               <li><b>Regrouper.</b> Comme un k-moyennes, il affecte chaque jour à l'état dont le
               profil (centre μ) lui ressemble le plus.</li>
@@ -385,9 +385,9 @@ def build_html() -> str:
             <h3>Réglages retenus</h3>
             <ul class="kvlist">
               <li><span>États</span><b>2 (stress, calme)</b></li>
-              <li><span>Pénalité λ</span><b>choisie dans {1, 3, 10, 30, 100, 300} à chaque
-              réestimation</b></li>
-              <li><span>Variables</span><b>≈ 10 effectives sur 50</b></li>
+              <li><span>Pénalité λ</span><b>choisie dans {1, 3, 10, 30, 100, 300} toutes les 4
+              réestimations&nbsp;; repli à 20 depuis 2022</b></li>
+              <li><span>Variables</span><b>au plus 10 sur 50</b></li>
               <li><span>Réestimation</span><b>tous les 6 mois, passé seul</b></li>
               <li><span>Ordre des états</span><b>par la volatilité d'entraînement</b></li>
             </ul>
@@ -402,7 +402,7 @@ def build_html() -> str:
                  "18 j", "14,08", "0,0 %"], ["C′ HAR-RV", "14 j", "18,41", "0,0 %"],
                  ["Témoin volatilité", "34 j", "6,75", "0,0 %"]]
     s.append(slide(8, "Résultat 1 — Qualité de classification",
-        "93&nbsp;% des récessions reconnues, en temps réel",
+        "93&nbsp;% d'exactitude face aux récessions, sans voir le futur",
         f"""<div class="two chart-left">
           <div><div class="chart-title">Exactitude équilibrée contre les récessions NBER
           — pointillé&nbsp;: hasard (50&nbsp;%)</div>{accuracy_chart()}</div>
@@ -413,8 +413,8 @@ def build_html() -> str:
           connaissait la suite du semestre. Latence mesurée contre les pics NBER&nbsp;: 0 à 13
           jours.</div>
           <div class="note small"><b>À garder en tête&nbsp;:</b> la période de test ne contient que
-          <b>deux récessions</b> (2008-09 et 2020, 20 mois). «&nbsp;En temps réel&nbsp;» veut dire
-          sans voir le futur, pas avant le marché.</div>
+          <b>deux récessions</b> (2008-09 et 2020, 20 mois). «&nbsp;Sans voir le futur&nbsp;» ne veut
+          pas dire avant le marché&nbsp;: au Covid, le VIX était déjà passé de 14 à 54.</div>
           </div></div>""", "docs/RESULTS_FINAL.md (couche 1), data/cache/states.parquet"))
 
     s.append(slide(9, "Résultat 1 — Les régimes dans le temps",
@@ -441,8 +441,9 @@ def build_html() -> str:
             témoin rien du tout.</p>
             <p>Sur les <b>rendements</b>, aucun modèle n'ajoute quoi que ce soit (t entre −0,3 et
             0,5).</p>
-            <p class="callout"><b>Mais le VIX le savait déjà.</b> Une fois le VIX pris en compte,
-            le modèle n'ajoute que +0,20 point, non significatif.</p>
+            <p class="callout"><b>Mais le VIX le savait déjà.</b> Dans un test à part (test P),
+            l'état ajoute +4,48 points au-delà d'un rang de volatilité, mais +0,20 seulement
+            (t −1,34) une fois le VIX ajouté.</p>
           </div></div>""", "docs/RESULTS_FINAL.md (couche 2), docs/RESULTS_CRISE.md (test P)"))
 
     pf_rows = [["60/40 seul", "0,47", "—", "−35,6 %"],
@@ -480,8 +481,8 @@ def build_html() -> str:
               récente sur les régimes (Nystrup et al., Aydınhan et al.).</li>
               <li><b>Persistance réglée explicitement</b> par λ&nbsp;: peu de changements, donc
               peu de rotation et peu de coûts.</li>
-              <li><b>Sélection de variables intégrée</b>&nbsp;: modèle lisible, et même
-              sous-ensemble fourni aux autres modèles pour une comparaison loyale.</li>
+              <li><b>Sélection de variables intégrée</b>&nbsp;: au plus 10 variables sur 50, donc un
+              modèle lisible.</li>
               <li>Pas d'hypothèse de loi explicite, contrairement au HMM gaussien.</li>
             </ul></div>
           <div class="card tall"><h3>Confirmé par les mesures</h3>
@@ -492,8 +493,8 @@ def build_html() -> str:
               au-delà d'une règle de volatilité, t = −3,40 (mais +0,20 au-delà du VIX).</li>
               <li><b>Fiable en temps réel</b>&nbsp;: 0,6&nbsp;% d'étiquettes instables, 0 à 13
               jours de latence.</li>
-              <li>Les modèles plus réactifs (C, C′) changent d'état 14 à 18 fois par an mais ne
-              reconnaissent les récessions qu'à 75-78&nbsp;%.</li>
+              <li>Les modèles plus réactifs (C, C′) changent d'état 14 à 18 fois par an mais
+              n'atteignent que 75-78&nbsp;% d'exactitude face aux récessions.</li>
             </ul></div>
         </div>
         <div class="limit"><b>Sa limite, à assumer&nbsp;:</b> il ne prédit pas la direction du
@@ -524,8 +525,9 @@ def build_html() -> str:
     s.append(slide(14, "Conclusion", "Ce qu'il faut retenir",
         """<div class="concl">
           <div class="cl"><div class="cn">1</div><div><h3>La classification de régimes
-          fonctionne.</h3><p>Le Sparse Jump Model reconnaît les crises en temps réel (93&nbsp;%
-          contre le NBER), avec des états stables et lisibles.</p></div></div>
+          fonctionne.</h3><p>Le Sparse Jump Model reconnaît les crises sans voir le futur
+          (93&nbsp;% d'exactitude contre le NBER, sur deux récessions), avec des états stables et
+          lisibles.</p></div></div>
           <div class="cl"><div class="cn">2</div><div><h3>Elle mesure le risque, pas la
           direction.</h3><p>Il informe sur la volatilité future, pas sur les rendements, et le
           VIX en savait déjà presque autant.</p></div></div>
@@ -580,8 +582,8 @@ def build_html() -> str:
         """<ul class="ticks big">
           <li><b>Trois épisodes de stress et deux récessions seulement</b> en 24 ans&nbsp;: les
           93&nbsp;% et la plupart des conclusions reposent sur très peu de crises.</li>
-          <li><b>Le VIX sait déjà</b>&nbsp;: au-delà du VIX, le modèle n'ajoute que +0,20 point
-          sur la volatilité future.</li>
+          <li><b>Le VIX sait déjà</b>&nbsp;: dans le test P, l'apport de l'état passe de +4,48
+          à +0,20 point sur la volatilité future une fois le VIX ajouté.</li>
           <li><b>Calme continu depuis avril 2021</b>&nbsp;: la baisse de 2022 n'a pas été signalée,
           et les stratégies récentes ne voient qu'une crise, 2020.</li>
           <li><b>Couplages bruts de coûts</b>&nbsp;: les Sharpe des stratégies sont optimistes.</li>
