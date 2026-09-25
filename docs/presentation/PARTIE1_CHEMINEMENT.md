@@ -60,8 +60,8 @@ Kolm, Mulvey et Shu (2024) l'étendent, et la littérature lui prête des régim
 plus exploitables que le HMM. Son idée clé : **chaque changement d'état a un coût**,
 donc le modèle ne change d'avis que si la preuve est forte.
 
-Nous avons pris sa version *sparse* : elle **choisit elle-même au plus 10 variables**
-parmi nos 50, et en ignore le reste. Nous avons aussi mis parmi les 50 des variables qui
+Nous avons pris sa version *sparse* : elle **concentre elle-même son poids sur une
+dizaine de variables** parmi nos 50 (nombre effectif : 10) et néglige les autres. Nous avons aussi mis parmi les 50 des variables qui
 ne sont pas de la volatilité (crédit, taux, dispersion entre secteurs…), pour qu'il ne
 puisse pas se contenter de redécouvrir la volatilité.
 
@@ -162,11 +162,11 @@ n'allume pas le chauffage à chaque courant d'air.
 
 ### Le Sparse Jump Model (notre modèle principal)
 
-**En une phrase** : le Jump Model, qui en plus **choisit lui-même au plus 10
-indicateurs** parmi les 50, et ignore les autres.
+**En une phrase** : le Jump Model, qui en plus **concentre son attention sur une
+dizaine d'indicateurs** parmi les 50, et néglige les autres.
 
 **Image** : un analyste qui, face à un tableau de bord de 50 voyants, n'en surveille
-qu'une dizaine au plus, ceux qui comptent vraiment.
+vraiment qu'une dizaine, ceux qui comptent.
 
 **En vrai** :
 - **13 changements d'état en 24 ans** ;
@@ -215,7 +215,7 @@ qu'une volatilité déguisée.
 |---|---|---|---|
 | HMM | oui | selon des probabilités de passage | moyen, 2 fois par an |
 | Jump Model | oui | seulement si ça vaut l'amende λ | calme, 0,5 fois par an |
-| Sparse Jump | oui | idem, avec au plus 10 indicateurs | calme, 0,5 fois par an |
+| Sparse Jump | oui | idem, avec une dizaine d'indicateurs | calme, 0,5 fois par an |
 | Gradient boosting | non, prédit la volatilité | dès que la prévision passe la médiane | nerveux, 14 fois par an |
 | HAR-RV | non, prédit la volatilité | idem | très nerveux, 18 fois par an |
 
@@ -275,7 +275,7 @@ est nerveux, plus il voit tôt, mais plus il se trompe (fausses alertes).
 ---
 
 *Corrigé le 25/09/2026 : le « 93 % » est une exactitude équilibrée, pas une part de
-récessions reconnues ; le Sparse Jump Model garde au plus 10 variables, pas exactement
-10 ; le « retard » du HMM était une hypothèse du cadrage, que nos données démentent ; la
+récessions reconnues ; le Sparse Jump Model fixe à 10 le nombre *effectif* de variables,
+mais une vingtaine gardent un poids non nul (`docs/artifacts/sjm_sparsity.txt`) ; le « retard » du HMM était une hypothèse du cadrage, que nos données démentent ; la
 phrase « investi 77 % du temps » venait d'une ligne retirée de la réplication de Shu le
 22/09 ; deux comptes de changements d'état sont recalculés sur `states.parquet`.*

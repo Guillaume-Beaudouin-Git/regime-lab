@@ -1,4 +1,4 @@
-# Avancement du projet — état au 24 septembre 2026
+# Avancement du projet — état au 25 septembre 2026
 
 Ce document sert à partir du même point : **ce qui est fait, où sont les données, ce qui
 reste et par quoi commencer.** Chaque chiffre renvoie à un document ou à un script du
@@ -27,7 +27,7 @@ pour tests multiples ?
    (volatilité réalisée sous sa médiane). Les huit études des 23 et 24 septembre (§1)
    n'ont trouvé aucun usage utile non plus, et en expliquent la raison : le modèle entre
    en stress tard et **y reste pendant les reprises**. Le chiffre qui explique tout : l'état change
-   **13 fois en 6 377 séances**, soit treize décisions en 25 ans.
+   **13 fois en 6 377 séances**, soit treize décisions en 24 ans.
 4. **Quatre hypothèses dérivées ont été falsifiées** : H1, H2, H3 et la prime de
    retournement.
 
@@ -229,16 +229,49 @@ d'essais compte 84 configurations distinctes (`data/trials.parquet`).
   (le script refuse de dessiner en cas d'écart). La crypto n'apparaît qu'en chiffres
   agrégés.
 
-- **Le deck de l'oral de 10 minutes** (13 diapositives depuis le 25/09, structure fixée
+- **Le deck de l'oral de 10 minutes** (14 diapositives avec la bibliographie, structure fixée
   par Guillaume : intro, données, Markov, Sparse Jump Model et ses papiers, crises, risque
   contre direction, partie 2, stratégies, cinq méthodes avec le ratio de Sharpe, limites,
   conclusion, ouverture ; notes orales minutées) existe en deux styles, comme présentations
   Claude téléchargeables en PowerPoint ou en PDF (privées, à partager depuis la page) :
   style clair https://claude.ai/artifact/Bpg2cRahCG2bsy3YAqbBh6 et style éditorial sombre
   https://claude.ai/artifact/HhFYhrryrYGZqV1s3KqoQJ. Noms : Guillaume Beaudouin et Gabriel
-  Golivet ; date indiquée : 25 septembre 2026, à changer si l'oral a lieu un autre jour. Ses chiffres sont ceux des deux PDF. Les écarts de Sharpe du
+  Golivet. **L'oral a eu lieu le 25 septembre 2026.** Ses chiffres sont ceux des deux PDF. Les écarts de Sharpe du
   tableau des méthodes sont calculés avant arrondi, et identiques dans le deck et dans le
   PDF de la partie 2.
+
+### Le 25 septembre : l'oral, le dossier, et neuf corrections
+
+- **L'oral a eu lieu le 25/09.** Le **dossier remis au professeur** est
+  `docs/presentation/dossier_regimes.pdf` (A4, en français), généré par
+  `scripts/build_dossier.py` : résumé, démarche, données, modèles, deux résultats,
+  application aux trois stratégies, mécanisme de l'échec, limites, conclusion,
+  reproductibilité, bibliographie et cinq annexes. Le script recalcule le tableau de
+  classification depuis `states.parquet` et refuse de construire si un chiffre publié ne
+  se reproduit pas. Version de référence : l'étiquette git `dossier-2026-09-25`.
+- **En préparant le dossier, neuf erreurs ont été trouvées et corrigées partout** (PDF,
+  decks, note PARTIE1, résultats) :
+  1. le rappel 419/435 attribué à A est celui d'A′ ; A fait 431/435 ;
+  2. trois écarts au cadrage n'étaient pas déclarés : le sous-ensemble de variables commun
+     jamais mis en œuvre, le Jump Model continu jamais estimé, λ recalculé toutes les
+     quatre réestimations avec un repli à 20, hors grille, pour A′ depuis avril 2022
+     (`docs/PROTOCOL_FREEZE.md`) ;
+  3. « 93 % des récessions reconnues » est une exactitude équilibrée (rappel 96,3 %,
+     spécificité 90,0 %) ;
+  4. **le Sparse Jump Model ne garde pas « au plus 10 » variables** : `max_feats = 10`
+     fixe à 10 le nombre *effectif* de variables, mais 17 à 24 gardent un poids non nul
+     (`scripts/measure_sjm_sparsity.py`, `docs/artifacts/sjm_sparsity.txt`). La
+     correction « au plus 10 » de `adef0cb`/`1fbd6b4` était elle-même fausse ;
+  5. le HMM « en retard » était une hypothèse du cadrage que les données démentent : il
+     entre en stress au Covid deux semaines avant A′ ; son défaut est la fausse alerte
+     (35 % du temps en stress, 19 % de ses séances de stress en récession) ;
+  6. « investi 77 % du temps » venait d'une ligne retirée de la réplication de Shu ;
+  7. « +0,17 → +0,05 » sur 90 ans comparait deux modèles : même modèle réduit, +0,145 →
+     +0,045 ;
+  8. au Covid, le modèle sort une première fois du stress le 5 août 2020 (+49 %) et
+     définitivement le 5 avril 2021 (+82 %) ; « 97 % » compte le jour du creux ;
+  9. « 0 donnée du futur » était faux au sens strict : NFCI et inscriptions au chômage
+     sont pris en valeur actuelle décalée, pas en première publication.
 
 ### Le 24 septembre : les cinq pistes du conseiller, lancées en parallèle
 
@@ -280,7 +313,7 @@ regime-lab/                         UN SEUL dépôt, public
 ├── README.md                       commencer ici
 ├── AVANCEMENT.md                   ce fichier
 ├── CLAUDE.md                       consignes pour les sessions Claude Code
-├── regime_lab/  scripts/  tests/   l'étude principale : code, scripts, 114 tests
+├── regime_lab/  scripts/  tests/   l'étude principale : code, scripts, tests
 ├── docs/                           cadrage gelé, résultats, registre d'amendements
 ├── chantiers/
 │   ├── macro-momentum/             H1, H2, H3 (son propre code et ses docs)
@@ -302,7 +335,7 @@ La littérature (4 PDF) reste **hors du dépôt**, pour des raisons de droits d'
 git clone https://github.com/Guillaume-Beaudouin-Git/regime-lab.git
 cd regime-lab
 uv sync --all-packages --extra dev          # un seul .venv pour les trois études
-.venv/bin/python -m pytest -q               # 122 tests, ~40 s
+.venv/bin/python -m pytest -q               # 849 tests au 25/09, ~15 min
 ```
 
 Les tests passent sans aucune donnée. Les scripts, eux, en ont besoin (§3).
@@ -410,7 +443,7 @@ critère de fin.
 | # | tâche | effort | données | c'est fini quand |
 |---|---|---|---|---|
 | ~~0~~ | ~~Fixer l'objectif final~~ **FAIT le 23/09** : une présentation de 10 minutes ; objectif de fond, des stratégies dépendantes du régime (§0) | — | — | — |
-| **1** | **Construire la présentation de 10 minutes**, au format entreprise, en 8 à 10 diapositives. Le fil : la question → la méthode (données point-in-time, critère écrit avant le chiffre) → ce qui marche (classifieur à 93,2 %, qui prédit la variance et pas la direction) → ce que ça implique (un outil de dimensionnement, pas de timing ; 13 changements d'état en 25 ans) → ce qu'on a testé sans succès (7 dispositifs, 4 hypothèses) → la suite, vers des stratégies dépendantes du régime. Trois figures : **(a)** R² sur la volatilité contre R² sur les rendements, un point par famille ; **(b)** la frise des 13 transitions ; **(c)** les dispositifs face à la règle d'une ligne | 1-2 j | `data/cache/*` et `docs/RESULTS_*.md`, déjà calculés | les diapositives et un texte oral de 10 minutes, répétés une fois |
+| ~~1~~ | **FAIT le 25/09 : oral, deck de 14 diapositives et dossier `docs/presentation/dossier_regimes.pdf`.** Ancien énoncé : **Construire la présentation de 10 minutes**, au format entreprise, en 8 à 10 diapositives. Le fil : la question → la méthode (données point-in-time, critère écrit avant le chiffre) → ce qui marche (classifieur à 93,2 %, qui prédit la variance et pas la direction) → ce que ça implique (un outil de dimensionnement, pas de timing ; 13 changements d'état en 25 ans) → ce qu'on a testé sans succès (7 dispositifs, 4 hypothèses) → la suite, vers des stratégies dépendantes du régime. Trois figures : **(a)** R² sur la volatilité contre R² sur les rendements, un point par famille ; **(b)** la frise des 13 transitions ; **(c)** les dispositifs face à la règle d'une ligne | 1-2 j | `data/cache/*` et `docs/RESULTS_*.md`, déjà calculés | les diapositives et un texte oral de 10 minutes, répétés une fois |
 | ~~2~~ | ~~**Plan Two Sigma**~~ **FAIT et FERMÉ le 23/09** : A FAIL, B sous-puissant, C non montré (`docs/RESULTS_TWOSIGMA.md`). Ce qui suit est l'ancien énoncé : ~~descendre l'arbre A → B → C** (le verrou est commité).~~ C'est la piste la plus proche de l'objectif de fond : le régime choisit entre dix signaux. Le verrou impose d'abord d'écrire et de commiter **les trois instruments** (A, B, C), leurs seuils et les empreintes des données (§13.1). Ensuite viennent les lectures dans l'ordre A, B, C, **quel que soit le résultat de chacune** ; chaque lecture compte comme un essai. Le verdict alimente la dernière diapositive | ~2 j pour les instruments, puis quelques heures par lecture | `industry_49`, `factors_5`, `features` (§3.1) | verdicts écrits dans `docs/RESULTS_TWOSIGMA*.md` |
 | **3** | **Fermer l'arbre AHL** : le MDE de C1, que le pré-enregistrement déclare sous-puissant d'avance, la note de fermeture, et la décision sur la lecture A1 principale sur (126,10), qui reste due | ½-1 j | `trend_universe_m1.parquet` | `docs/RESULTS_AHL_LEVEL_C.md` et la fermeture |
 | **4** | **Nettoyer et commiter `pilotage/mesures_brutes/`** : retirer les chemins absolus et privés des scripts | 1-2 h | — | les scripts dans git, les données dans `data/` |

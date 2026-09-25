@@ -346,7 +346,7 @@ def build_html() -> str:
     model_rows = [
         ["<b>A′ Sparse Jump Model</b>", "Regroupe les jours semblables et <b>fait payer chaque "
          "changement d'état</b>&nbsp;; sélectionne lui-même ses variables", "2 états, pénalité λ "
-         "recalibrée toutes les 4 réestimations, au plus 10 variables", "Modèle principal"],
+         "recalibrée toutes les 4 réestimations, ≈ 10 variables effectives", "Modèle principal"],
         ["A Jump model", "Même principe, sans sélection de variables", "2 états, λ recalibrée "
          "toutes les 4 réestimations", "Variante"],
         ["B HMM gaussien", "Chaîne de Markov cachée, lois gaussiennes par état, probabilité "
@@ -371,7 +371,8 @@ def build_html() -> str:
             Σ<sub>t</sub> ‖ x<sub>t</sub> − μ<sub>s<sub>t</sub></sub> ‖<sup>2</sup><sub>w</sub>
             &nbsp;+&nbsp; <b>λ</b> · Σ<sub>t</sub> 1{ s<sub>t</sub> ≠ s<sub>t−1</sub> }</div>
             <div class="formula-caption">avec des poids de variables <i>w</i> contraints en
-            norme L1&nbsp;: au plus 10 variables sur 50 reçoivent un poids.</div>
+            norme L1&nbsp;: le nombre effectif de variables est fixé à 10&nbsp;; une vingtaine gardent un
+            poids, dix en portent l'essentiel.</div>
             <ol class="steps3">
               <li><b>Regrouper.</b> Comme un k-moyennes, il affecte chaque jour à l'état dont le
               profil (centre μ) lui ressemble le plus.</li>
@@ -387,7 +388,7 @@ def build_html() -> str:
               <li><span>États</span><b>2 (stress, calme)</b></li>
               <li><span>Pénalité λ</span><b>choisie dans {1, 3, 10, 30, 100, 300} toutes les 4
               réestimations&nbsp;; repli à 20 depuis 2022</b></li>
-              <li><span>Variables</span><b>au plus 10 sur 50</b></li>
+              <li><span>Variables</span><b>10 effectives sur 50</b></li>
               <li><span>Réestimation</span><b>tous les 6 mois, passé seul</b></li>
               <li><span>Ordre des états</span><b>par la volatilité d'entraînement</b></li>
             </ul>
@@ -481,8 +482,8 @@ def build_html() -> str:
               récente sur les régimes (Nystrup et al., Aydınhan et al.).</li>
               <li><b>Persistance réglée explicitement</b> par λ&nbsp;: peu de changements, donc
               peu de rotation et peu de coûts.</li>
-              <li><b>Sélection de variables intégrée</b>&nbsp;: au plus 10 variables sur 50, donc un
-              modèle lisible.</li>
+              <li><b>Sélection de variables intégrée</b>&nbsp;: l'essentiel du poids sur une dizaine de
+              variables, donc un modèle lisible.</li>
               <li>Pas d'hypothèse de loi explicite, contrairement au HMM gaussien.</li>
             </ul></div>
           <div class="card tall"><h3>Confirmé par les mesures</h3>

@@ -15,6 +15,8 @@ régime (voir `AVANCEMENT.md` §0).
 
 | si vous voulez… | lisez |
 |---|---|
+| **le dossier du projet** (M2, restitué le 25/09/2026) | **`docs/presentation/dossier_regimes.pdf`** |
+| les supports de présentation | `docs/presentation/presentation_regimes.pdf` (partie 1), `docs/presentation/presentation_partie2.pdf` (partie 2) |
 | savoir où en est le projet et ce qu'il reste à faire | **`AVANCEMENT.md`** |
 | les résultats de l'étude principale | `docs/RESULTS_FINAL.md` |
 | le protocole fixé avant toute mesure | `docs/CHARTER.html` (gelé), `docs/PROTOCOL_FREEZE.md` (écarts) |
@@ -28,13 +30,19 @@ régime (voir `AVANCEMENT.md` §0).
 
 1. **Le classifieur fonctionne.** 93,2 % d'exactitude équilibrée contre les récessions
    officielles (NBER), sur 6 377 jours jamais vus à l'entraînement. Cinq méthodes
-   différentes s'accordent.
+   différentes s'accordent. ⚠ La période de test ne contient que **deux récessions**
+   (2008-09 et 2020) ; réestimée sur 1926-2026, une version réduite n'en reconnaît que
+   6 sur 14 (`docs/RESULTS_LONGHIST.md`).
 2. **Il prédit la volatilité, pas la direction.** Il ajoute +3,93 points de R² sur la
-   volatilité future, et rien sur les rendements futurs (+0,03 point, t 0,27).
+   volatilité future au-delà d'une règle de volatilité passée, et rien sur les
+   rendements futurs (+0,03 point, t 0,27). ⚠ Au-delà du VIX, il n'ajoute que +0,20
+   point, non significatif (`docs/RESULTS_CRISE.md`, test P).
 3. **Personne n'a réussi à en tirer de l'argent.** Sept dispositifs ont été testés et
    aucun ne bat une règle d'une ligne : « la volatilité récente est-elle sous sa
-   médiane ? ». La raison est mécanique : le régime change **13 fois en 25 ans**, soit
-   trop peu de décisions pour qu'un signal de trading en émerge.
+   médiane ? ». La raison est mécanique : le régime change **13 fois en 24 ans**, soit
+   trop peu de décisions pour qu'un signal de trading en émerge. Les études de
+   septembre 2026 (stratégies de crise, valeurs refuges, couplage à des stratégies
+   réelles) le confirment : aucun usage du filtre n'est démontré utile.
 
 Ce résultat négatif est le résultat. Il a été obtenu par des mesures conçues **à
 l'avance** pour pouvoir dire non.
@@ -45,7 +53,7 @@ l'avance** pour pouvoir dire non.
 README.md, AVANCEMENT.md       entrée et état d'avancement
 regime_lab/                    le code de l'étude principale (données, variables, modèles, évaluation)
 scripts/                       les scripts qui produisent chaque résultat publié
-tests/                         114 tests
+tests/                         les tests unitaires et d'intégration
 docs/                          cadrage, résultats, registre des écarts au protocole
 chantiers/macro-momentum/      trois hypothèses dérivées (H1, H2, H3), toutes falsifiées
 chantiers/reversal-lab/        la prime de retour à la moyenne, disparue depuis 2020
@@ -65,12 +73,12 @@ Il faut Python 3.12 et [uv](https://docs.astral.sh/uv/).
 git clone https://github.com/Guillaume-Beaudouin-Git/regime-lab.git
 cd regime-lab
 uv sync --all-packages --extra dev          # un seul environnement pour tout le dépôt
-.venv/bin/python -m pytest -q               # 122 tests
+.venv/bin/python -m pytest -q               # plus de 800 tests, une dizaine de minutes
 ```
 
 Utilisez toujours `.venv/bin/python`, jamais le Python du système.
 
-**Les données ne sont pas dans git** (36 Mo, régénérables). L'inventaire exact, fichier
+**Les données ne sont pas dans git** (environ 50 Mo, régénérables). L'inventaire exact, fichier
 par fichier (source, période, script qui le produit), est dans `AVANCEMENT.md` §3. Pour
 les télécharger soi-même, une clé API FRED gratuite suffit : copiez `.env.example` vers
 `.env` et renseignez `FRED_API_KEY`.
@@ -78,7 +86,9 @@ les télécharger soi-même, une clé API FRED gratuite suffit : copiez `.env.ex
 ## Les règles de méthode
 
 - Le signal est calculé en T−1 et la position prise en T.
-- On juge sur des rendements **nets de coûts et en excès du taux sans risque**.
+- On juge sur des rendements **nets de coûts et en excès du taux sans risque**. Seule
+  exception, déclarée : les couplages aux stratégies de la partie 2 de la présentation
+  sont calculés sans coût, par hypothèse du cours.
 - Erreurs-types robustes (HAC), correction dès qu'il y a plusieurs tests, bootstrap par
   blocs.
 - **Le critère de décision est écrit et commité avant de produire le chiffre.** Un effet
@@ -92,7 +102,9 @@ les télécharger soi-même, une clé API FRED gratuite suffit : copiez `.env.ex
 A study of machine-learned market regimes under a point-in-time data contract. The
 classifier works (93.2% balanced accuracy against NBER recessions, out of sample) and
 carries information about **variance, not mean**: +3.93 points of incremental R² on
-forward volatility, nothing on forward returns. None of seven devices built to monetise
-it beats a one-line volatility rule, because the state changes 13 times in 25 years. Four
+forward volatility beyond a past-volatility rule (only +0.20 beyond the VIX), nothing on
+forward returns. The test period holds two recessions only. None of seven devices built
+to monetise it beats a one-line volatility rule, because the state changes 13 times in
+24 years. Four
 derived hypotheses are falsified in `chantiers/`. The English description of the main
 study is in `docs/OVERVIEW_EN.md`.

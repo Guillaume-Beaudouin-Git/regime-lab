@@ -1,0 +1,21 @@
+Sparse jump model (A'), max_features = 10: weights of the lasso step, one fit per
+calibration window of the published run (calibration rows logged 2026-09-09 UTC).
+
+train end     lambda  non-zero  effective  top-10 share  largest weights
+2002-03-29        10        18       10.0           97%  xs_dispersion_szbm 0.50, xs_dispersion_ind 0.50, cre_baa 0.36, vol_rv_63 0.36, asy_drawdown_252 0.28
+2004-03-31         3        20       10.0           98%  cre_baa 0.54, asy_drawdown_252 0.51, xs_dispersion_ind 0.30, vol_rv_63 0.30, xs_dispersion_szbm 0.27
+2006-03-30        10        17       10.0           98%  xs_dispersion_ind 0.43, xs_dispersion_szbm 0.42, asy_drawdown_252 0.39, vol_rv_63 0.39, cre_baa 0.37
+2008-03-31        30        20       10.0           98%  xs_dispersion_ind 0.43, xs_dispersion_szbm 0.41, cre_baa 0.40, asy_drawdown_252 0.40, vol_rv_63 0.37
+2010-03-31         1        17       10.0           96%  asy_drawdown_252 0.60, cre_baa 0.49, cre_quality 0.33, mom_eq_252 0.29, mac_unrate_chg12m 0.22
+2012-03-29         3        18       10.0           96%  asy_drawdown_252 0.63, cre_baa 0.45, cre_quality 0.31, mom_eq_252 0.30, mac_unrate_chg12m 0.24
+2014-03-31         1        18       10.0           96%  asy_drawdown_252 0.66, cre_baa 0.42, mom_eq_252 0.30, cre_quality 0.28, mac_unrate_chg12m 0.24
+2016-03-31        10        18       10.0           96%  asy_drawdown_252 0.68, cre_baa 0.40, mom_eq_252 0.27, cre_quality 0.26, mac_unrate_chg12m 0.26
+2018-03-29        10        18       10.0           96%  asy_drawdown_252 0.69, cre_baa 0.40, mom_eq_252 0.27, cre_quality 0.26, mac_unrate_chg12m 0.24
+2020-03-31        10        19       10.0           96%  asy_drawdown_252 0.69, cre_baa 0.41, mom_eq_252 0.25, cre_quality 0.25, vol_rv_63 0.22
+2022-03-31        20        23       10.0           97%  mac_unrate_sahm 0.57, mac_unrate_chg12m 0.54, mac_payems_yoy 0.38, mac_claims_yoy 0.27, cre_quality 0.18
+2024-03-29        20        24       10.0           98%  mac_unrate_sahm 0.57, mac_unrate_chg12m 0.53, mac_payems_yoy 0.39, mac_claims_yoy 0.27, cre_quality 0.18
+2026-03-31        20        23       10.0           98%  mac_unrate_sahm 0.57, mac_unrate_chg12m 0.52, mac_payems_yoy 0.39, mac_claims_yoy 0.27, cre_quality 0.19
+
+non-zero weights: 17 to 24 of 50; the ten largest carry 96% to 98% of sum w^2.
+Reading: the effective number of features is 10 by construction; the number of
+features with a non-zero weight is not bounded by 10.
