@@ -337,7 +337,7 @@ def covid_chart() -> str:
     pts = " ".join(f"{x(d):.1f},{y(v):.1f}" for d, v in spx.items())
     out.append(f'<polyline points="{pts}" fill="none" stroke="{INK}" stroke-width="1.8"/>')
     marks = [("2020-02-19", "1", -16, 0), ("2020-03-11", "2", 0, 16), ("2020-03-23", "3", 16, 0),
-             ("2021-04-01", "4", -18, 0)]
+             ("2020-08-05", "4", -18, 0), ("2021-04-05", "5", -18, 0)]
     for d, num, dy, dx in marks:
         dd = pd.Timestamp(d)
         v = spx.loc[:dd].iloc[-1]
@@ -581,7 +581,7 @@ def build_html() -> str:
             <p class="callout">Et une règle de volatilité d'une ligne fait aussi bien&nbsp;: 0,82 avec l'or.</p>
           </div></div>""", "lectures_trois_strategies.txt ; courbes recalculées et vérifiées contre la lecture"))
 
-    s.append(slide(8, "Stratégie 1 — L'épreuve des 90 ans", "Sur 90 ans, le gain du momentum fond de +0,17 à +0,05",
+    s.append(slide(8, "Stratégie 1 — L'épreuve des 90 ans", "Sur 90 ans, le gain du momentum tombe à +0,05",
         f"""<div class="two chart-left">
           <div><div class="chart-title">Gain de Sharpe en coupant le momentum en stress, par période
           (modèle réestimé sur 1926-2026)</div>{longhist_chart()}</div>
@@ -589,8 +589,9 @@ def build_html() -> str:
             <p>Réestimer le même type de modèle sur un siècle, avec les variables qui existent depuis 1926,
             pour avoir 14 récessions au lieu de 2 et un test 2,5 fois plus précis.</p>
             <h3>Ce qu'on a trouvé</h3>
-            <p>Le gain vient presque entièrement de 2002-2026. Sur 90 ans, il vaut +0,045, trois fois et
-            demie sous le seuil, et il vient d'une baisse du risque, pas d'un gain de rendement.</p>
+            <p>Le gain vient presque entièrement de 2002-2026&nbsp;: le modèle réduit y gagne +0,145
+            (A′ complet&nbsp;: +0,17). Sur 90 ans, il vaut +0,045, trois fois et demie sous le seuil,
+            et il vient d'une baisse du risque, pas d'un gain de rendement.</p>
             <p class="callout">Une règle publiée fait mieux&nbsp;: « marché baissier + forte volatilité »
             (Daniel et Moskowitz) donne +0,11 et ramène la perte max de −37&nbsp;% à −27&nbsp;%.</p>
           </div></div>""", "docs/RESULTS_LONGHIST.md (modèle réduit à 30 variables, sans VIX ni macro)"))
@@ -648,14 +649,15 @@ def build_html() -> str:
           <div><div class="chart-title">S&amp;P 500 pendant le Covid, et l'état du modèle
           <span class="legend inline"><span><i style="background:{RED};opacity:.3"></i>stress</span></span></div>{covid_chart()}
           <div class="marks"><span><b>1</b> sommet, 19 févr.</span><span><b>2</b> le modèle bascule, 11 mars (−19&nbsp;%)</span>
-          <span><b>3</b> creux, 23 mars (−34&nbsp;%)</span><span><b>4</b> sortie du stress, avril 2021 (+80&nbsp;% depuis le creux)</span></div></div>
+          <span><b>3</b> creux, 23 mars (−34&nbsp;%)</span><span><b>4</b> première sortie, 5 août 2020 (+49&nbsp;% depuis le creux)</span>
+          <span><b>5</b> sortie définitive, 5 avril 2021 (+82&nbsp;%)</span></div></div>
           <div class="side">
             <p><b>1. Il alerte tard.</b> Le 11 mars 2020, le VIX, l'indice de la peur, était déjà passé de 14 à 54.</p>
-            <p><b>2. Il reste en crise pendant la reprise.</b> Il sort du stress quand le marché a repris
-            +80&nbsp;% depuis le creux&nbsp;: 97&nbsp;% de ses jours de stress Covid tombent après le creux
-            (55&nbsp;% sur les trois épisodes).</p>
-            <p><b>3. Le marché le savait déjà.</b> Au-delà du VIX, le modèle n'ajoute presque rien à la
-            prévision du risque (+0,20 point).</p>
+            <p><b>2. Il reste en crise pendant la reprise.</b> Il sort une première fois du stress à +49&nbsp;%
+            depuis le creux, y revient, et n'en sort définitivement qu'à +82&nbsp;%&nbsp;: 97&nbsp;% de ses
+            jours de stress Covid tombent le jour du creux ou après (55&nbsp;% sur les trois épisodes).</p>
+            <p><b>3. Le marché le savait déjà.</b> Une fois le VIX ajouté, le modèle n'ajoute presque rien
+            à la prévision du risque (+0,20 point, contre +4,48 sans le VIX).</p>
             <p class="callout"><b>Conséquence&nbsp;:</b> une couverture gagne dans la chute puis reperd dans le
             rebond. Seule une stratégie qui <b>perd dans les rebonds</b>, comme le momentum, en profite.</p>
           </div></div>""", "docs/presentation/PISTES_AMELIORATION.md §0, docs/RESULTS_CRISE.md (test P), data/cache/states.parquet"))
