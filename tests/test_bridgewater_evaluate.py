@@ -754,3 +754,51 @@ def test_placebo_session_paths_are_the_null_draws(world, planted):
     replay = [engine.run(paths[c]).reduction for c in paths.columns]
     np.testing.assert_array_equal(replay, null["r"].values)
     assert paths.shape == (len(sessions), 6)
+
+
+# ------------------------------------------------ the lock's additions (2026-09-25)
+
+
+def test_the_foreign_lag_holds_foreign_columns_one_session_later(world):
+    sessions, stamped, _, _ = world
+    excess, within, sleeve_r = _instrument_world(sessions, stamped.index)
+    live = sleeve_r.notna().all(axis=1)
+    path = pd.DataFrame(np.nan, index=sessions, columns=list(TOY_SLEEVES))
+    path.loc[live] = [0.1, 0.4, 0.2, 0.2, 0.1]
+    base = E.InstrumentLegBuilder(excess, within, TOY_SLEEVES)(path)
+    zero = E.InstrumentLegBuilder(excess, within, TOY_SLEEVES, foreign=("^BBB",))(path)
+    pd.testing.assert_series_equal(base.returns, zero.returns)  # lag 0 is the declared book
+    late = E.InstrumentLegBuilder(excess, within, TOY_SLEEVES, foreign_lag=1,
+                                  foreign=("^BBB",))(path)
+    pd.testing.assert_series_equal(late.held["^BBB"], base.held["^BBB"].shift(1))
+    pd.testing.assert_series_equal(late.held["^AAA"], base.held["^AAA"])
+    pd.testing.assert_series_equal(late.multiplier, base.multiplier)
+    ok = late.returns.notna()
+    gross = (late.held * excess.reindex(columns=late.held.columns).fillna(0.0)).sum(axis=1)
+    from regime_lab.construction import sleeves as S
+
+    expected = gross - S.cost_drag(late.held, "headline")
+    np.testing.assert_allclose(late.returns[ok], expected[ok], atol=1e-15)
+    assert (late.returns - base.returns).abs().max() > 0
+    with pytest.raises(ValueError, match="non-negative"):
+        E.InstrumentLegBuilder(excess, within, TOY_SLEEVES, foreign_lag=-1,
+                               foreign=("^BBB",))(path)
+    with pytest.raises(ValueError, match="foreign column"):
+        E.InstrumentLegBuilder(excess, within, TOY_SLEEVES, foreign_lag=1)(path)
+
+
+def test_a_missing_return_counts_as_zero_in_the_p2_estimator():
+    rng = np.random.default_rng(5)
+    index = pd.bdate_range("2020-01-01", periods=150)
+    r = pd.DataFrame(rng.standard_normal((150, 3)) * 0.01, index=index, columns=list("abc"))
+    w = pd.DataFrame(rng.random((150, 3)), index=index, columns=list("abc"))
+    gap = r.copy()
+    gap.iloc[60, 1] = np.nan
+    strict = E.ex_ante_volatility(w, gap, window=20)
+    zero = E.ex_ante_volatility(w, gap, window=20, missing_as_zero=True)
+    filled = E.ex_ante_volatility(w, gap.fillna(0.0), window=20)
+    assert strict.iloc[61:81].isna().all() and strict.iloc[81:].notna().all()
+    pd.testing.assert_series_equal(zero, filled)
+    assert zero.iloc[20:].notna().all()
+    pd.testing.assert_series_equal(E.ex_ante_volatility(w, r, window=20),
+                                   E.ex_ante_volatility(w, r, window=20, missing_as_zero=True))

@@ -1,9 +1,19 @@
 """Evaluation machinery of the Bridgewater tree: level A, its placebos, B2's map, level C.
 
 The draft is `pilotage/plans_de_recherche/bridgewater/PRESPEC_BRIDGEWATER.md`
-(2026-09-22, **not locked**); every § below is that draft's. Nothing in this module
-reads `data/`. Every function takes returns and labels as arguments, and the tests
-run it on synthetic data only.
+(2026-09-22); every § below is that draft's. The lock text, `docs/PRESPEC_BRIDGEWATER.md`,
+settles the open choices listed here (its §12) and wins wherever the two differ; the
+OC-* defaults below record the state of this module when it was built, not the lock's
+decisions. The declared objects are assembled by `construction.declared` (§12.4 of the
+lock), and the lock's inference helpers live in `construction.inference`. Nothing in
+this module reads `data/`. Every function takes returns and labels as arguments, and the
+tests run it on synthetic data only.
+
+**Not the lock's level C.** :func:`cadence_book`, :func:`level_c_compare`,
+:func:`level_c_null` and :func:`placebo_rebalances` implement a level C with a constant
+target (Two Sigma's C-1 shape). The lock's level C rebalances `sleeves.blind_book` on
+stamp subsets and calls none of them. :func:`placebo_rebalances` returns sessions that
+are already lagged, so passing them to `sleeves.blind_book` would lag twice.
 
 **Blindness.** Until the lock is committed, nothing here may be run on a real return
 series together with the real quadrant labels, or the real B1 labels, except through
@@ -866,6 +876,13 @@ class InstrumentLegBuilder:
     ``Σ_s S_s · r_s`` with ``r_s`` = `sleeves.sleeve_returns` on the same held
     within-sleeve weights, which is what `LevelA` fits its weights on (tested). A sleeve
     at weight zero holds nothing, even where its within weights are undefined.
+
+    ``foreign_lag`` (§12.4, §12.18 of the lock) is a diagnostic of time-zone causality:
+    the scaled weights of the ``foreign`` columns (markets that close before the US
+    close of the same date) are held ``foreign_lag`` sessions later before the book
+    return is formed, and costs are charged on the weights so held. The multiplier is
+    the one of the book at ``foreign_lag = 0``. At 0 the builder is the declared book,
+    bit for bit.
     """
 
     excess: pd.DataFrame
@@ -875,6 +892,8 @@ class InstrumentLegBuilder:
     target: float = VOL_TARGET
     window: int = VOL_WINDOW
     cap: float = MAX_LEVERAGE
+    foreign_lag: int = 0
+    foreign: tuple[str, ...] = ()
 
     def __call__(self, path: pd.DataFrame) -> Leg:
         names = sleeve_module.instruments(self.sleeves)
@@ -886,10 +905,22 @@ class InstrumentLegBuilder:
         held_frame = pd.DataFrame(held, index=path.index, columns=names)
         book = sleeve_module.build_book(self.excess, held_frame, target=self.target,
                                         window=self.window, cap=self.cap)
-        out = book.returns
+        if self.foreign_lag < 0:
+            raise ValueError("foreign_lag must be non-negative")
+        if self.foreign_lag == 0:
+            out = book.returns
+            weights = book.weights
+        else:
+            late = [c for c in names if c in set(self.foreign)]
+            if not late:
+                raise ValueError("foreign_lag needs at least one foreign column of the book")
+            weights = book.weights.copy()
+            weights[late] = book.weights[late].shift(self.foreign_lag)
+            r = self.excess.reindex(index=weights.index, columns=names).fillna(0.0)
+            out = (weights * r).sum(axis=1).where(weights.notna().all(axis=1)).rename("book")
         if self.cost_column is not None:
-            out = out - sleeve_module.cost_drag(book.weights, self.cost_column)
-        return Leg(out.rename("leg"), book.weights, book.multiplier, book.cap_binds)
+            out = out - sleeve_module.cost_drag(weights, self.cost_column)
+        return Leg(out.rename("leg"), weights, book.multiplier, book.cap_binds)
 
 
 @dataclass(frozen=True)
@@ -1502,16 +1533,24 @@ def gross_exposure(held: pd.DataFrame) -> pd.Series:
 
 
 def ex_ante_volatility(
-    held: pd.DataFrame, asset_returns: pd.DataFrame, *, window: int = VOL_WINDOW
+    held: pd.DataFrame,
+    asset_returns: pd.DataFrame,
+    *,
+    window: int = VOL_WINDOW,
+    missing_as_zero: bool = False,
 ) -> pd.Series:
     """Annualised ``√(w_t' Σ_{t−1} w_t)``. ``Σ_{t−1}`` is the sample covariance of
     ``asset_returns`` over the ``window`` sessions ending at t−1 (OC-P2a).
 
     Every leg is read through the same estimator, and it is causal: the weights held
     on t are known at t−1, and so is the covariance. NaN until a full window of finite
-    returns exists.
+    returns exists. With ``missing_as_zero`` a missing return counts as a zero return,
+    the convention of the book itself (`sleeves.build_book`), so a single missing price
+    does not leave the next ``window`` sessions undefined (the lock's P2, §12.11).
     """
     x = asset_returns.reindex(index=held.index, columns=held.columns).to_numpy(float)
+    if missing_as_zero:
+        x = np.where(np.isfinite(x), x, 0.0)
     n, p = x.shape
     ok = np.isfinite(x).all(axis=1)
     z = np.where(ok[:, None], x, 0.0)
@@ -1556,6 +1595,7 @@ def exposure_matched(
     on: Literal["gross", "vol"],
     target: float = VOL_TARGET,
     window: int = VOL_WINDOW,
+    missing_as_zero: bool = False,
 ) -> ExposureMatch:
     """§6 P2, the plainest operational readings: rescale session by session, reread D.
 
@@ -1580,8 +1620,10 @@ def exposure_matched(
         blind_scale = ones
         balanced_scale = (gb / go.replace(0.0, np.nan)).reindex(rb.index)
     elif on == "vol":
-        vb = ex_ante_volatility(result.blind_leg.held, asset_returns, window=window)
-        vo = ex_ante_volatility(result.balanced_leg.held, asset_returns, window=window)
+        vb = ex_ante_volatility(result.blind_leg.held, asset_returns, window=window,
+                                missing_as_zero=missing_as_zero)
+        vo = ex_ante_volatility(result.balanced_leg.held, asset_returns, window=window,
+                                missing_as_zero=missing_as_zero)
         blind_scale = (target / vb.replace(0.0, np.nan)).reindex(rb.index)
         balanced_scale = (target / vo.replace(0.0, np.nan)).reindex(rb.index)
     else:

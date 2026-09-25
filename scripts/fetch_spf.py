@@ -33,9 +33,25 @@ the retrieval time and what was checked; the SPF files are also compared with th
 hashes of the draft's download of 2026-09-22 (a new survey row every quarter changes
 them, which is reported, not refused).
 
+**The files on disk are locked inputs** (`docs/PRESPEC_BRIDGEWATER.md` §12.1). Every file
+is downloaded and verified into ``data/raw/spf/.staging/`` first, then compared with the
+file on disk:
+
+- absent on disk: installed;
+- byte-identical: nothing is written;
+- different: **refused**, and the hashes are printed, old and new, with whether the
+  content the declared object reads (`construction.declared.content_of`: surveys up to
+  2026Q3, real-time quarters up to 2026Q2, ``T10YIE`` up to 2026-09-23) is unchanged.
+  Only ``--replace`` installs a different file, and it is an amendment of the lock.
+
+``manifest.json`` is rewritten only when a file is installed or replaced. ``T10YIE`` is
+cut at ``declared.T10YIE_CUTOFF`` before it is written, so a later fetch writes the same
+rows (FRED adds a value every day).
+
 Usage:
-    .venv/bin/python scripts/fetch_spf.py
+    .venv/bin/python scripts/fetch_spf.py              # fetch, verify, compare, refuse
     .venv/bin/python scripts/fetch_spf.py --skip-fred
+    .venv/bin/python scripts/fetch_spf.py --replace    # an amendment, never by default
 """
 
 from __future__ import annotations
@@ -43,17 +59,21 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import os
+import sys
 import time
 from datetime import UTC, datetime
 from pathlib import Path
 
 import requests
 
-from regime_lab.config import RAW
+from regime_lab.config import RAW, ROOT
+from regime_lab.construction import declared as dc
 from regime_lab.construction import quadrant as qd
 from regime_lab.data.sources import fred
 
 TARGET = RAW / "spf"
+STAGING = TARGET / ".staging"
 HEADERS = {"User-Agent": "Mozilla/5.0 (research; regime-lab)"}
 
 #: SHA-256 of the files the draft opened on 2026-09-22 (survey 2026Q3 the latest row).
@@ -85,11 +105,36 @@ def sha256(content: bytes) -> str:
 
 
 def write(name: str, content: bytes) -> Path:
-    path = TARGET / name
+    """Write a verified download into the staging directory, never over a locked input."""
+    path = STAGING / name
     path.write_bytes(content)
     if sha256(path.read_bytes()) != sha256(content):
         raise RuntimeError(f"{name}: the bytes on disk differ from the bytes downloaded")
     return path
+
+
+def plan_installation(staged: dict[str, str], on_disk: dict[str, str | None], *,
+                      replace: bool) -> dict[str, str]:
+    """What to do with each staged file: ``install``, ``same``, ``replace`` or ``refused``.
+
+    ``staged`` and ``on_disk`` map a file name to its SHA-256 (``None`` when absent).
+    A file whose bytes differ from the locked one is refused unless ``replace``.
+    """
+    plan = {}
+    for name, digest in staged.items():
+        current = on_disk.get(name)
+        if current is None:
+            plan[name] = "install"
+        elif current == digest:
+            plan[name] = "same"
+        else:
+            plan[name] = "replace" if replace else "refused"
+    return plan
+
+
+def content_digest(name: str, content: bytes) -> str:
+    """SHA-256 of the content the declared object reads from a file (§12.1 of the lock)."""
+    return sha256(dc.content_of(f"data/raw/spf/{name}", content))
 
 
 def entry(name: str, url: str, content: bytes, content_type: str, checks: str) -> dict:
@@ -162,16 +207,17 @@ def fetch_release_dates() -> list[dict]:
 
 def fetch_t10yie() -> dict:
     frame = fred.fetch_current("T10YIE", frequency="daily", start="2003-01-01")
-    path = TARGET / qd.T10YIE_FILE
+    frame = frame.loc[frame["period"] <= dc.T10YIE_CUTOFF].reset_index(drop=True)
+    path = STAGING / qd.T10YIE_FILE
     frame.to_parquet(path, index=False)
     content = path.read_bytes()
     print(f"{qd.T10YIE_FILE:34} {len(content):>7,} B  {len(frame):,} rows "
           f"{frame['period'].min():%Y-%m-%d} -> {frame['period'].max():%Y-%m-%d}")
     return entry(qd.T10YIE_FILE, f"{fred.FRED_CSV}?id=T10YIE&cosd=2003-01-01", content,
                  "application/x-parquet (written from FRED CSV)",
-                 f"FRED lag path, available_at = period + 1 day, coverage-checked; "
-                 f"{len(frame)} rows {frame['period'].min():%Y-%m-%d} to "
-                 f"{frame['period'].max():%Y-%m-%d}")
+                 f"FRED lag path, available_at = period + 1 day, coverage-checked; cut at "
+                 f"{dc.T10YIE_CUTOFF:%Y-%m-%d}; {len(frame)} rows "
+                 f"{frame['period'].min():%Y-%m-%d} to {frame['period'].max():%Y-%m-%d}")
 
 
 def negative_control() -> dict:
@@ -187,11 +233,59 @@ def negative_control() -> dict:
     raise RuntimeError(f"negative control accepted: {url} is now a real workbook?")
 
 
+def name_of(row: dict) -> str:
+    return Path(row["path"]).name
+
+
+def install(files: list[dict], *, replace: bool
+            ) -> tuple[dict[str, str], list[dict], list[dict]]:
+    """Compare the staged files with the locked ones and install what the plan allows."""
+    manifest_path = TARGET / "manifest.json"
+    old = {}
+    if manifest_path.exists():
+        old = {name_of(r): r for r in json.loads(manifest_path.read_text())["files"]}
+    staged = {name_of(r): r["sha256"] for r in files}
+    on_disk = {n: (sha256((TARGET / n).read_bytes()) if (TARGET / n).exists() else None)
+               for n in staged}
+    plan = plan_installation(staged, on_disk, replace=replace)
+    print(f"\n{'file':34} {'status':8} {'on disk':>16} {'downloaded':>16}  used content")
+    report = []
+    for row in files:
+        name = name_of(row)
+        new_bytes = (STAGING / name).read_bytes()
+        same_content = None
+        if on_disk[name] is not None:
+            same_content = (content_digest(name, new_bytes)
+                            == content_digest(name, (TARGET / name).read_bytes()))
+        report.append({"file": name, "status": plan[name], "on_disk": on_disk[name],
+                       "downloaded": row["sha256"], "same_used_content": same_content})
+        print(f"{name:34} {plan[name]:8} {(on_disk[name] or '-')[:16]:>16} "
+              f"{row['sha256'][:16]:>16}  "
+              + {None: "-", True: "unchanged", False: "CHANGED"}[same_content])
+        if plan[name] in ("install", "replace"):
+            os.replace(STAGING / name, TARGET / name)
+    entries = []
+    for row in files:
+        name = name_of(row)
+        if plan[name] in ("install", "replace") or name not in old and plan[name] == "same":
+            entries.append(row)
+        elif name in old:
+            entries.append(old[name])
+        else:
+            disk = (TARGET / name).read_bytes()
+            entries.append(entry(name, row["url"], disk, "",
+                                 "on disk before this fetch; the download was refused"))
+    return plan, entries, report
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("--skip-fred", action="store_true", help="do not fetch T10YIE")
+    parser.add_argument("--replace", action="store_true",
+                        help="install downloads that differ from the locked files (amendment)")
     args = parser.parse_args()
     TARGET.mkdir(parents=True, exist_ok=True)
+    STAGING.mkdir(parents=True, exist_ok=True)
 
     files = [fetch_workbook(name, required) for name, required in qd.SPF_LEVEL_FILES.values()]
     files.append(fetch_workbook(*qd.SPF_GROWTH_FILE))
@@ -199,18 +293,35 @@ def main() -> None:
     files.extend(fetch_release_dates())
     if not args.skip_fred:
         files.append(fetch_t10yie())
-    elif (TARGET / qd.T10YIE_FILE).exists():
-        content = (TARGET / qd.T10YIE_FILE).read_bytes()
-        files.append(entry(qd.T10YIE_FILE, "", content, "application/x-parquet",
-                           "not refetched (--skip-fred); hash of the file on disk"))
-    manifest = {
-        "written_at": datetime.now(UTC).isoformat(timespec="seconds"),
-        "script": "scripts/fetch_spf.py",
-        "files": files,
-        "negative_control": negative_control(),
-    }
-    (TARGET / "manifest.json").write_text(json.dumps(manifest, indent=2) + "\n")
-    print(f"manifest: data/raw/spf/manifest.json ({len(files)} files)")
+    control = negative_control()
+    plan, entries, report = install(files, replace=args.replace)
+    (STAGING / "comparison.json").write_text(json.dumps(
+        {"compared_at": datetime.now(UTC).isoformat(timespec="seconds"), "files": report},
+        indent=2) + "\n")
+    manifest_path = TARGET / "manifest.json"
+    shown = manifest_path.relative_to(ROOT)
+    if any(action in ("install", "replace") for action in plan.values()):
+        kept = {name_of(e) for e in entries}
+        if manifest_path.exists():
+            for row in json.loads(manifest_path.read_text())["files"]:
+                if name_of(row) not in kept:
+                    entries.append(row)
+        manifest = {
+            "written_at": datetime.now(UTC).isoformat(timespec="seconds"),
+            "script": "scripts/fetch_spf.py",
+            "files": entries,
+            "negative_control": control,
+        }
+        manifest_path.write_text(json.dumps(manifest, indent=2) + "\n")
+        print(f"manifest: {shown} ({len(entries)} files)")
+    else:
+        print(f"manifest: {shown} left unchanged (nothing installed)")
+    refused = [n for n, action in plan.items() if action == "refused"]
+    if refused:
+        print(f"REFUSED to overwrite {len(refused)} locked input(s): {', '.join(refused)}. "
+              "The downloads stay in the staging directory. Replacing them is an amendment "
+              "of the lock (--replace).", file=sys.stderr)
+        raise SystemExit(2)
 
 
 if __name__ == "__main__":
