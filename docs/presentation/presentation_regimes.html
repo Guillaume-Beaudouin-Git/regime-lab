@@ -198,7 +198,7 @@ code { font: 11.5pt Menlo, monospace; background: #f1f2f4; padding: 0 0.04in; bo
 <section class="slide ">
   <div class="eyebrow">Les cinq modèles</div>
   <h1>Deux familles à états cachés, deux prédicteurs directs</h1>
-  <div class="body"><table class="wide"><thead><tr><th class="">Modèle</th><th class="">Comment ça marche</th><th class="">Réglages</th><th class="">Rôle</th></tr></thead><tbody><tr class="hl"><td class=""><b>A′ Sparse Jump Model</b></td><td class="">Regroupe les jours semblables et <b>fait payer chaque changement d'état</b>&nbsp;; sélectionne lui-même ses variables</td><td class="">2 états, pénalité λ recalibrée toutes les 4 réestimations, au plus 10 variables</td><td class="">Modèle principal</td></tr><tr><td class="">A Jump model</td><td class="">Même principe, sans sélection de variables</td><td class="">2 états, λ recalibrée toutes les 4 réestimations</td><td class="">Variante</td></tr><tr><td class="">B HMM gaussien</td><td class="">Chaîne de Markov cachée, lois gaussiennes par état, probabilité <b>filtrée</b></td><td class="">2 états, matrice de transition</td><td class="">Référence classique</td></tr><tr><td class="">C Gradient boosting</td><td class="">Pas d'état caché&nbsp;: prédit la volatilité à 21 jours, puis la coupe à sa médiane</td><td class="">LightGBM, seuil appris sur le passé</td><td class="">Défi du machine learning</td></tr><tr><td class="">C′ HAR-RV</td><td class="">Modèle linéaire de volatilité (1, 5, 21 jours), coupé de même</td><td class="">Régression à 3 termes</td><td class="">Référence de la littérature</td></tr></tbody></table><div class="note">C et C′ sont <b>supervisés</b>&nbsp;: ils apprennent, sur le passé,
+  <div class="body"><table class="wide"><thead><tr><th class="">Modèle</th><th class="">Comment ça marche</th><th class="">Réglages</th><th class="">Rôle</th></tr></thead><tbody><tr class="hl"><td class=""><b>A′ Sparse Jump Model</b></td><td class="">Regroupe les jours semblables et <b>fait payer chaque changement d'état</b>&nbsp;; sélectionne lui-même ses variables</td><td class="">2 états, pénalité λ recalibrée toutes les 4 réestimations, ≈ 10 variables effectives</td><td class="">Modèle principal</td></tr><tr><td class="">A Jump model</td><td class="">Même principe, sans sélection de variables</td><td class="">2 états, λ recalibrée toutes les 4 réestimations</td><td class="">Variante</td></tr><tr><td class="">B HMM gaussien</td><td class="">Chaîne de Markov cachée, lois gaussiennes par état, probabilité <b>filtrée</b></td><td class="">2 états, matrice de transition</td><td class="">Référence classique</td></tr><tr><td class="">C Gradient boosting</td><td class="">Pas d'état caché&nbsp;: prédit la volatilité à 21 jours, puis la coupe à sa médiane</td><td class="">LightGBM, seuil appris sur le passé</td><td class="">Défi du machine learning</td></tr><tr><td class="">C′ HAR-RV</td><td class="">Modèle linéaire de volatilité (1, 5, 21 jours), coupé de même</td><td class="">Régression à 3 termes</td><td class="">Référence de la littérature</td></tr></tbody></table><div class="note">C et C′ sont <b>supervisés</b>&nbsp;: ils apprennent, sur le passé,
         à prédire directement la volatilité future. A, A′ et B ne voient jamais cette cible. Les
         premiers sont donc avantagés sur la prévision de volatilité&nbsp;: c'est voulu, pour
         vérifier si la notion d'«&nbsp;état caché&nbsp;» apporte quelque chose.</div></div>
@@ -214,7 +214,8 @@ code { font: 11.5pt Menlo, monospace; background: #f1f2f4; padding: 0 0.04in; bo
             Σ<sub>t</sub> ‖ x<sub>t</sub> − μ<sub>s<sub>t</sub></sub> ‖<sup>2</sup><sub>w</sub>
             &nbsp;+&nbsp; <b>λ</b> · Σ<sub>t</sub> 1{ s<sub>t</sub> ≠ s<sub>t−1</sub> }</div>
             <div class="formula-caption">avec des poids de variables <i>w</i> contraints en
-            norme L1&nbsp;: au plus 10 variables sur 50 reçoivent un poids.</div>
+            norme L1&nbsp;: le nombre effectif de variables est fixé à 10&nbsp;; une vingtaine gardent un
+            poids, dix en portent l'essentiel.</div>
             <ol class="steps3">
               <li><b>Regrouper.</b> Comme un k-moyennes, il affecte chaque jour à l'état dont le
               profil (centre μ) lui ressemble le plus.</li>
@@ -230,7 +231,7 @@ code { font: 11.5pt Menlo, monospace; background: #f1f2f4; padding: 0 0.04in; bo
               <li><span>États</span><b>2 (stress, calme)</b></li>
               <li><span>Pénalité λ</span><b>choisie dans {1, 3, 10, 30, 100, 300} toutes les 4
               réestimations&nbsp;; repli à 20 depuis 2022</b></li>
-              <li><span>Variables</span><b>au plus 10 sur 50</b></li>
+              <li><span>Variables</span><b>10 effectives sur 50</b></li>
               <li><span>Réestimation</span><b>tous les 6 mois, passé seul</b></li>
               <li><span>Ordre des états</span><b>par la volatilité d'entraînement</b></li>
             </ul>
@@ -327,8 +328,8 @@ code { font: 11.5pt Menlo, monospace; background: #f1f2f4; padding: 0 0.04in; bo
               récente sur les régimes (Nystrup et al., Aydınhan et al.).</li>
               <li><b>Persistance réglée explicitement</b> par λ&nbsp;: peu de changements, donc
               peu de rotation et peu de coûts.</li>
-              <li><b>Sélection de variables intégrée</b>&nbsp;: au plus 10 variables sur 50, donc un
-              modèle lisible.</li>
+              <li><b>Sélection de variables intégrée</b>&nbsp;: l'essentiel du poids sur une dizaine de
+              variables, donc un modèle lisible.</li>
               <li>Pas d'hypothèse de loi explicite, contrairement au HMM gaussien.</li>
             </ul></div>
           <div class="card tall"><h3>Confirmé par les mesures</h3>

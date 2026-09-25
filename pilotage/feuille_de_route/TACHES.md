@@ -194,6 +194,9 @@ du résultat, c'est de la mise en évidence — voir `PISTES.md`, piste 3, P ≈
 *23/09 :* un support complet existe, `docs/presentation/presentation_regimes.pdf`
 (généré par `scripts/build_presentation.py`). Reste à le réduire à 8-10 diapositives et
 à écrire le texte oral.
+*25/09 : FAIT.* L'oral a eu lieu le 25 septembre 2026, sur le deck de 14 diapositives
+(deux styles, liens dans `AVANCEMENT.md` §1). Le dossier remis au professeur est
+`docs/presentation/dossier_regimes.pdf`, généré par `scripts/build_dossier.py`.
 
 **C2. H3 n'a pas son écrit.** H1 et H2 ont `RESULT_DISPERSION.md` et
 `NOTE_DISPERSION_FR.md`. H3 — les surprises macro, la construction de Dedale — n'a
@@ -329,7 +332,7 @@ automatiquement par toute session ouverte ici. Ce fichier-ci en est le détail.
 
 ### ⟶ 12. ENSUITE — voir `AVANCEMENT.md` §4 et §5
 
-Dans l'ordre proposé : la présentation de 10 minutes ; ~~les instruments et les
+Dans l'ordre proposé : ~~la présentation de 10 minutes~~ (**FAITE le 25/09**, oral et dossier) ; ~~les instruments et les
 lectures Two Sigma~~ (**FAIT le 23/09**, arbre fermé, voir l'item 11) ; la fermeture de l'arbre AHL (le MDE de C1,
 et la décision sur la lecture A1 principale sur (126,10)) ; le nettoyage et le commit de
 `pilotage/mesures_brutes/` ; puis le plan Bridgewater. La porte G0 de Rentec reste la

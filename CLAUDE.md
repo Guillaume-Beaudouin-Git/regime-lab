@@ -44,8 +44,10 @@ voisin »). C'est la règle appliquée le 21/09 puis le 22/09.
 **Les priorités sont dans `AVANCEMENT.md` §4 et §5, et c'est Guillaume qui les fixe.**
 Ne choisis pas à sa place. Trois chantiers sont prêts.
 
-**1. La présentation de 10 minutes** (rien à calculer) : le fil et les trois figures
-sont décrits dans `AVANCEMENT.md` §4, tâche 1.
+**1. La présentation de 10 minutes — FAITE le 25/09.** L'oral a eu lieu ; le dossier
+remis au professeur est `docs/presentation/dossier_regimes.pdf` (`scripts/build_dossier.py`,
+étiquette git `dossier-2026-09-25`). Tout chiffre qu'on y change doit l'être aussi dans les
+deux PDF de présentation, les deux decks et `docs/presentation/PARTIE1_CHEMINEMENT.md`.
 
 **2. Le plan Two Sigma — FAIT et FERMÉ le 23/09** (`docs/RESULTS_TWOSIGMA.md`). Les trois
 niveaux sont lus, l'étape de Holm et les 14 sensibilités aussi, et 20 essais sont
@@ -135,8 +137,8 @@ résultats de régime** : un livre de 9 stratégies non conditionné fait 1,52 d
 sur 2005-2026 (plafond : sans coût, stratégies choisies en connaissant ces années) ; le
 signe de la corrélation actions-obligations prédit le risque d'un portefeuille à risque
 égal au-delà du VIX (placebo pile au seuil de 95 %). Le mécanisme de l'échec du SJM : il
-entre en stress tard et **y reste pendant les reprises** (55 % des séances de stress après
-le creux, 97 % au Covid). La réserve scellée AQR (1971-1989) a été **ouverte** le 23/09
+entre en stress tard et **y reste pendant les reprises** (55 % des séances de stress le
+jour du creux ou après, 97 % au Covid). La réserve scellée AQR (1971-1989) a été **ouverte** le 23/09
 pour `longhist` (`docs/PROTOCOL_FREEZE.md`).
 
 **La sélection entre signaux a été testée le 23/09 (plan Two Sigma) et ne transfère
@@ -182,7 +184,7 @@ moins un de ces axes **et le chiffrer**.
 - Les documents verrouillés ne se modifient pas : les écarts vont dans
   `docs/PROTOCOL_FREEZE.md`.
 
-## Les six pièges qui se sont réellement produits ici
+## Les sept pièges qui se sont réellement produits ici
 
 1. **Un chiffre publié sans code commité, cinq fois.** La dernière : les scripts des
    mesures qui ont fondé les cinq plans vivaient dans `/private/tmp`. Relance le code
@@ -198,12 +200,16 @@ moins un de ces axes **et le chiffrer**.
 6. **Affirmer une cause sans l'avoir vérifiée.** Le 22/09, l'écart 7,26 / 9,10 alarmes par
    an a d'abord été attribué à une standardisation non causale. La vraie cause était le
    type de rendement (log contre simple). Corrigé dans `4dd0eb6`.
+7. **Décrire un réglage au lieu de le mesurer.** Le 25/09, « le Sparse Jump Model garde au
+   plus 10 variables » a remplacé « ≈ 10 effectives » dans tous les supports, alors que
+   `max_feats = 10` borne le nombre *effectif* de variables et que 17 à 24 gardent un
+   poids non nul. Mesuré par `scripts/measure_sjm_sparsity.py`, puis corrigé partout.
 
 ## Environnement
 
 ```bash
 uv sync --all-packages --extra dev     # un seul .venv à la racine, les trois paquets en éditable
-.venv/bin/python -m pytest -q          # 122 tests
+.venv/bin/python -m pytest -q          # 849 tests au 25/09, ~15 min
 .venv/bin/ruff check .                 # doit rester propre
 ```
 
