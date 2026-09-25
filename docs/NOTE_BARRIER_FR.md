@@ -580,6 +580,6 @@ seul, et journalisés au §4 avec ce qu'ils produisaient avant correction.
 | `run_full.txt` | sortie intégrale du passage complet (260 s, tirages du §3) |
 | `run_quick_kept.txt`, `barrier_results_quick.json` | le passage court préalable (34 s, un quart des tirages) — verdicts identiques |
 
-Reproduction : `.venv/bin/python regime_barrier.py` depuis `~/Desktop/regime-lab`
+Reproduction : `.venv/bin/python regime_barrier.py` depuis la racine du dépôt
 avec le venv du dépôt. `BARRIER_SCALE=quick` pour le passage court. Graine unique
 `20260913`, déclarée dans `DECLARED`.

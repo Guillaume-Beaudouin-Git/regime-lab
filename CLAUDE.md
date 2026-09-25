@@ -112,8 +112,9 @@ est `docs/PRESPEC_AHL.md` (commit `92e4e9e`). Ne le modifie pas.
 ## Ce que le programme a établi
 
 **Le classifieur marche comme classifieur** : 93,2 % d'exactitude équilibrée contre les
-récessions NBER, kappa 0,53, sur 6 377 jours hors échantillon. ⚠ **Sur deux récessions
-seulement** (2008-09, 2020). La même méthode réduite à 30 variables et réestimée sur
+récessions NBER, kappa 0,53, sur 6 377 jours hors échantillon, contre 84,0 % (κ 0,34) pour
+la meilleure règle de volatilité d'une ligne sur les mêmes jours (`docs/artifacts/temoin_nber.txt`,
+mesuré le 25/09). ⚠ **Sur deux récessions seulement** (2008-09, 2020). La même méthode réduite à 30 variables et réestimée sur
 1926-2026 n'en reconnaît que **6 sur 14** (57,5 %, κ 0,16), pas mieux qu'une règle de
 volatilité (`docs/RESULTS_LONGHIST.md`) : ne jamais citer le 93 % sans ces deux faits.
 
@@ -138,7 +139,10 @@ sur 2005-2026 (plafond : sans coût, stratégies choisies en connaissant ces ann
 signe de la corrélation actions-obligations prédit le risque d'un portefeuille à risque
 égal au-delà du VIX (placebo pile au seuil de 95 %). Le mécanisme de l'échec du SJM : il
 entre en stress tard et **y reste pendant les reprises** (55 % des séances de stress le
-jour du creux ou après, 97 % au Covid). La réserve scellée AQR (1971-1989) a été **ouverte** le 23/09
+jour du creux ou après, 97 % au Covid). ⚠ **En partie un effet des réestimations** : trois des
+six entrées en stress d'A′ tombent un jour de réestimation (1/10/2009, 1/10/2020, 1/4/2021),
+soit 153 des 1 013 jours de stress et 124 des 229 du Covid (`regime_lab/models/base.py`, le
+filtrage repart de `train.tail(252)` à chaque réestimation ; constaté le 25/09). La réserve scellée AQR (1971-1989) a été **ouverte** le 23/09
 pour `longhist` (`docs/PROTOCOL_FREEZE.md`).
 
 **La sélection entre signaux a été testée le 23/09 (plan Two Sigma) et ne transfère
@@ -209,7 +213,7 @@ moins un de ces axes **et le chiffrer**.
 
 ```bash
 uv sync --all-packages --extra dev     # un seul .venv à la racine, les trois paquets en éditable
-.venv/bin/python -m pytest -q          # 849 tests au 25/09, ~15 min
+.venv/bin/python -m pytest -q          # 851 tests au 25/09, 15 à 25 min
 .venv/bin/ruff check .                 # doit rester propre
 ```
 
@@ -226,4 +230,4 @@ les chemins.
 - ⚠ `~/.gitignore_global` contient `config.py` : un nouveau fichier de ce nom doit être
   ajouté avec `git add -f`.
 - La littérature (PDF, sous droits) est hors du dépôt :
-  `~/Desktop/M2/Projet_Big_Data_Regimes/3_Litterature/`.
+  le dossier `3_Litterature/`, à côté du dépôt.

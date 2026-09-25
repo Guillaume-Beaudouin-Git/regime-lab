@@ -149,8 +149,9 @@ Open, and declared rather than quietly omitted:
   as `scripts/run_t1_control.py`, `run_t3_control.py` and
   `run_t5_refit.py` + `run_t5_control.py`; results in
   `docs/RESULTS_FALSIFICATION.md`. What they found: **T1** — no family beats the
-  one-line volatility-quantile placebo at strategy level, gaps of +0.04 to +0.06
-  Sharpe against minimum detectable effects of 0.22 to 0.44, and stopping rule 1
+  one-line volatility-quantile placebo at strategy level, gaps of −0.04 to +0.06
+  Sharpe against minimum detectable effects of 0.22 to 0.44 (corrected 2026-09-25: this
+  line said "+0.04 to +0.06"; B and C are at −0.04 and −0.02 in the source table), and stopping rule 1
   passes on 0 folds of 5 against a threshold of 3. **T3** — the overlay sits at
   the 89th-97th percentile of its matched-exposure placebo on Sharpe and alpha
   but at the 13th-76th on mean return and the **0th on beta**: the apparent alpha
@@ -177,5 +178,5 @@ Open, and declared rather than quietly omitted:
   the first print of a period forever, which is conservative rather than exact —
   the README claim that any past panel is rebuilt "exactly as it stood" is
   wrong, and is corrected there.
-- **The trials log holds 83 distinct configurations**, not the 805 evaluations
+- **The trials log held 83 distinct configurations on 2026-09-10**, not the 805 evaluations
   its row count suggests; repeated runs stack duplicates.

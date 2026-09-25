@@ -1,0 +1,14 @@
+One-line volatility rules against NBER, on the models' out-of-sample days
+2002-04-01 to 2026-09-08, 6377 days, 435 recession days; S&P 500 21-session realised volatility.
+
+label                                  bal.acc  kappa  recall   spec  stress switch/yr rec|stress mean run
+A  jump                                  93.3%   0.49   99.1%  87.6%   18.3%      0.53      36.9%      456
+A' sparse jump                           93.2%   0.53   96.3%  90.0%   15.9%      0.53      41.4%      456
+B  filtered HMM                          84.7%   0.24  100.0%  69.5%   35.3%      2.01      19.3%      128
+C  gradient boost                        75.0%   0.12   98.9%  51.2%   52.2%     14.08      12.9%       18
+C' HAR-RV                                78.2%   0.17   94.5%  62.0%   41.8%     18.41      15.4%       14
+rule: vol above expanding median         77.2%   0.14   99.5%  54.9%   48.8%      6.75      13.9%       38
+rule: vol above expanding 80th pct       84.0%   0.34   85.3%  82.8%   21.8%      4.26      26.7%       61
+
+Switches per calendar year; rec|stress = share of stress days that fall in a
+recession; mean run in days. The five model rows reproduce the published kappas.

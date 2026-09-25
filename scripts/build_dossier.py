@@ -96,6 +96,24 @@ def sparsity() -> tuple[int, int, int, int]:
     return tuple(int(g) for g in m.groups())  # type: ignore[return-value]
 
 
+RULES = {"rule: vol above expanding 80th pct": "Témoin : vol. > 80ᵉ centile",
+         "rule: vol above expanding median": "Témoin : vol. > médiane"}
+
+
+def temoin() -> dict[str, dict]:
+    """The two one-line volatility rules scored against NBER (docs/artifacts/temoin_nber.txt)."""
+    text = (ROOT / "docs" / "artifacts" / "temoin_nber.txt").read_text(encoding="utf-8")
+    out = {}
+    for key, label in RULES.items():
+        line = next((ln for ln in text.splitlines() if ln.startswith(key)), None)
+        if line is None:
+            raise SystemExit(f"{key} missing from temoin_nber.txt: run scripts/measure_vol_rule_nber.py")
+        ba, kappa, recall, spec, stress, per_year, precision, run = map(float, re.findall(r"\d+\.\d+|\d+", line[len(key):]))
+        out[key] = {"label": label, "ba": ba, "kappa": kappa, "recall": recall, "spec": spec, "stress": stress,
+                    "per_year": per_year, "precision": precision, "run": int(run), "rule": True}
+    return out
+
+
 def n_configs() -> int:
     return int(pd.read_parquet(ROOT / "data" / "trials.parquet")["config_hash"].nunique())
 
@@ -112,8 +130,8 @@ def gridline(x: float, top: float, bottom: float, zero: bool = False) -> str:
             f'stroke-width="{1.4 if zero else 1}"/>')
 
 
-def fig_accuracy(l1: dict) -> str:
-    others = sorted((r for k, r in l1.items() if k != "A' sparse jump"), key=lambda r: -r["ba"])
+def fig_accuracy(l1: dict, rules: dict) -> str:
+    others = sorted([*(r for k, r in l1.items() if k != "A' sparse jump"), *rules.values()], key=lambda r: -r["ba"])
     rows = [l1["A' sparse jump"], *others]
     width, row, label_w, right = 700, 34, 170, 190
     height = row * len(rows) + 30
@@ -133,7 +151,9 @@ def fig_accuracy(l1: dict) -> str:
         lead = r["label"].startswith("A′")
         w = 600 if lead else 400
         out.append(svg_text(label_w - 10, yc, esc(r["label"]), size=13, anchor="end", weight=w))
-        out.append(f'<rect x="{label_w}" y="{yc - 11:.1f}" width="{x(r["ba"]) - label_w:.1f}" height="22" rx="3" fill="{BLUE if lead else GREY}"/>')
+        fill = BLUE if lead else ("#e9e7e0" if r.get("rule") else GREY)
+        stroke = f' stroke="{GREY}" stroke-dasharray="3 2"' if r.get("rule") else ""
+        out.append(f'<rect x="{label_w}" y="{yc - 11:.1f}" width="{x(r["ba"]) - label_w:.1f}" height="22" rx="3" fill="{fill}"{stroke}/>')
         out.append(svg_text(x(r["ba"]) + 8, yc, fr(r["ba"], ".1f") + " %", size=13, weight=w))
         out.append(svg_text(x(r["ba"]) + 70, yc, "κ " + fr(r["kappa"], ".2f"), size=12, fill=INK2))
     out.append("</svg>")
@@ -183,7 +203,7 @@ def fig_timeline() -> str:
 def fig_r2() -> str:
     rows = [("A′ Sparse Jump Model", 3.93, 0.030, True), ("A Jump Model", 3.47, 0.022, False),
             ("B HMM filtré", 2.26, 0.007, False), ("C Gradient boosting", 2.13, 0.023, False),
-            ("C′ HAR-RV", 0.19, 0.008, False), ("Témoin de volatilité", 0.004, 0.000, False)]
+            ("C′ HAR-RV", 0.19, 0.008, False), ("Règle médiane (binaire)", 0.004, 0.000, False)]
     width, row, label_w, right = 700, 42, 170, 70
     height = row * len(rows) + 30
     plot = width - label_w - right
@@ -367,6 +387,8 @@ def french_typography(html: str) -> str:
             part = part.replace("« ", "«\u00a0")
             part = re.sub(r"(\d) (\d{3})\b", "\\1\u00a0\\2", part)
             part = part.replace(" = ", "\u00a0=\u00a0")
+            part = part.replace("'", "\u2019")
+            part = re.sub(r"(\d) (?=[^\W\d_])", "\\1\u00a0", part)
             parts[i] = part
         chunks[j] = "".join(parts)
     return "".join(chunks)
@@ -460,6 +482,7 @@ tr { break-inside: avoid; }
 def build_html() -> str:
     print("checking the published figures against the data")
     l1 = check_layer1()
+    rules = temoin()
     umd, bond = p2.umd_arms(), p2.b1_arms()
     extra = p2.check(umd, bond)
     nz_lo, nz_hi, sh_lo, sh_hi = sparsity()
@@ -483,11 +506,11 @@ def build_html() -> str:
   <a href="{REPO_URL}" style="font-size:11pt">{REPO_URL.replace("https://", "")}</a><br>
   Sa page d'accueil explique par où commencer et où se trouve le code de chaque partie de ce dossier (voir
   aussi §10). Version qui accompagne ce dossier&nbsp;: étiquette <b>{TAG}</b>. Tous les chiffres renvoient à
-  un fichier du dépôt, cité sous chaque tableau et chaque figure.</div>
+  un fichier du dépôt&nbsp;: chaque tableau et chaque figure cite sa source.</div>
 </div>
 <div class="toc">
   <b>Résumé</b><br><b>1</b> La question et la démarche<br><b>2</b> Les données<br><b>3</b> Les modèles et le protocole<br>
-  <b>4</b> Résultat 1 : il reconnaît les crises<br><b>5</b> Résultat 2 : le risque, pas la direction<br>
+  <b>4</b> Résultat 1 : il reconnaît les deux récessions<br><b>5</b> Résultat 2 : le risque, pas la direction<br>
   <b>6</b> Application : trois stratégies<br><b>7</b> Pourquoi le filtre ne paie pas<br><b>8</b> Limites<br>
   <b>9</b> Conclusion et ouverture<br><b>10</b> Accéder au code et reproduire les résultats<br><b>Bibliographie</b><br>
   <b>Annexes</b> A. Les 50 variables · B. Écarts au protocole · C. Méthode statistique · D. Le test sur 90 ans · E. Les autres études
@@ -499,36 +522,40 @@ def build_html() -> str:
 <p>Les marchés alternent des périodes calmes et des périodes de crise. Nous avons posé deux questions. Un modèle
 peut-il reconnaître la crise <b>pendant</b> qu'elle se produit, sans connaître la suite&nbsp;? Et cette
 reconnaissance permet-elle de <b>mieux investir</b>&nbsp;? Les modèles, les règles et les critères de décision ont
-été écrits et gelés avant le premier résultat&nbsp;; chaque étude ultérieure a eu son protocole commité avant
-sa lecture.</p>
+été écrits et gelés avant le premier résultat&nbsp;; chaque étude ultérieure a eu son protocole déposé dans git
+avant sa lecture.</p>
 <div class="kpis">
-  <div class="kpi"><div class="v">{fr(a['ba'], '.1f')} %</div><div class="l">d'exactitude face aux récessions officielles</div>
-  <div class="d">Sparse Jump Model, {thousands(a['n'])} séances hors échantillon (avril 2002 – septembre 2026). Sur deux récessions seulement.</div></div>
+  <div class="kpi"><div class="v">{fr(a['ba'], '.1f')} %</div><div class="l">d'exactitude équilibrée face aux récessions officielles</div>
+  <div class="d">Sparse Jump Model, {thousands(a['n'])} jours hors échantillon (2002-2026), sur deux récessions seulement. Règle de volatilité d'une ligne&nbsp;: 84,0 %.</div></div>
   <div class="kpi"><div class="v">+3,93 pts</div><div class="l">de R² sur la volatilité à venir</div>
-  <div class="d">au-delà d'une règle de volatilité passée (t = −3,40)&nbsp;; +0,20 seulement une fois le VIX ajouté.</div></div>
+  <div class="d">au-delà d'une règle de volatilité passée (t = −3,40). Test séparé sur le S&amp;P 500&nbsp;: +4,48 sans le VIX, +0,20 avec.</div></div>
   <div class="kpi"><div class="v">+0,03 pt</div><div class="l">de R² sur les rendements à venir</div>
   <div class="d">t = 0,27&nbsp;: aucune information sur la direction du marché.</div></div>
-  <div class="kpi"><div class="v">0 / 63</div><div class="l">usages du filtre démontrés utiles</div>
+  <div class="kpi"><div class="v">0 / 62</div><div class="l">usages du filtre démontrés utiles</div>
   <div class="d">arrêt, réduction, bascule, valeurs refuges, options, sur 13 stratégies.</div></div>
 </div>
 <ol>
   <li><b>Le classifieur fonctionne, dans un cadre étroit.</b> Parmi cinq modèles comparés sous un protocole
-  identique, le Sparse Jump Model est le plus stable ({a['switches']} changements d'état en 24 ans) et le plus en
-  accord avec les récessions (κ = 0,53). Mais la période de test ne contient que deux récessions&nbsp;; réestimée
-  sur 1926-2026 avec les 30 variables qui existent depuis 1926, la même méthode n'en reconnaît que 6 sur 14.</li>
+  identique, le Sparse Jump Model est, avec le Jump Model simple, le plus stable ({a['switches']} changements
+  d'état en 24 ans), et le plus en accord avec les récessions&nbsp;: κ = 0,53, contre 0,34 pour la meilleure règle
+  de volatilité d'une ligne. Mais la période de test ne contient que deux récessions&nbsp;; réestimée sur 1926-2026
+  (hors échantillon&nbsp;: 1937-2026) avec les 30 variables qui existent depuis 1926, la même méthode n'en reconnaît
+  que 6 sur 14.</li>
   <li><b>Il mesure le risque, pas la direction.</b> L'état prévoit l'ampleur des mouvements des semaines
   suivantes, pas leur sens. Et le marché des options, à travers le VIX, contient déjà presque toute cette
   information.</li>
   <li><b>Comme filtre de trading, il ne paie pas de façon démontrable.</b> Sur trois stratégies aux profils
-  opposés, l'effet dépend de la stratégie&nbsp;: il aide le momentum actions (Sharpe 0,47 → 0,70 en coupant en
-  stress, 0,77 avec de l'or à la place), laisse le rebond obligataire de fin de mois inchangé et pénalise la
-  tendance crypto (1,13 → 0,89). Aucun gain ne dépasse le seuil de détection, une règle de volatilité d'une
-  ligne fait aussi bien, et sur 90 ans le meilleur cas tombe à +0,045.</li>
+  opposés, l'effet dépend de la stratégie&nbsp;: il améliore le Sharpe du momentum actions (0,47 → 0,70 en le
+  coupant en stress, 0,77 avec de l'or à la place), laisse le rebond obligataire de fin de mois inchangé et
+  dégrade la tendance crypto (1,13 → 0,89). Aucun de ces écarts ne dépasse le seuil de détection, une règle de
+  volatilité d'une ligne fait aussi bien, et sur 90 ans le gain de l'arrêt du momentum en stress tombe à
+  +0,045.</li>
 </ol>
 <p><b>Pourquoi.</b> Le modèle entre en stress tard (Covid&nbsp;: le 11 mars 2020, S&amp;P 500 déjà à −19 %, VIX passé de
-14 à 54) et y reste pendant la reprise (sortie définitive le 5 avril 2021, +82 % au-dessus du point bas). Une
-protection gagne donc dans la chute et reperd dans le rebond&nbsp;; seule une stratégie qui perd précisément dans
-les rebonds, comme le momentum, en profite.</p>
+14 à 54) et reste en stress pendant une grande partie de la reprise&nbsp;: sorti le 5 août 2020, il y est replacé
+par la réestimation semestrielle d'octobre jusqu'en mars 2021. Une protection gagne donc dans la chute et rend
+ses gains dans le rebond&nbsp;; seule une stratégie qui perd précisément dans les rebonds, comme le momentum, en
+profite.</p>
 <div class="box warn"><h3>Ce que ce dossier ne prétend pas</h3><ul>
   <li>Les Sharpe de la partie application (§6-7) sont <b>sans coûts de transaction</b>, par hypothèse du cours&nbsp;:
   ce ne sont pas des performances investissables.</li>
@@ -562,7 +589,8 @@ il ne sert à rien.</p>
 <ul>
   <li><b>Pré-enregistrement.</b> Le cadrage (<code>docs/CHARTER.html</code>) a été gelé et scellé par empreinte
   SHA-256 avant le premier résultat. Chaque étude ultérieure a son protocole et son critère de décision
-  commités avant la lecture, qui n'a lieu qu'une fois. Les écarts sont consignés, datés, dans
+  déposés dans git avant la lecture, qui n'a lieu qu'une fois. Sur un historique déjà public, cela limite les
+  choix faits après avoir vu les résultats, sans les exclure tout à fait. Les écarts sont consignés, datés, dans
   <code>docs/PROTOCOL_FREEZE.md</code> (annexe B).</li>
   <li><b>Pas de regard vers l'avenir.</b> Signal calculé à la clôture de T−1, position prise en T. États
   <b>filtrés</b> (connus le jour même), jamais lissés.</li>
@@ -570,17 +598,22 @@ il ne sert à rien.</p>
   avril 2026, chacune sur les seules données antérieures.</li>
   <li><b>Un témoin partout.</b> «&nbsp;Stress si la volatilité réalisée sur 21 séances dépasse sa médiane
   passée&nbsp;», et sa variante au 80ᵉ centile.</li>
-  <li><b>Statistiques.</b> Rendements en excès du taux sans risque à 3 mois&nbsp;; erreurs-types HAC (6 retards)&nbsp;;
+  <li><b>Statistiques.</b> Rendements en excès du taux sans risque à 3 mois&nbsp;; erreurs-types HAC (6 retards
+  sur les écarts quotidiens, 21 pour les régressions à 21 séances)&nbsp;;
   seuils de détection par bootstrap stationnaire par blocs&nbsp;; placebo&nbsp;; correction pour tests multiples&nbsp;;
-  journal de tous les essais ({configs} configurations distinctes au 25 septembre 2026). Détails en annexe C.</li>
+  journal de tous les essais ({configs} configurations distinctes au 25 septembre 2026, fichier non versionné).
+  Détails en annexe C.</li>
 </ul>
 <div class="box"><h3>Comment lire un verdict</h3>
-<p><b>Seuil de détection (MDE).</b> Le plus petit écart de Sharpe que l'échantillon permet de distinguer du
-hasard, au risque corrigé du nombre de tests de l'étude.</p>
-<p><b>UTILE</b>&nbsp;: écart ≥ seuil, t HAC de même signe, au-dessus de 95 % du placebo, et meilleur que la même
-règle pilotée par chacun des deux témoins de volatilité. <b>SOUS-PUISSANT</b>&nbsp;: écart positif mais sous le
-seuil — ni oui ni non. <b>PAS UTILE</b>&nbsp;: écart nul ou négatif, sans l'être assez pour être mesuré.
-<b>NUISIBLE</b>&nbsp;: écart ≤ −seuil, confirmé par le t et le placebo.</p></div>""")
+<p><b>Seuil de détection (MDE).</b> L'écart de Sharpe que le test détecterait 8 fois sur 10, au risque d'erreur
+corrigé du nombre de tests de l'étude. Exiger un écart au moins égal à ce seuil est plus strict qu'un simple
+test de significativité.</p>
+<p><b>Placebo.</b> Les mêmes épisodes de stress, décalés à des dates tirées au hasard (400 tirages)&nbsp;: ce
+qu'obtiendrait un filtre de même rythme mais sans information.</p>
+<p><b>UTILE</b>&nbsp;: écart ≥ seuil, t HAC de même signe, meilleur que 95 % des placebos, et meilleur que le même
+usage piloté par le témoin de volatilité. <b>SOUS-PUISSANT</b>&nbsp;: écart positif mais sous le seuil — ni oui
+ni non. <b>NON MONTRÉ</b>&nbsp;: écart ≥ seuil, mais une autre condition échoue. <b>PAS UTILE</b>&nbsp;: écart nul ou
+négatif, sans dégradation mesurable. <b>NUISIBLE</b>&nbsp;: écart ≤ −seuil, confirmé par le t et le placebo.</p></div>""")
 
     # ------------------------------------------------------------------ 2 data
     data_rows = [
@@ -592,9 +625,9 @@ seuil — ni oui ni non. <b>PAS UTILE</b>&nbsp;: écart nul ou négatif, sans l'
         ["Référence", "Dates des récessions américaines (NBER, série USREC)", "FRED", "<b>jamais vue par les modèles</b>&nbsp;: sert seulement à les noter"],
     ]
     fam_rows = [
-        ["Tendance", "7", "Rendement du S&amp;P 500 sur 1, 3 et 12 mois, accélération, pétrole et dollar sur 3 mois, part des marchés au-dessus de leur moyenne à 200 jours"],
+        ["Tendance", "7", "Rendement du S&amp;P 500 sur 1, 3 et 12 mois, accélération, pétrole et dollar sur 3 mois, part des marchés au-dessus de leur moyenne à 200 séances"],
         ["Volatilité", "9", "Volatilité réalisée sur 5, 21 et 63 séances, structure par terme, volatilité de la volatilité, ratio des semi-variances, part des sauts, VIX, prime de variance"],
-        ["Asymétrie et mémoire", "6", "Asymétrie et aplatissement, distance au plus haut sur un an, exposant de Hurst, ratios de variance à 5 et 20 jours"],
+        ["Asymétrie et mémoire", "6", "Asymétrie et aplatissement, distance au plus haut sur un an, exposant de Hurst, ratios de variance à 5 et 20 séances"],
         ["Coupe transversale", "8", "Dispersion entre secteurs et entre portefeuilles, corrélation moyenne, ratio d'absorption et sa variation, part des secteurs en hausse, facteurs taille et valeur"],
         ["Macroéconomie", "9", "Croissance de la production, de l'emploi et des prix (1 an et 3 mois), variation du chômage, règle de Sahm, inscriptions au chômage"],
         ["Crédit", "4", "Écart Baa, écart Baa − Aaa, et leurs variations sur 3 mois"],
@@ -608,11 +641,12 @@ au jour). Elles couvrent 1990-2026. Un <b>contrat point-in-time</b> gouverne leu
 dans un modèle qu'à partir du jour où elle était réellement connue.</p>
 {c.table("Les sources, et la façon dont chacune respecte le contrat point-in-time.", tbl(["Bloc", "Séries", "Source", "Traitement dans le temps"], data_rows, widths=[18, 38, 14, 30]), "regime_lab/data/universe.py ; inventaire fichier par fichier dans AVANCEMENT.md §3.")}
 <h2>50 indicateurs, huit familles</h2>
-<p>La littérature de référence n'utilise que trois indicateurs, tous tirés des rendements, donc tous de la
-volatilité&nbsp;: un modèle ainsi nourri ne peut que redécouvrir un quantile de volatilité. Nous avons donc ajouté
+<p>L'implémentation de référence du Sparse Jump Model (Shu, Yu et Mulvey, 2024) n'utilise que trois indicateurs
+tirés des rendements (un écart baissier et deux ratios de Sortino), dominés par la volatilité&nbsp;: ainsi nourri,
+le modèle risque de ne redécouvrir qu'un quantile de volatilité. Nous avons donc ajouté
 des familles qui n'en sont pas (coupe transversale, crédit, taux, macroéconomie). La liste complète, avec les
 définitions, est en annexe A.</p>
-{c.table("Les 50 indicateurs, par famille.", tbl(["Famille", "Nombre", "Contenu"], fam_rows, num={1}), "regime_lab/features/ ; data/cache/features.parquet.")}
+{c.table("Les 50 indicateurs, par famille.", tbl(["Famille", "Nombre", "Contenu"], fam_rows, num={1}), "regime_lab/features/ ; data/cache/features.parquet, non versionné, régénéré par scripts/build_features.py.")}
 <h2>Standardisation</h2>
 <p>Chaque indicateur est centré et réduit avec <b>son seul passé</b> (moyenne et écart-type sur une fenêtre qui
 s'allonge, 252 séances au minimum), puis borné à ±5 écarts-types. La première ligne complète date du 2 mars 1992.
@@ -621,9 +655,10 @@ Les modèles ne voient donc jamais une moyenne ou une dispersion calculée avec 
 <p>Quatre séries macroéconomiques sont prises en première publication (ALFRED). Les inscriptions au chômage et le
 NFCI, eux, sont pris dans leur version actuelle, décalée de leur délai de publication&nbsp;: leurs révisions
 ultérieures ne sont pas neutralisées. Les séries de Yahoo et de Ken French peuvent aussi être révisées après
-coup. Enfin, la jambe actions du portefeuille 60/40 de référence est l'indice de prix du S&amp;P 500, sans
-dividendes&nbsp;: son rendement est sous-estimé d'environ 2 points par an, de la même façon dans toutes les
-variantes comparées.</p></div>""")
+coup. Enfin, le portefeuille 60/40 de référence est reconstitué&nbsp;: sa jambe actions est l'indice de prix du
+S&amp;P 500, sans dividendes (environ 2 points de rendement par an en moins), et sa jambe obligataire est calculée à
+partir du taux à 10 ans (portage et duration de 7,5). L'oubli des dividendes pèse d'autant plus qu'une variante
+est investie en actions&nbsp;: il favorise légèrement celles qui réduisent l'exposition.</p></div>""")
 
     # ------------------------------------------------------------------ 3 models
     model_rows = [
@@ -649,14 +684,17 @@ jamais. C'est voulu&nbsp;: la comparaison dit si la notion d'«&nbsp;état cach�
   <li><b>Regrouper.</b> Chaque jour est affecté à l'état dont le profil moyen lui ressemble le plus.</li>
   <li><b>Stabiliser.</b> La pénalité λ fait payer chaque changement d'état&nbsp;: les régimes durent et le signal ne
   clignote pas.</li>
-  <li><b>Sélectionner.</b> La contrainte L1 fixe à 10 le <b>nombre effectif</b> de variables,
-  (Σ<i>w</i>)²/Σ<i>w</i>². En pratique, {nz_lo} à {nz_hi} des 50 variables gardent un poids non nul selon la
-  fenêtre, et les dix premières portent {sh_lo} à {sh_hi} % du poids (<code>docs/artifacts/sjm_sparsity.txt</code>).</li>
+  <li><b>Sélectionner.</b> La contrainte L1 borne à 10 le <b>nombre effectif</b> de variables,
+  (Σ<i>w</i>)²/Σ<i>w</i>², et cette borne est atteinte à chaque réestimation. En pratique, {nz_lo} à {nz_hi} des 50
+  variables gardent un poids non nul selon la fenêtre, et les dix premières portent {sh_lo} à {sh_hi} % de
+  Σ<i>w</i>² (<code>docs/artifacts/sjm_sparsity.txt</code>).</li>
 </ul>
 <h2>Le protocole commun</h2>
 <ul>
   <li><b>Réestimation.</b> Les cinq modèles sont réestimés aux mêmes dates, tous les six mois, sur une fenêtre qui
-  commence en 1992 et s'allonge&nbsp;: 49 réestimations. Entre deux, l'état est calculé chaque jour en ligne.</li>
+  commence en 1992 et s'allonge&nbsp;: 49 réestimations. Entre deux, l'état est calculé chaque jour en ligne. À
+  chaque réestimation, le nouveau modèle repart des 252 dernières séances d'entraînement&nbsp;: l'état peut donc
+  changer le jour même d'une réestimation, sans information de marché nouvelle (§7, §8).</li>
   <li><b>Choix de λ.</b> Sur la seule fenêtre d'entraînement, λ maximise le Sharpe du portefeuille de référence
   piloté par les états, parmi les candidats qui changent d'état entre 0,5 et 12 fois par an. Il est recalculé
   toutes les quatre réestimations (tous les deux ans). Quand aucun candidat n'est admissible, le code retient
@@ -664,8 +702,8 @@ jamais. C'est voulu&nbsp;: la comparaison dit si la notion d'«&nbsp;état cach�
   annexe B).</li>
   <li><b>Ordre des états.</b> L'état «&nbsp;stress&nbsp;» est celui dont la volatilité d'entraînement est la plus
   forte.</li>
-  <li><b>Portefeuille de référence.</b> 60 % S&amp;P 500, 40 % obligation à 10 ans, rééquilibré chaque mois, en
-  excès du taux à 3 mois. Coût de 2 points de base aller-retour dans l'étude principale.</li>
+  <li><b>Portefeuille de référence.</b> 60 % S&amp;P 500, 40 % obligation à 10 ans (jambes reconstituées, §2),
+  rééquilibré chaque mois, en excès du taux à 3 mois. Coût de 2 points de base aller-retour dans l'étude principale.</li>
   <li><b>Règle de position.</b> Fixée d'avance&nbsp;: investi dans l'état calme, sans position en stress. Une règle de
   taille, proportionnelle à l'inverse de la volatilité de l'état, a été ajoutée ensuite et déclarée comme telle.</li>
 </ul>""")
@@ -678,34 +716,44 @@ jamais. C'est voulu&nbsp;: la comparaison dit si la notion d'«&nbsp;état cach�
         l1_rows.append([r["label"], pct(r["ba"]), pct(r["recall"]), pct(r["spec"]), fr(r["kappa"], ".2f"),
                         fr(r["switches"] / r["years"], ".1f" if r["switches"] / r["years"] >= 1 else ".2f"),
                         pct(r["stress"]), pct(r["precision"], ".0f"), f"{r['run']}"])
+    for r in rules.values():
+        l1_rows.append([f"<i>{r['label']}</i>", pct(r["ba"]), pct(r["recall"]), pct(r["spec"]), fr(r["kappa"], ".2f"),
+                        fr(r["per_year"], ".1f"), pct(r["stress"]), pct(r["precision"], ".0f"), f"{r['run']}"])
+    r80 = rules["rule: vol above expanding 80th pct"]
     s.append(f"""
-<h1 class="sec"><span class="n">4</span>Résultat 1&nbsp;: il reconnaît les crises</h1>
-<p>Chaque séance hors échantillon est notée contre la chronologie officielle des récessions américaines (NBER),
-que les modèles ne voient jamais. L'<b>exactitude équilibrée</b> est la moyenne de deux taux&nbsp;: la part des
-séances de récession classées en stress (rappel) et la part des séances normales classées en calme
-(spécificité). Les deux comptent autant, alors que les récessions ne représentent que {fr(rec_share, '.1f')} % des
-séances. 50 % correspond au hasard.</p>
-{c.figure(fig_accuracy(l1), "Exactitude équilibrée face aux récessions NBER, avec le κ de Cohen (0 = hasard, 1 = accord parfait). Pointillé : le hasard.", "recalculé depuis data/cache/states.parquet ; docs/RESULTS_FINAL.md (couche 1).", "narrow")}
-{c.table(f"Qualité de classification, {thousands(a['n'])} séances du {a['start']:%d/%m/%Y} au {a['end']:%d/%m/%Y}.", tbl(["Modèle", "Exactitude équilibrée", "Rappel", "Spécificité", "κ", "Changements / an", "Temps en stress", "Stress en récession", "Durée moy. d'un état (séances)"], l1_rows, num=set(range(1, 9)), lead=0, cls="small", widths=[19, 11, 8, 10, 6, 11, 10, 11, 14]),
-    "recalculé depuis data/cache/states.parquet contre la série USREC ; κ et durées : docs/RESULTS_FINAL.md.",
-    note="« Stress en récession » : part des séances de stress qui tombent pendant une récession officielle. Changements par année civile.")}
+<h1 class="sec"><span class="n">4</span>Résultat 1&nbsp;: il reconnaît les deux récessions de la période</h1>
+<p>Chaque jour hors échantillon est noté contre la chronologie officielle des récessions américaines (NBER), que
+les modèles ne voient jamais. L'échantillon compte {thousands(a['n'])} jours ouvrés, dont 227 jours fériés aux
+États-Unis où l'état de la veille est reconduit&nbsp;; comptes et durées sont exprimés en jours ouvrés.
+L'<b>exactitude équilibrée</b> est la moyenne de deux taux&nbsp;: la part des jours de récession classés en stress
+(rappel) et la part des jours normaux classés en calme (spécificité). Les deux comptent autant, alors que les
+récessions ne représentent que {fr(rec_share, '.1f')} % des jours. 50 % correspond au hasard. Le témoin est noté de
+la même façon.</p>
+{c.figure(fig_accuracy(l1, rules), "Exactitude équilibrée face aux récessions NBER, avec le κ de Cohen (0 = hasard, 1 = accord parfait). En pointillé clair, les deux règles de volatilité d'une ligne (témoins) ; ligne pointillée : le hasard.", "docs/artifacts/etats_hors_echantillon.csv ; docs/artifacts/temoin_nber.txt ; docs/RESULTS_FINAL.md (couche 1).", "narrow")}
+{c.table(f"Qualité de classification, {thousands(a['n'])} jours ouvrés du {a['start']:%d/%m/%Y} au {a['end']:%d/%m/%Y}.", tbl(["Modèle", "Exactitude équilibrée", "Rappel", "Spécificité", "κ", "Changements / an", "Temps en stress", "Stress en récession", "Durée moy. d'un état (jours)"], l1_rows, num=set(range(1, 9)), lead=0, cls="small", widths=[19, 11, 8, 10, 6, 11, 10, 11, 14]),
+    "recalculé depuis docs/artifacts/etats_hors_echantillon.csv contre la série USREC ; témoins : docs/artifacts/temoin_nber.txt ; κ et durées : docs/RESULTS_FINAL.md.",
+    note="Témoins : stress quand la volatilité réalisée du S&P 500 sur 21 séances dépasse son 80ᵉ centile passé, ou sa médiane passée. « Stress en récession » : part des jours de stress qui tombent pendant une récession officielle. Changements par année civile.")}
 <ul>
-  <li><b>Le Sparse Jump Model est le plus stable et le plus en accord avec les récessions</b> (κ = 0,53). Il met
-  en stress {a['rec_hits']} des {a['rec_days']} séances de récession et laisse en calme {fr(a['spec'], '.0f')} % des
-  séances normales. Le Jump Model simple fait jeu égal en exactitude (93,3 %), avec un κ plus faible.</li>
+  <li><b>Le Sparse Jump Model est, avec le Jump Model simple, le plus stable, et le plus en accord avec les
+  récessions</b> (κ = 0,53). Il met en stress {a['rec_hits']} des {a['rec_days']} jours de récession et laisse en calme
+  {fr(a['spec'], '.0f')} % des jours normaux. Il dépasse d'environ {fr(a['ba'] - r80['ba'], '.0f')} points la meilleure règle
+  de volatilité d'une ligne ({fr(r80['ba'], '.1f')} %, κ = {fr(r80['kappa'], '.2f')}). Le Jump Model simple fait jeu égal
+  en exactitude (93,3 %), avec un κ plus faible.</li>
   <li><b>Le HMM ne manque aucune récession, mais crie souvent au loup</b>&nbsp;: il est en stress {fr(b['stress'], '.0f')} %
-  du temps et seules {fr(b['precision'], '.0f')} % de ses séances de stress tombent en récession. Il n'est pas en
+  du temps et seuls {fr(b['precision'], '.0f')} % de ses jours de stress tombent en récession. Son exactitude
+  ({fr(b['ba'], '.1f')} %) égale à peine celle de la règle du 80ᵉ centile, avec un κ plus faible. Il n'est pas en
   retard&nbsp;: au Covid, il bascule le 27 février 2020 (S&amp;P 500 à −12 %), deux semaines avant le Sparse Jump
   Model.</li>
-  <li><b>Les prédicteurs directs sont nerveux</b>&nbsp;: 14 à 18 changements d'état par an, 75 à 78 % d'exactitude.</li>
+  <li><b>Les prédicteurs directs sont nerveux</b>&nbsp;: 14 à 18 changements d'état par an, 75 à 78 % d'exactitude,
+  moins que la règle du 80ᵉ centile.</li>
 </ul>
-{c.figure(fig_timeline(), "Le S&P 500 (échelle logarithmique) et, en rouge, les séances où le Sparse Jump Model est en stress. Treize changements d'état en 24 ans : l'après-bulle internet (tronqué au début de l'échantillon), la crise financière, le Covid.", "data/cache/states.parquet ; cours Yahoo Finance.")}
+{c.figure(fig_timeline(), "Le S&P 500 (échelle logarithmique) et, en rouge, les jours où le Sparse Jump Model est en stress. Treize changements d'état en 24 ans : l'après-bulle internet (tronqué au début de l'échantillon), la crise financière, le Covid.", "docs/artifacts/etats_hors_echantillon.csv ; cours Yahoo Finance.")}
 <div class="box warn"><h3>Trois réserves, sans lesquelles le 93 % trompe</h3><ul>
-  <li><b>Deux récessions seulement</b> dans la période de test (2008-2009 et 2020, 20 mois). Sur 1926-2026, la même
-  méthode réduite à 30 variables n'en reconnaît que 6 sur 14 (57,5 %, κ = 0,16), pas mieux qu'une règle de
+  <li><b>Deux récessions seulement</b> dans la période de test (2008-2009 et 2020, 20 mois). Réestimée sur
+  1926-2026 (hors échantillon&nbsp;: 1937-2026), la même méthode réduite à 30 variables n'en reconnaît que 6 sur 14 (57,5 %, κ = 0,16), pas mieux qu'une règle de
   volatilité (annexe D).</li>
   <li><b>«&nbsp;Sans voir le futur&nbsp;» n'est pas «&nbsp;avant le marché&nbsp;».</b> Contre les dates officielles, la
-  latence de détection est de 0 à 13 jours&nbsp;; contre le marché, le modèle arrive tard (§7).</li>
+  latence de détection est de 0 à 13 jours calendaires&nbsp;; contre le marché, le modèle arrive tard (§7).</li>
   <li><b>2022 n'a pas été signalée</b>&nbsp;: une baisse de 25 % due aux taux, lente, sans panique. Le modèle est
   calme depuis avril 2021.</li>
 </ul></div>""")
@@ -716,7 +764,7 @@ séances. 50 % correspond au hasard.</p>
                ["B HMM filtré", "+2,26", "−4,59", "+0,007", "−0,22"],
                ["C Gradient boosting", "+2,13", "−6,34", "+0,023", "0,52"],
                ["C′ HAR-RV", "+0,19", "−1,84", "+0,008", "−0,30"],
-               ["Témoin de volatilité", "+0,004", "0,21", "+0,000", "−0,03"]]
+               ["Règle médiane (état binaire)", "+0,004", "0,21", "+0,000", "−0,03"]]
     l3_rows = [["60/40 seul", "0,47", "−35,6 %", "—", "—"],
                ["A′ Sparse Jump Model", "0,55", "−22,3 %", "0,49", "−31,2 %"],
                ["A Jump Model", "0,54", "−22,3 %", "0,50", "−29,3 %"],
@@ -727,17 +775,18 @@ séances. 50 % correspond au hasard.</p>
 <h1 class="sec"><span class="n">5</span>Résultat 2&nbsp;: le risque, pas la direction</h1>
 <p>On régresse, séance par séance, la volatilité réalisée des 21 séances suivantes du portefeuille 60/40 (puis
 son rendement) sur le rang de la volatilité passée — le témoin — et sur l'état du modèle. Le <b>R² incrémental</b>
-est ce que l'état ajoute au témoin.</p>
-<div class="legend"><i style="background:{BLUE}"></i>volatilité des 21 séances suivantes<i style="background:{ORANGE}"></i>rendement des 21 séances suivantes</div>
-{c.figure(fig_r2(), "R² incrémental au-delà du témoin, en points de pourcentage.", "docs/RESULTS_FINAL.md (couche 2).", "narrow")}
-{c.table("R² incrémental et t HAC de l'état, par cible.", tbl(["Modèle", "Volatilité : R² (pts)", "t", "Rendement : R² (pts)", "t"], l2_rows, num={1, 2, 3, 4}, lead=0, cls="small"), "docs/RESULTS_FINAL.md (couche 2).")}
+est ce que l'état ajoute au témoin. Le rang est calculé sur tout l'échantillon et les t sont des t HAC à 21
+retards&nbsp;: c'est un test de contenu prédictif, pas une prévision en temps réel.</p>
+{c.figure('<div class="legend"><i style="background:' + BLUE + '"></i>volatilité des 21 séances suivantes<i style="background:' + ORANGE + '"></i>rendement des 21 séances suivantes</div>' + fig_r2(), "R² incrémental au-delà du témoin, en points de pourcentage.", "docs/RESULTS_FINAL.md (couche 2).", "narrow")}
+{c.table("R² incrémental et t HAC de l'état, par cible.", tbl(["Modèle", "Volatilité : R² (pts)", "t", "Rendement : R² (pts)", "t"], l2_rows, num={1, 2, 3, 4}, lead=0, cls="small"), "docs/RESULTS_FINAL.md (couche 2).",
+    note="Les t sur la volatilité sont négatifs parce que l'état calme est codé 1 : la volatilité à venir y est plus faible. La dernière ligne teste la règle médiane elle-même, prise comme état binaire.")}
 <ul>
   <li><b>Sur la volatilité</b>, quatre modèles sur cinq ajoutent 2 à 4 points de R² à ce que le témoin sait déjà
   (t de −3,4 à −6,3). Le résultat résiste aux effets fixes par pli de cinq ans (3,68 points, t = −3,51) et au
   retrait de n'importe quel pli (jamais sous 1,74 point, t = −2,42).</li>
   <li><b>Sur les rendements</b>, aucun modèle n'ajoute quoi que ce soit (t entre −0,3 et 0,5). L'état est une
-  information de <b>dimensionnement</b>, pas de timing.</li>
-  <li><b>Mais le VIX le savait déjà.</b> Dans un test séparé, commité avant sa lecture (test P, 6 129 séances), on
+  information de <b>dimensionnement</b>, pas de choix du moment.</li>
+  <li><b>Mais le VIX le savait déjà.</b> Dans un test séparé, déposé dans git avant sa lecture (test P, 6 129 séances), on
   prévoit le logarithme de la variance réalisée du S&amp;P 500 sur 21 séances. L'état y ajoute +4,48 points au-delà
   d'un rang de volatilité (t = −5,23), mais seulement <b>+0,20 point</b> une fois la variance implicite du VIX
   ajoutée (t = −1,34, seuil |t| ≥ 2,77). Le marché des options contient déjà l'information.</li>
@@ -747,7 +796,7 @@ est ce que l'état ajoute au témoin.</p>
     note="Les onze lignes de l'étude sont publiées, y compris celles qui ne favorisent pas le modèle principal.")}
 <p>Toutes les améliorations restent sous le seuil de détection de cette comparaison, 0,271 à 0,399 de Sharpe. Les
 contrôles de falsification confirment&nbsp;: aucun modèle ne bat le témoin de volatilité au niveau de la stratégie
-(+0,04 à +0,06 de Sharpe, contre des seuils de 0,22 à 0,44), et le gain apparent passe par le dénominateur —
+(écarts de −0,04 à +0,06 de Sharpe, contre des seuils de 0,22 à 0,44), et le gain apparent passe par le dénominateur —
 moins de risque, pas plus de rendement.</p>""")
 
     # ------------------------------------------------------------------ 6 application
@@ -779,43 +828,48 @@ moins de risque, pas plus de rendement.</p>""")
     vrows = []
     for strat, rows in p2.VERDICTS.items():
         vrows.append([f"{strat}"])
-        vrows.extend(list(r) for r in rows)
+        for r in rows:
+            r = list(r)
+            if strat == "Tendance crypto" or r[0] in {"Or", "Obligations (TLT)", "Options"}:
+                r[0] += " ‡"
+            vrows.append(r)
     strat_rows = [
-        ["Momentum actions", "Achète les actions américaines qui ont le plus monté sur un an, vend celles qui ont le plus baissé (facteur UMD de Ken French)", "oct. 2002 – juil. 2026", "0,47", "public"],
+        ["Momentum actions", "Achète les actions américaines qui ont le plus monté sur les 12 derniers mois (hors le plus récent), vend celles qui ont le plus baissé (facteur UMD de Ken French&nbsp;; Carhart, 1997)", "oct. 2002 – juil. 2026", "0,47", "public"],
         ["Rebond obligataire de fin de mois", "Acheteur d'obligations d'État américaines longues (ETF TLT) les 3 dernières séances de chaque mois&nbsp;: un effet de flux lié aux rééquilibrages", "oct. 2004 – sept. 2026", "0,85", "public"],
-        ["Tendance crypto", "Suit la tendance du bitcoin et de l'ether&nbsp;: acheteur quand elle monte, sans position sinon", "déc. 2014 – juin 2026", "1,13", "dépôt privé voisin&nbsp;: agrégats seulement, non reproductible depuis le dépôt public"],
+        ["Tendance crypto", "Suit la tendance du bitcoin et de l'ether&nbsp;: acheteur quand elle monte, sans position sinon", "déc. 2014 – juin 2026", "1,13", "dépôt privé&nbsp;: agrégats seulement, non reproductible depuis le dépôt public"],
     ]
     s.append(f"""
 <h1 class="sec"><span class="n">6</span>Application&nbsp;: trois stratégies</h1>
 <p>Le modèle prévoit l'ampleur des mouvements, pas leur sens. La question devient&nbsp;: quelles stratégies ont
-besoin d'un thermomètre du risque&nbsp;? Nous avons retenu trois stratégies aux profils opposés face aux crises, et
-six façons d'utiliser le filtre quand le Sparse Jump Model est en stress (état connu la veille).</p>
+besoin d'un thermomètre du risque&nbsp;? Parmi les 13 stratégies testées, nous en présentons trois, choisies après
+les lectures pour illustrer trois cas opposés face aux crises&nbsp;; les verdicts de toutes les autres sont en annexe
+E. Le filtre est utilisé de six façons quand le Sparse Jump Model est en stress (état connu la veille).</p>
 {c.table("Les trois stratégies. Chacune est ciblée à 10 % de volatilité annuelle, en excès du taux sans risque.", tbl(["Stratégie", "Principe", "Période", "Sharpe seule", "Données"], strat_rows, num={3}), "docs/artifacts/partie2/lectures_trois_strategies.txt.")}
 <p><b>Les six usages du filtre en stress</b>&nbsp;: <b>couper</b> la stratégie, la <b>réduire de moitié</b>, la
 <b>remplacer</b> par un livre de tendance multi-actifs (46 marchés), par de l'<b>or</b>, par des <b>obligations
 d'État longues</b> (TLT) ou par des <b>options</b> (volatilité achetée&nbsp;: un swap de variance synthétique à un mois,
 équivalent d'un straddle couvert en delta). Chaque jambe de remplacement est elle aussi ciblée à 10 % de
 volatilité.</p>
-<p><b>Hypothèse de coûts&nbsp;: aucun coût, partout</b> (décision du cours). Les Sharpe sont bruts, en excès du taux
-sans risque&nbsp;; ils surestiment ce qu'un investisseur obtiendrait.</p>
+<p><b>Hypothèse de coûts&nbsp;: aucun coût</b> (décision du cours), sauf pour les trois tests du rebond obligataire
+marqués †, faits à 1 point de base. Les Sharpe sont bruts, en excès du taux sans risque&nbsp;; ils surestiment ce
+qu'un investisseur obtiendrait.</p>
 {c.table("Écart de Sharpe avec la stratégie seule (et, entre parenthèses, le Sharpe obtenu). Un échantillon par colonne, celui du tableau 7.", matrix, "docs/artifacts/partie2/lectures_trois_strategies.txt ; lignes ° recalculées sans coût par scripts/build_presentation_partie2.py et vérifiées par ce dossier.",
     note="Bleu : gain d'au moins 0,05 ; rouge : perte d'au moins 0,05 ; gris : entre les deux. Les écarts sont calculés avant arrondi. Aucune case n'est un résultat démontré : voir le tableau suivant.")}
 {c.table("Chaque usage, testé avec un critère écrit avant la lecture.", tbl(["Usage en stress", "Δ Sharpe", "Seuil (MDE)", "t HAC", "Placebo", "Témoins (médiane / 80ᵉ)", "Verdict"], vrows, num={1, 2, 3, 4}, cls="small"),
     "docs/artifacts/partie2/lectures_trois_strategies.txt ; docs/artifacts/crise/reading.txt ; docs/RESULTS_B1_COUPLAGE.md.",
-    note="* Test de l'étude de crise, sur avril 2002 – juillet 2026 (momentum seul : 0,52) ; les autres lignes du momentum portent sur octobre 2002 – juillet 2026 (0,47), d'où l'écart avec le tableau précédent (+0,23). † Tests à 1 point de base de coût (rebond seul : 0,79). Placebo : part des 400 placements aléatoires des séances de stress que le vrai filtre bat. Témoins : écart de Sharpe du même usage piloté par la règle de volatilité (médiane passée, puis 80ᵉ centile).")}
+    note="* Test de l'étude de crise, sur avril 2002 – juillet 2026 (momentum seul : 0,52) ; les autres lignes du momentum portent sur octobre 2002 – juillet 2026 (0,47), d'où l'écart avec le tableau précédent (+0,23). † Tests à 1 point de base de coût (rebond seul : 0,79) ; l'arrêt a été ajouté après la lecture des deux autres usages. ‡ Protocole et critère déposés avant la lecture dans un dépôt privé : non vérifiables depuis le dépôt public. Placebo : part des 400 placements aléatoires des jours de stress que le vrai filtre bat. Témoins : écart de Sharpe du même usage piloté par la règle de volatilité (médiane passée, puis 80ᵉ centile).")}
 <h2>Ce qu'on lit</h2>
 <ul>
   <li><b>C'est la stratégie qui décide, pas la méthode.</b> Le momentum s'améliore avec toutes les méthodes sauf
   les options&nbsp;; le rebond obligataire ne bouge presque pas&nbsp;; la tendance crypto se dégrade partout.</li>
   <li><b>Le meilleur cas du programme&nbsp;: momentum et or en stress, 0,47 → 0,77</b> (t = +2,68, meilleur que les 400
-  placebos). Mais l'écart reste sous le seuil (0,62), l'essentiel vient du simple arrêt (0,70), et la règle de
-  volatilité médiane fait autant (0,82 avec de l'or).</li>
+  placebos). Mais l'écart reste sous le seuil (0,62), l'essentiel vient du simple arrêt (0,70), et la même
+  bascule vers l'or pilotée par la règle de volatilité médiane fait mieux (0,82).</li>
   <li><b>Le stress n'est pas un mauvais moment pour toutes les stratégies.</b> Le momentum y perd (Sharpe −1,13 en
   stress contre 0,75 en calme)&nbsp;; la tendance crypto y gagne le plus (3,89 contre 0,93)&nbsp;: la couper en stress, c'est
   couper ses meilleurs jours.</li>
 </ul>
-<div class="legend"><i style="background:{BLUE}"></i>Sharpe en calme<i style="background:{ORANGE}"></i>Sharpe en stress</div>
-{c.figure(fig_stress_calm(), "Sharpe de chaque stratégie seule, selon l'état du modèle la veille (descriptif).", "docs/artifacts/partie2/lectures_trois_strategies.txt.", "narrow")}""")
+{c.figure('<div class="legend"><i style="background:' + BLUE + '"></i>Sharpe en calme<i style="background:' + ORANGE + '"></i>Sharpe en stress</div>' + fig_stress_calm(), "Sharpe de chaque stratégie seule, selon l'état du modèle la veille (descriptif).", "docs/artifacts/partie2/lectures_trois_strategies.txt.", "narrow")}""")
 
     # ------------------------------------------------------------------ 7 why
     lh = fig_bars([("1937-1962", -0.008, False), ("1963-2001", 0.031, False), ("2002-2026", 0.145, False), ("1937-2026, en tout", 0.045, True)],
@@ -823,7 +877,7 @@ sans risque&nbsp;; ils surestiment ce qu'un investisseur obtiendrait.</p>
                   mark=(0.158, "seuil de détection : 0,158"))
     s.append(f"""
 <h1 class="sec"><span class="n">7</span>Pourquoi le filtre ne paie pas</h1>
-{c.figure(fig_covid(), "Le S&P 500 pendant le Covid et, en rouge, les séances de stress du Sparse Jump Model.", "data/cache/states.parquet ; cours Yahoo Finance ; docs/presentation/PISTES_AMELIORATION.md §0.")}
+{c.figure(fig_covid(), "Le S&P 500 pendant le Covid et, en rouge, les jours de stress du Sparse Jump Model.", "docs/artifacts/etats_hors_echantillon.csv ; cours Yahoo Finance ; scripts/build_dossier.py.")}
 <div class="marks" style="margin-top:-2mm;margin-bottom:3mm">
   <span><b>1</b>sommet du marché, 19 février 2020</span><span><b>2</b>le modèle passe en stress, 11 mars (−19 %)</span>
   <span><b>3</b>point bas, 23 mars (−34 %)</span><span><b>4</b>première sortie, 5 août (+49 % depuis le point bas)</span>
@@ -831,26 +885,28 @@ sans risque&nbsp;; ils surestiment ce qu'un investisseur obtiendrait.</p>
 <ol>
   <li><b>Il alerte tard.</b> Le 11 mars 2020, le VIX était déjà passé de 14 à 54. Le HMM, plus nerveux, avait
   basculé le 27 février.</li>
-  <li><b>Il reste en crise pendant la reprise.</b> 97 % de ses séances de stress du Covid tombent le jour du point
-  bas ou après&nbsp;; 55 % sur les trois épisodes de stress de la période. C'est le prix d'un modèle calme, qui ne
-  change d'avis que rarement&nbsp;: il sort de la crise tard.</li>
+  <li><b>Il reste en crise pendant une grande partie de la reprise, en partie à cause des réestimations.</b> Sorti
+  du stress le 5 août 2020, il y est replacé par la réestimation semestrielle du 1ᵉʳ octobre 2020, un jour de hausse
+  du marché (+0,5 %), et y reste jusqu'au 22 mars 2021. Au total, 97 % de ses jours de stress du Covid tombent le
+  jour du point bas ou après (55 % sur les trois épisodes), et 54 % d'entre eux suivent une rentrée en stress
+  survenue un jour de réestimation.</li>
   <li><b>Le marché le savait déjà</b>&nbsp;: au-delà du VIX, l'état n'ajoute presque rien à la prévision du risque
   (§5).</li>
 </ol>
-<p><b>Conséquence.</b> Une couverture gagne dans la chute puis reperd dans le rebond. Acheter de la volatilité en
+<p><b>Conséquence.</b> Une couverture gagne dans la chute puis rend ses gains dans le rebond. Acheter de la volatilité en
 stress gagne de 29 à 38 % pendant la chute de 2008 selon la stratégie remplacée, puis perd de 18 à 23 % au rebond
 de 2009. Seule une stratégie qui perd <b>précisément</b> dans les rebonds, comme le momentum, en profite.</p>
 <h2>L'épreuve des 90 ans</h2>
-<p>Pour sortir des deux récessions, le même type de modèle a été réestimé sur 1926-2026 avec les 30 variables qui
+<p>Pour ne plus dépendre de deux récessions, le même type de modèle a été réestimé sur 1926-2026 avec les 30 variables qui
 existent depuis 1926 (sans VIX ni macroéconomie en première publication)&nbsp;: 14 récessions hors échantillon au
 lieu de 2, et un test 2,5 fois plus précis (seuil 0,158 au lieu de 0,395).</p>
 {c.figure(lh, "Gain de Sharpe du momentum quand on le coupe en stress, modèle réduit réestimé sur 1926-2026.", "docs/RESULTS_LONGHIST.md ; docs/artifacts/longhist/reading.txt.", "narrow")}
-<p>Le gain vient presque entièrement de 2002-2026&nbsp;: le modèle réduit y gagne +0,145 (A′ complet&nbsp;: +0,17). Sur 90
-ans, il vaut <b>+0,045, trois fois et demie sous le seuil</b>, et il passe par une baisse du risque, pas par un
-gain de rendement (rendement annuel 12,19 % → 11,80 %). Une règle publiée fait mieux sans modèle&nbsp;: «&nbsp;marché
+<p>Le gain vient presque entièrement de 2002-2026&nbsp;: +0,145 pour le modèle réduit sur cette sous-période (sur la
+fenêtre exacte d'A′, +0,138 contre +0,166 pour A′ complet). Sur 90 ans, il vaut <b>+0,045, trois fois et demie sous le seuil</b>, et il passe par une baisse du risque, pas par un
+gain de rendement (rendement annuel 12,19 % → 11,80 %). Une règle publiée fait mieux sans modèle (témoin, écart non testé)&nbsp;: «&nbsp;marché
 baissier et forte volatilité&nbsp;» (Daniel et Moskowitz, 2016) donne +0,106 et ramène la perte maximale de −37 % à
 −27 %.</p>
-<h2>Ce que disent les 63 usages testés</h2>
+<h2>Ce que disent les 62 usages testés</h2>
 <p>Couper, réduire, basculer, or, obligations, options, sur 13 stratégies&nbsp;: <b>aucun usage n'est utile</b>. Les
 meilleurs sont sous-puissants, et une règle de volatilité d'une ligne fait aussi bien. La portée exacte de ce
 constat compte&nbsp;: il porte sur un classifieur à deux états, ordonné par la volatilité, qui change d'état environ
@@ -858,9 +914,10 @@ une fois tous les deux ans, utilisé pour couper, réduire ou remplacer une stra
 plus rapide, d'un état non lié à la volatilité, ni d'un usage en sélection de signaux ou en construction de
 portefeuille.</p>
 <p><b>À noter, et ce n'est pas un résultat de régime</b>&nbsp;: un livre de neuf stratégies peu corrélées, à risque
-égal et sans aucun filtre, fait un Sharpe brut de 1,52 sur 2005-2026 (intervalle à 95 %&nbsp;: 1,06 à 1,96). C'est un
-plafond&nbsp;: sans coût, avec des stratégies choisies en connaissant ces années, dont sept sur neuf vivent dans le
-dépôt privé voisin. Utilisé comme budget de risque à l'intérieur de ce livre, le régime n'apporte rien de
+égal et sans aucun filtre, fait un Sharpe brut de 1,52 sur 2005-2026 (intervalle à 95 %&nbsp;: 1,06 à 1,96). Il ne
+compte que 3 stratégies en 2005-2007, 4 en 2008-2009, et les 9 seulement depuis décembre 2015 (1,91 sur
+2016-2026). C'est un plafond&nbsp;: sans coût, avec des stratégies choisies en connaissant ces années, dont sept sur
+neuf vivent dans un dépôt privé. Utilisé comme budget de risque à l'intérieur de ce livre, le régime n'apporte rien de
 démontrable (<code>docs/RESULTS_BUDGET_RISQUE.md</code>).</p>""")
 
     # ------------------------------------------------------------------ 8 limits
@@ -870,7 +927,8 @@ démontrable (<code>docs/RESULTS_BUDGET_RISQUE.md</code>).</p>""")
   <li><b>Très peu de crises.</b> Deux récessions et trois épisodes de stress en 24 ans&nbsp;; les stratégies récentes
   n'en voient qu'un (2020). Le 93 % et la plupart des verdicts reposent sur ces quelques épisodes, et le test sur
   90 ans ne confirme pas le 93 %.</li>
-  <li><b>Une référence datée après coup.</b> Les dates du NBER sont publiées six à dix-huit mois après les faits.
+  <li><b>Une référence datée après coup.</b> Les dates du NBER sont annoncées de quatre à vingt mois après les faits
+  (juin 2020 pour le sommet de février 2020, juillet 2003 pour le creux de novembre 2001).
   Elles servent à noter les modèles, jamais à les entraîner&nbsp;; seuls les états des modèles sont «&nbsp;en temps
   réel&nbsp;».</li>
   <li><b>Des données imparfaitement point-in-time</b>&nbsp;: révisions non stockées, deux séries hebdomadaires en
@@ -882,9 +940,14 @@ démontrable (<code>docs/RESULTS_BUDGET_RISQUE.md</code>).</p>""")
   plis de cinq ans d'A′ ne contiennent qu'un état, ce qui rend incalculable la règle d'arrêt «&nbsp;trois plis sur
   cinq&nbsp;»&nbsp;; la règle d'arrêt n°2 (R² incrémental sur les rendements sous 0,2 point) s'est déclenchée et l'étude
   a continué sur la volatilité.</li>
-  <li><b>Une application sans coûts.</b> Les Sharpe de la partie application sont bruts&nbsp;; la tendance crypto et
-  sept des neuf stratégies du livre sont privées, publiées en agrégats seulement.</li>
-  <li><b>Une puissance statistique faible.</b> Les seuils de détection vont de 0,1 à 1,4 de Sharpe selon les tests.
+  <li><b>Des réestimations qui déplacent l'état.</b> Trois des six entrées en stress d'A′ tombent le jour même d'une
+  réestimation (1ᵉʳ octobre 2009, 1ᵉʳ octobre 2020, 1ᵉʳ avril 2021)&nbsp;: 153 des 1 013 jours de stress, dont 124 des
+  229 du Covid, viennent de ces rentrées et non d'une information de marché nouvelle. Le mécanisme d'échec du §7
+  en dépend en partie.</li>
+  <li><b>Une application sans coûts, présentée après coup.</b> Les Sharpe de la partie application sont bruts&nbsp;;
+  les trois stratégies présentées ont été choisies après les lectures&nbsp;; la tendance crypto et sept des neuf
+  stratégies du livre sont privées, publiées en agrégats seulement.</li>
+  <li><b>Une puissance statistique faible.</b> Les seuils de détection vont de moins de 0,1 à 1,4 de Sharpe selon les tests.
   Beaucoup de verdicts sont donc «&nbsp;sous-puissants&nbsp;»&nbsp;: ce n'est ni un oui ni un non.</li>
   <li><b>Des tests multiples à l'échelle du programme.</b> Chaque étude corrige pour ses propres tests (Bonferroni
   ou Holm)&nbsp;; aucune correction ne couvre l'ensemble des configurations journalisées du programme. Un résultat
@@ -896,16 +959,19 @@ démontrable (<code>docs/RESULTS_BUDGET_RISQUE.md</code>).</p>""")
 
     # ------------------------------------------------------------------ 9 conclusion
     s.append("""
+<div style="break-inside: avoid">
 <h1 class="sec"><span class="n">9</span>Conclusion et ouverture</h1>
 <p><b>Détecter une crise ne suffit pas à gagner.</b></p>
 <ol>
-  <li><b>On sait détecter les crises</b>, avec un modèle stable et lisible, sans voir le futur — sur les deux
-  récessions de la période, et sans devancer le marché.</li>
+  <li><b>Le modèle reconnaît les deux récessions de la période</b> sans voir le futur, avec des états stables et
+  lisibles, et mieux qu'une règle de volatilité d'une ligne. Mais il ne devance pas le marché, et la même méthode
+  réduite ne reconnaît que 6 récessions sur 14 sur 1937-2026.</li>
   <li><b>Le modèle prévoit le risque, pas la direction</b>&nbsp;: c'est un thermomètre, utile pour dimensionner, pas
   pour acheter ou vendre. Et le VIX en sait déjà presque autant.</li>
   <li><b>Comme filtre de trading, son effet dépend de la stratégie</b>, et aucune méthode ne gagne de façon
   démontrée. Il faudrait une stratégie qui perd précisément quand il sonne — dans les rebonds.</li>
 </ol>
+</div>
 <h2>Avec plus de temps, trois pistes</h2>
 <ul>
   <li><b>Un régime propre à chaque marché</b> (actions, or, crypto…), plutôt qu'un régime unique. Piste&nbsp;: un
@@ -923,9 +989,10 @@ démontrable (<code>docs/RESULTS_BUDGET_RISQUE.md</code>).</p>""")
         ["§3 Sparse Jump Model, Jump Model, choix de λ", "regime_lab/models/jump.py, calibrate.py ; scripts/measure_sjm_sparsity.py", "docs/artifacts/sjm_sparsity.txt"],
         ["§3 HMM filtré", "regime_lab/models/hmm.py", "—"],
         ["§3 Gradient boosting et HAR-RV", "regime_lab/models/supervised.py", "—"],
-        ["§3 Walk-forward, 49 réestimations (15 à 20 min)", "regime_lab/models/base.py ; scripts/run_phase2.py", "data/cache/states.parquet"],
+        ["§3 Walk-forward, 49 réestimations (15 à 20 min)", "regime_lab/models/base.py ; scripts/run_phase2.py, export_states.py", "docs/artifacts/etats_hors_echantillon.csv"],
         ["§3 Portefeuille 60/40 de référence", "regime_lab/strategies/", "—"],
         ["§4 Classification", "regime_lab/evaluation/reliability.py ; scripts/run_evaluation.py", "docs/RESULTS_FINAL.md"],
+        ["§4 Témoin de volatilité face au NBER", "scripts/measure_vol_rule_nber.py", "docs/artifacts/temoin_nber.txt"],
         ["§5 Risque, direction, portefeuille", "regime_lab/evaluation/predictive.py ; scripts/run_evaluation.py, run_layer3.py", "docs/RESULTS_FINAL.md"],
         ["§5 Contrôles de falsification", "scripts/run_t1_control.py, run_t3_control.py, run_t5_refit.py, run_t5_control.py", "docs/RESULTS_FALSIFICATION.md"],
         ["§5 Test P ; §6 stratégies de crise", "regime_lab/extensions/crisis.py ; scripts/run_crisis_coupling.py", "docs/RESULTS_CRISE.md"],
@@ -933,7 +1000,7 @@ démontrable (<code>docs/RESULTS_BUDGET_RISQUE.md</code>).</p>""")
         ["§6 Valeurs refuges (or, obligations, options)", "scripts/run_safe_haven_switch.py", "docs/RESULTS_REFUGE.md"],
         ["§7 Le test sur 90 ans", "regime_lab/extensions/longhist.py ; scripts/longhist_*.py", "docs/RESULTS_LONGHIST.md"],
         ["Annexe B, écarts au protocole", "—", "docs/PROTOCOL_FREEZE.md"],
-        ["Annexe C, bootstrap, placebo, puissance, journal des essais", "regime_lab/analysis/", "data/trials.parquet"],
+        ["Annexe C, bootstrap, placebo, puissance, journal des essais", "regime_lab/analysis/", "data/trials.parquet (non versionné)"],
         ["Figures et tableaux de ce dossier", "scripts/build_dossier.py", "docs/presentation/"],
     ]
     reading = [
@@ -952,30 +1019,33 @@ démontrable (<code>docs/RESULTS_BUDGET_RISQUE.md</code>).</p>""")
 <a href="{REPO_URL}"><b>{REPO_URL.replace("https://", "")}</b></a>. Un navigateur suffit pour le lire&nbsp;: la page
 d'accueil du dépôt (le fichier README, affiché automatiquement) dit par où commencer et reprend le tableau
 ci-dessous, avec des liens directs vers chaque fichier. La version exacte qui accompagne ce dossier est
-l'étiquette <a href="{REPO_URL}/tree/{TAG}"><b>{TAG}</b></a>. Le code et ses commentaires sont en anglais.</p></div>
+l'étiquette <a href="{REPO_URL}/tree/{TAG}"><b>{TAG}</b></a>. Le code et ses commentaires sont en anglais.</p>
+<p>Le code a été écrit avec l'aide d'un assistant de programmation (Claude Code)&nbsp;; la question, le protocole, les
+choix de recherche et l'interprétation sont les nôtres.</p></div>
 <h2>Par où commencer&nbsp;: six fichiers, dans l'ordre</h2>
 <ol>{reading_html}</ol>
-{c.table("Où est le code de chaque partie de ce dossier.", tbl(["Partie du dossier", "Code (chemins dans le dépôt)", "Résultat écrit"], [[r[0], f"<code>{r[1]}</code>", r[2] if r[2] in ("annexe A", "—") else f"<code>{r[2]}</code>"] for r in code_map], cls="small", widths=[24, 42, 34]), "dépôt regime-lab, fichier README.md.",
+{c.table("Où est le code de chaque partie de ce dossier.", tbl(["Partie du dossier", "Code (chemins dans le dépôt)", "Résultat écrit"], [[r[0], f"<code>{r[1]}</code>", r[2] if r[2] in ("annexe A", "—") else f"<code>{r[2]}</code>"] for r in code_map], cls="small", widths=[21, 40, 39]), "dépôt regime-lab, fichier README.md.",
     note="Non reproductibles depuis le dépôt public : la tendance crypto et les sept stratégies privées du livre de neuf, qui vivent dans un dépôt privé et ne sont publiées qu'en agrégats.")}
 <h2>Relancer les calculs</h2>
 <p>Il faut Python 3.12 et uv.</p>
 <p><code>git clone {REPO_URL}.git</code><br>
 <code>cd regime-lab &amp;&amp; git checkout {TAG}</code><br>
 <code>uv sync --all-packages --extra dev</code><br>
-<code>.venv/bin/python -m pytest -q</code> (849 tests, tous verts au 25 septembre 2026, sans données)</p>
+<code>.venv/bin/python -m pytest -q</code> (851 tests, tous réussis le 25 septembre 2026 avec les données&nbsp;; sans elles, ceux qui en ont besoin sont
+sautés)</p>
 <p>Les données ne sont pas versionnées (une cinquantaine de mégaoctets, régénérables)&nbsp;; une clé API FRED gratuite suffit
 à les télécharger avec <code>scripts/fetch_data.py</code>. L'inventaire exact, fichier par fichier, est dans
 <code>AVANCEMENT.md</code> §3. Les lectures des études n'ont été faites qu'une fois&nbsp;: leurs sorties intégrales sont
-commitées dans <code>docs/artifacts/</code>.</p>""")
+versionnées dans <code>docs/artifacts/</code>.</p>""")
 
     # ------------------------------------------------------------------ bibliography
     s.append("""
 <div class="refs">
 <h1 class="sec">Bibliographie</h1>
 <h2>Articles de référence du cours</h2>
-<p>Mamon, R. S. et Elliott, R. J. (dir.) (2014). <i>Hidden Markov Models in Finance: Further Developments and Applications, Volume II</i>. Springer, International Series in Operations Research &amp; Management Science.</p>
+<p>Mamon, R. S. et Elliott, R. J. (dir.) (2014). <i>Hidden Markov Models in Finance: Further Developments and Applications, Volume II</i>. Springer, International Series in Operations Research &amp; Management Science, vol. 209.</p>
 <p>Nguyen, N. (2018). Hidden Markov Model for Stock Trading. <i>International Journal of Financial Studies</i>, 6(2), 36.</p>
-<p>Sidhu, G. S., Metwaly, A. I. A., Tiwari, A. et Bhattacharyya, R. (2021). Short Term Trading Models Using Hurst Exponent and Machine Learning. SSRN, document 3824032.</p>
+<p>Sidhu, G. S., Metwaly, A. I. A., Tiwari, A. et Bhattacharyya, R. (2021). Short Term Trading Models Using Hurst Exponent and Machine Learning. Document de travail, SSRN n° 3824032.</p>
 <p>Zhang, M., Jiang, X., Fang, Z., Zeng, Y. et Xu, K. (2019). High-order Hidden Markov Model for trend prediction in financial time series. <i>Physica A</i>, 517, 1-12.</p>
 <h2>Modèles de régimes</h2>
 <p>Aydınhan, A. O., Kolm, P. N., Mulvey, J. M. et Shu, Y. (2024). Identifying patterns in financial markets: extending the statistical jump model for regime identification. <i>Annals of Operations Research</i>.</p>
@@ -991,13 +1061,20 @@ commitées dans <code>docs/artifacts/</code>.</p>""")
 <p>Ke, G. et al. (2017). LightGBM: a highly efficient gradient boosting decision tree. <i>Advances in Neural Information Processing Systems</i>, 30.</p>
 <p>Kritzman, M., Li, Y., Page, S. et Rigobon, R. (2011). Principal components as a measure of systemic risk. <i>Journal of Portfolio Management</i>, 37(4), 112-126.</p>
 <p>Lo, A. W. et MacKinlay, A. C. (1988). Stock market prices do not follow random walks: evidence from a simple specification test. <i>Review of Financial Studies</i>, 1(1), 41-66.</p>
+<p>Peng, C.-K., Buldyrev, S. V., Havlin, S., Simons, M., Stanley, H. E. et Goldberger, A. L. (1994). Mosaic organization of DNA nucleotides. <i>Physical Review E</i>, 49(2), 1685-1689.</p>
+<p>Sahm, C. (2019). Direct stimulus payments to individuals. Dans H. Boushey, R. Nunn et J. Shambaugh (dir.), <i>Recession Ready</i>. The Hamilton Project, Brookings Institution.</p>
 <h2>Méthode statistique</h2>
+<p>Cohen, J. (1960). A coefficient of agreement for nominal scales. <i>Educational and Psychological Measurement</i>, 20(1), 37-46.</p>
+<p>Holm, S. (1979). A simple sequentially rejective multiple test procedure. <i>Scandinavian Journal of Statistics</i>, 6(2), 65-70.</p>
 <p>Newey, W. K. et West, K. D. (1987). A simple, positive semi-definite, heteroskedasticity and autocorrelation consistent covariance matrix. <i>Econometrica</i>, 55(3), 703-708.</p>
 <p>Politis, D. N. et Romano, J. P. (1994). The stationary bootstrap. <i>Journal of the American Statistical Association</i>, 89(428), 1303-1313.</p>
 <h2>Stratégies et ouverture</h2>
+<p>Barroso, P. et Santa-Clara, P. (2015). Momentum has its moments. <i>Journal of Financial Economics</i>, 116(1), 111-120.</p>
+<p>Carhart, M. M. (1997). On persistence in mutual fund performance. <i>Journal of Finance</i>, 52(1), 57-82.</p>
 <p>Daniel, K. et Moskowitz, T. J. (2016). Momentum crashes. <i>Journal of Financial Economics</i>, 122(2), 221-247.</p>
 <p>Jegadeesh, N. et Titman, S. (1993). Returns to buying winners and selling losers: implications for stock market efficiency. <i>Journal of Finance</i>, 48(1), 65-91.</p>
 <p>Lunde, A. et Timmermann, A. (2004). Duration dependence in stock prices: an analysis of bull and bear markets. <i>Journal of Business &amp; Economic Statistics</i>, 22(3), 253-273.</p>
+<p>Moreira, A. et Muir, T. (2017). Volatility-managed portfolios. <i>Journal of Finance</i>, 72(4), 1611-1644.</p>
 <h2>Données</h2>
 <p>Federal Reserve Bank of St. Louis, FRED et ALFRED (archive des publications successives) · Kenneth R. French Data Library · National Bureau of Economic Research, chronologie des cycles américains · Yahoo Finance · Cboe (VIX).</p>
 </div>""")
@@ -1026,7 +1103,7 @@ FEATURES = [
     ("asy_skew_63, asy_kurt_63", "Asymétrie et mémoire", "Asymétrie et aplatissement des rendements sur 63 séances", "Yahoo"),
     ("asy_drawdown_252", "Asymétrie et mémoire", "Distance au plus haut des 252 dernières séances", "Yahoo"),
     ("asy_hurst", "Asymétrie et mémoire", "Exposant de Hurst par analyse des fluctuations sans tendance (DFA)", "Yahoo"),
-    ("asy_vr_5, asy_vr_20", "Asymétrie et mémoire", "Ratios de variance de Lo et MacKinlay à 5 et 20 jours, sur 252 séances", "Yahoo"),
+    ("asy_vr_5, asy_vr_20", "Asymétrie et mémoire", "Ratios de variance de Lo et MacKinlay à 5 et 20 séances, sur 252 séances", "Yahoo"),
     ("xs_dispersion_ind / szbm", "Coupe transversale", "Dispersion des rendements entre les 49 secteurs, puis entre les 25 portefeuilles taille × valeur, lissée sur 21 séances", "Ken French"),
     ("xs_avg_corr", "Coupe transversale", "Corrélation moyenne entre secteurs, 63 séances", "Ken French"),
     ("xs_absorption, xs_absorption_chg", "Coupe transversale", "Part de la variance des secteurs expliquée par les 5 premiers facteurs (252 séances), et sa variation sur 63", "Ken French"),
@@ -1053,32 +1130,36 @@ def annexes(configs: int, nz_lo: int, nz_hi: int) -> str:
     if n_listed != 50:
         raise SystemExit(f"annex A lists {n_listed} features, not 50")
     deviations = [
-        ["08/09", "Ordre des états", "Une erreur de signe dans l'enveloppe du modèle inversait les états « calme » et « stress ». Corrigée en ordonnant les états par leur volatilité d'entraînement ; la première explication consignée était fausse et a été rectifiée."],
+        ["08/09", "Ordre des états", "Une erreur de signe dans l'interface (wrapper) du modèle inversait les états « calme » et « stress ». Corrigée en ordonnant les états par leur volatilité d'entraînement ; la première explication consignée était fausse et a été rectifiée."],
         ["08/09", "Règle de position", "Une règle de taille (inverse de la volatilité de l'état) a été ajoutée à côté de la règle tout-ou-rien gelée ; les deux sont publiées."],
         ["08/09", "Grille de λ", "Non élargie malgré un optimum en bord de grille : un élargissement après avoir vu les résultats aurait été un ajustement a posteriori."],
-        ["10/09", "Audit indépendant", "NBER noté contre le mois civil, et non avec jusqu'à 45 jours de recul ; témoin de volatilité causal ajouté ; information sur la volatilité future publiée. Exactitude revue de 95,1 % à 93,2 %."],
+        ["10/09", "Relecture critique", "NBER noté contre le mois civil, et non avec jusqu'à 45 jours de recul ; témoin de volatilité causal ajouté ; information sur la volatilité future publiée. Exactitude revue de 95,1 % à 93,2 %."],
         ["13/09", "Contrôles T1, T3, T5", "Exécutés après les résultats principaux ; deux des trois affaiblissent l'étude (aucun modèle ne bat le témoin ; le gain passe par le dénominateur)."],
         ["13/09", "Plis", "Deux des cinq plis de cinq ans d'A′ ne contiennent qu'un état : la règle d'arrêt « trois plis sur cinq » est incalculable. Le walk-forward à 49 réestimations devient la référence."],
         ["—", "Règle d'arrêt n°2", "Déclenchée (R² incrémental sur les rendements de 0,007 à 0,030 point, sous 0,2) sans être annoncée ; l'étude a continué sur la volatilité."],
         ["—", "Seconde stratégie de base", "Le momentum à risque égal, prévu par le cadrage, n'a jamais été évalué."],
         ["—", "Révisions", "Les séries ne stockent que leur première publication : un panel passé n'est pas reconstruit exactement tel qu'il était connu."],
         ["22/09", "Réplication de Shu et al.", "Une ligne publiée sans code qui la produise a été retirée ; la conclusion repose sur le balayage de huit pénalités fixes."],
-        ["23/09", "Réserve scellée", "La réserve 1971-1989, tenue à l'écart jusque-là, a été ouverte pour le test sur 90 ans, avant sa lecture."],
+        ["23/09", "Réserve scellée", "La période 1971-1989, mise de côté dès le départ pour un contrôle final, a été ouverte pour le test sur 90 ans, avant sa lecture."],
         ["25/09", "Sous-ensemble commun", "Jamais mis en œuvre : les 50 variables vont à A, A′, B et C ; seul A′ sélectionne, dans son propre ajustement. La comparaison A′ – B mêle modèle et sélection."],
         ["25/09", "Jump Model continu", "Prévu par le cadrage, jamais estimé."],
-        ["25/09", "Choix de λ", "Recalculé toutes les quatre réestimations ; repli à 20 (médiane de la grille, hors grille) quand aucun candidat n'est admissible, ce qui vaut pour A′ d'avril 2022 à juillet 2026."],
+        ["25/09", "Choix de λ", "Recalculé toutes les quatre réestimations ; repli à 20 (médiane de la grille, hors grille) quand aucun candidat n'est admissible, ce qui vaut pour les 9 réestimations d'A′ d'avril 2022 à avril 2026."],
         ["25/09", "Attribution d'un rappel", "Le rappel corrigé 419/435 attribué à A est celui d'A′ ; celui d'A est 431/435."],
+        ["25/09", "Réestimations", "Trois des six entrées en stress d'A′ tombent le jour même d'une réestimation (§8) ; ce n'était signalé nulle part."],
+        ["25/09", "Témoin en classification", "Le témoin de volatilité n'avait pas été noté face au NBER ; il l'est désormais (§4, docs/artifacts/temoin_nber.txt)."],
+        ["25/09", "Stratégies de l'application", "Les trois stratégies du §6 ont été choisies après les lectures ; l'arrêt du rebond obligataire a été ajouté après la lecture de ses deux autres usages."],
+        ["25/09", "Écarts T1", "Les écarts du contrôle T1 vont de −0,04 à +0,06, et non de +0,04 à +0,06 comme l'écrivait docs/RESULTS_FINAL.md."],
         ["—", "Étiquette git", "Annotée mais non signée ; la date de publication sur GitHub fait foi."],
     ]
     phase_a = [["SJM réduit (30 variables)", "57,5 %", "0,16", "6 / 14", "2,05", "12,2 %"],
                ["Règle de volatilité médiane", "61,8 %", "0,11", "11 / 14", "8,85", "47,5 %"],
                ["Règle de volatilité au 80ᵉ centile", "60,4 %", "0,19", "9 / 14", "3,55", "16,0 %"],
                ["Panique de Daniel et Moskowitz", "64,6 %", "0,31", "6 / 14", "1,74", "11,3 %"]]
-    phase_b = [["B1 arrêt du SJM réduit − seul", "+0,045", "0,158", "−0,78", "96ᵉ c.", "Sous-puissant"],
-               ["B2 arrêt à sortie asymétrique − seul", "−0,013", "0,145", "−1,82", "70ᵉ c.", "Pas utile"],
-               ["B3 arrêt du SJM réduit − arrêt de la règle au 80ᵉ c.", "+0,026", "0,153", "+1,47", "96ᵉ c.", "Sous-puissant"]]
+    phase_b = [["B1 arrêt du SJM réduit − seul", "+0,045", "0,158", "−0,78", "96 %", "Sous-puissant"],
+               ["B2 arrêt à sortie asymétrique − seul", "−0,013", "0,145", "−1,82", "70 %", "Pas utile"],
+               ["B3 arrêt du SJM réduit − arrêt de la règle au 80ᵉ centile", "+0,026", "0,153", "+1,47", "96 %", "Sous-puissant"]]
     others = [
-        ["Stratégies de crise", "Vente de variance, vente de futures VIX, momentum, achat-vente de call, coupées ou réduites en stress : 9 tests, aucun utile ; test P : l'état ne prévoit pas la volatilité au-delà du VIX.", "RESULTS_CRISE"],
+        ["Stratégies de crise", "Vente de variance, vente de futures VIX, momentum, achat-vente de call, coupées ou réduites en stress : 8 tests, aucun utile ; test P : l'état ne prévoit pas la volatilité au-delà du VIX.", "RESULTS_CRISE"],
         ["Actions en calme, refuge en stress", "Or, obligations longues ou volatilité achetée en stress à la place des actions : 3 tests, aucun utile ; l'or +0,04, sous le seuil, et une règle de volatilité fait mieux.", "RESULTS_REFUGE §1"],
         ["Refuge pour neuf stratégies", "9 stratégies × 3 jambes de remplacement : 27 tests, 8 sous-puissants, 19 pas utiles.", "RESULTS_REFUGE §2"],
         ["Couplage à huit stratégies", "Arrêt, réduction, bascule vers la tendance : 24 tests, aucun utile ; tendance crypto et prime overnight pénalisées.", "RESULTS_COUPLAGE_STRATEGIES"],
@@ -1088,13 +1169,13 @@ def annexes(configs: int, nz_lo: int, nz_hi: int) -> str:
         ["Un régime par facteur", "Six régimes pour six facteurs (Shu et Mulvey, 2024), 1978-2026 : Sharpe 1,39 contre 1,51 pour les six facteurs tenus en permanence ; pas utile.", "RESULTS_FACTORSJM"],
         ["Sélection entre signaux", "Un contexte de marché, orthogonal à la volatilité, pour choisir entre dix signaux sectoriels : niveau A en échec (−0,110), B sous-puissant, C non montré.", "RESULTS_TWOSIGMA"],
         ["Vitesse des signaux de tendance", "Le régime ne change pas le classement des vitesses (niveau A, réfuté sur le signe) ; niveau B indécidable faute de puissance.", "RESULTS_AHL_LEVEL_A, _B"],
-        ["Réplication de Shu, Yu et Mulvey (2024)", "Le S&amp;P 500 conservé se reproduit au chiffre près (Sharpe 0,48) ; le risque se reproduit, pas le rendement ; le chiffre publié (0,68) ne dépasse une cible de volatilité (0,61) que de 0,06.", "REPLICATION_SHU2024"],
+        ["Réplication de Shu, Yu et Mulvey (2024)", "Le S&amp;P 500 conservé se reproduit au chiffre près (Sharpe 0,48) ; le risque se reproduit, pas le rendement ; le Sharpe publié (0,68) reste proche de celui d'une simple cible de volatilité (0,61).", "REPLICATION_SHU2024"],
         ["Hypothèses macro H1, H2, H3", "Momentum macro absolu, transversal sur 19 pays, surprises macro : falsifiées (H2 : la dispersion des taux courts de la zone euro a disparu en 1999).", "chantiers/macro-momentum"],
         ["Prime de retournement", "Sharpe de 3,64 dans les années 1990, −0,18 depuis 2020 : falsifiée.", "chantiers/reversal-lab"],
     ]
     return f"""
 <div class="annex">
-<h1 class="sec newpage"><span class="n">A</span>Les 50 variables</h1>
+<h1 class="sec"><span class="n">A</span>Les 50 variables</h1>
 <p class="small-p">Toutes sont centrées et réduites sur leur seul passé puis bornées à ±5 (§2). Le code est dans
 <code>regime_lab/features/</code>. Un facteur momentum prévu (<code>xs_ff_mom_63</code>) n'a jamais été construit, faute
 d'être dans le fichier des cinq facteurs&nbsp;; son absence est consignée dans le code.</p>
@@ -1113,12 +1194,15 @@ date et sa raison.</p>
   <li><b>Exactitude équilibrée</b>&nbsp;: (rappel + spécificité) / 2. <b>κ de Cohen</b>&nbsp;: (accord observé − accord
   attendu par hasard) / (1 − accord attendu).</li>
   <li><b>R² incrémental</b>&nbsp;: R² de la régression avec le témoin et l'état, moins R² avec le témoin seul, sur des
-  fenêtres de 21 séances qui se chevauchent&nbsp;; t de l'état par erreurs-types HAC.</li>
-  <li><b>t HAC</b>&nbsp;: Newey et West, 6 retards, sur la différence quotidienne entre la stratégie filtrée et la
-  stratégie seule.</li>
-  <li><b>Seuil de détection (MDE)</b>&nbsp;: bootstrap stationnaire apparié par blocs (longueurs moyennes de 21, 63 et
-  126 séances, la plus défavorable retenue), sur des séries centrées, au niveau α = 0,05 divisé par le nombre de
-  tests de l'étude (Bonferroni).</li>
+  fenêtres de 21 séances qui se chevauchent. Le rang de volatilité et la régression portent sur tout l'échantillon&nbsp;:
+  c'est un test de contenu prédictif, pas une prévision en temps réel. t de l'état par erreurs-types HAC à 21
+  retards.</li>
+  <li><b>t HAC</b> des écarts de stratégie&nbsp;: Newey et West, 6 retards, sur la différence quotidienne entre la
+  stratégie filtrée et la stratégie seule.</li>
+  <li><b>Seuil de détection (MDE)</b>&nbsp;: l'écart que le test détecterait avec une puissance de 80 %, au niveau
+  α = 0,05 divisé par le nombre de tests de l'étude (Bonferroni)&nbsp;; l'erreur-type vient d'un bootstrap stationnaire
+  apparié par blocs (longueurs moyennes de 21, 63 et 126 séances, la plus défavorable retenue), sur des séries
+  centrées.</li>
   <li><b>Placebo</b>&nbsp;: la série des états décalée circulairement d'au moins 252 séances, 400 tirages&nbsp;; il garde
   la durée et le nombre des épisodes de stress et change leurs dates.</li>
   <li><b>Témoins</b>&nbsp;: stress quand la volatilité réalisée du S&amp;P 500 sur 21 séances dépasse sa médiane passée
@@ -1129,13 +1213,14 @@ date et sa raison.</p>
   <li><b>Verdicts</b>&nbsp;: voir l'encadré du §1. Une lecture qui contient une valeur non finie ne reçoit pas de
   verdict.</li>
   <li><b>Journal des essais</b>&nbsp;: chaque configuration évaluée est inscrite dans <code>data/trials.parquet</code>
-  ({configs} configurations distinctes au 25 septembre 2026), pour permettre de corriger du nombre d'essais.</li>
+  ({configs} configurations distinctes au 25 septembre 2026&nbsp;; fichier non versionné), pour permettre de corriger du
+  nombre d'essais.</li>
 </ul>
 
 <h1 class="sec"><span class="n">D</span>Le test sur 90 ans</h1>
 <p class="small-p">Même méthode (deux états, réestimation semestrielle sur une fenêtre croissante, états filtrés),
 réestimée sur 1926-2026 avec les 30 variables calculables depuis 1926. C'est un cousin d'A′, pas A′&nbsp;: ni VIX, ni
-NFCI, ni macroéconomie en première publication. Protocole commité avant l'ajustement du modèle
+NFCI, ni macroéconomie en première publication. Protocole déposé dans git avant l'ajustement du modèle
 (<code>docs/PRESPEC_LONGHIST.md</code>).</p>
 {tbl(["Phase A : classification, 1937-2026, 14 récessions", "Exactitude équilibrée", "κ", "Récessions détectées", "Transitions / an", "Temps en stress"], phase_a, num={1, 2, 3, 4, 5}, cls="small", lead=0)}
 <p class="tnote" style="margin-bottom:3mm">Source : docs/RESULTS_LONGHIST.md §2.</p>
@@ -1148,8 +1233,10 @@ Dépression, le modèle ne signale presque aucun stress de 1937 à 1959.</p>
 
 <h1 class="sec"><span class="n">E</span>Les autres études du programme</h1>
 <p class="small-p">Le document de chacune (dans <code>docs/</code>, ou dans le dossier indiqué) précise son protocole, la
-date de son pré-enregistrement quand il y en a un, et sa lecture. Une étude de construction de portefeuille par quadrants macroéconomiques était en cours le 25
-septembre et n'est pas incluse.</p>
+date de son pré-enregistrement quand il y en a un, et sa lecture. En échec&nbsp;: le critère principal écrit d'avance
+n'est pas rempli. Non montré&nbsp;: voir l'encadré du §1. Indécidable&nbsp;: le test n'a pas été lu, faute d'une puissance
+suffisante, comme son protocole le prévoyait. Une étude de construction de portefeuille par quadrants
+macroéconomiques était en cours le 25 septembre et n'est pas incluse.</p>
 {tbl(["Étude", "Résultat", "Document"], [[r[0], r[1], f"<code>{r[2]}</code>"] for r in others], cls="small", widths=[17, 52, 31])}
 </div>"""
 
