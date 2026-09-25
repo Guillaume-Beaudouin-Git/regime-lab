@@ -15,8 +15,9 @@ pour tests multiples ?
 
 **La réponse, établie.**
 1. **Le classifieur marche comme classifieur.** 93,2 % d'exactitude équilibrée contre
-   les récessions NBER, kappa 0,53, sur 6 377 jours hors échantillon. Cinq méthodes
-   concordent. ⚠ **Mais sur deux récessions seulement.** Réestimée sur 1926-2026 avec
+   les récessions NBER, kappa 0,53, sur 6 377 jours hors échantillon, contre 84,0 % (κ 0,34)
+   pour la meilleure règle de volatilité d'une ligne (`docs/artifacts/temoin_nber.txt`).
+   Cinq méthodes concordent. ⚠ **Mais sur deux récessions seulement.** Réestimée sur 1926-2026 avec
    les 30 variables disponibles depuis 1926, la méthode ne reconnaît que 6 récessions sur
    14 (57,5 %), pas mieux qu'une règle de volatilité (`docs/RESULTS_LONGHIST.md`).
 2. **Il porte de la variance, pas de la moyenne.** Il ajoute +3,93 points de R² sur la
@@ -26,7 +27,9 @@ pour tests multiples ?
 3. **Aucun des sept dispositifs testés pour le monétiser ne bat une règle d'une ligne**
    (volatilité réalisée sous sa médiane). Les huit études des 23 et 24 septembre (§1)
    n'ont trouvé aucun usage utile non plus, et en expliquent la raison : le modèle entre
-   en stress tard et **y reste pendant les reprises**. Le chiffre qui explique tout : l'état change
+   en stress tard et **y reste pendant les reprises**, en partie parce que les
+   réestimations semestrielles l'y replacent (1/10/2009, 1/10/2020, 1/4/2021 : 153 des
+   1 013 jours de stress). Le chiffre qui explique tout : l'état change
    **13 fois en 6 377 séances**, soit treize décisions en 24 ans.
 4. **Quatre hypothèses dérivées ont été falsifiées** : H1, H2, H3 et la prime de
    retournement.
@@ -273,6 +276,22 @@ d'essais compte 84 configurations distinctes (`data/trials.parquet`).
   9. « 0 donnée du futur » était faux au sens strict : NFCI et inscriptions au chômage
      sont pris en valeur actuelle décalée, pas en première publication.
 
+- **Un audit du dossier par un agent de relecture (25/09 après-midi) a trouvé, et on a corrigé** :
+  - les deux chiffres juxtaposés du VIX (+3,93 et +0,20 viennent de deux tests différents ; le
+    terme comparable au +0,20 est +4,48) ;
+  - « le meilleur cas tombe à +0,045 sur 90 ans », alors que c'est l'arrêt, pas l'or, qui a
+    été testé sur 90 ans ;
+  - la fourchette T1 (−0,04 à +0,06, et non +0,04 à +0,06, corrigée aussi dans RESULTS_FINAL) ;
+  - des sources non versionnées : les états sont désormais exportés dans
+    `docs/artifacts/etats_hors_echantillon.csv` (`scripts/export_states.py`) ;
+  - le témoin absent de la classification (`scripts/measure_vol_rule_nber.py`) ;
+  - le rôle des réestimations dans le « reste en stress » ;
+  - 62 usages et un test de prédiction, et non 63 usages ;
+  - 227 jours fériés dans les 6 377 jours ;
+  - la définition du seuil (puissance de 80 %) ;
+  - les stratégies présentées, choisies après les lectures ;
+  - des pré-enregistrements faits dans le dépôt privé.
+
 ### Le 24 septembre : les cinq pistes du conseiller, lancées en parallèle
 
 Guillaume a dit « lance tout ». Cinq études, chacune pré-enregistrée, une lecture chacune,
@@ -327,7 +346,7 @@ regime-lab/                         UN SEUL dépôt, public
 ```
 
 La littérature (4 PDF) reste **hors du dépôt**, pour des raisons de droits d'auteur :
-`~/Desktop/M2/Projet_Big_Data_Regimes/3_Litterature/`.
+le dossier `3_Litterature/`, à côté du dépôt.
 
 ### Mise en route sur une autre machine
 
@@ -335,7 +354,7 @@ La littérature (4 PDF) reste **hors du dépôt**, pour des raisons de droits d'
 git clone https://github.com/Guillaume-Beaudouin-Git/regime-lab.git
 cd regime-lab
 uv sync --all-packages --extra dev          # un seul .venv pour les trois études
-.venv/bin/python -m pytest -q               # 849 tests au 25/09, ~15 min
+.venv/bin/python -m pytest -q               # 851 tests au 25/09, 15 à 25 min
 ```
 
 Les tests passent sans aucune donnée. Les scripts, eux, en ont besoin (§3).
@@ -348,7 +367,7 @@ Les tests passent sans aucune donnée. Les scripts, eux, en ont besoin (§3).
 façons de les obtenir :
 
 - **Recommandé : l'archive prête à envoyer**,
-  `~/Desktop/M2/Projet_Big_Data_Regimes/donnees_regime-lab_2026-09-22.zip` (36 Mo,
+  `donnees_regime-lab_2026-09-22.zip`, à côté du dépôt (36 Mo,
   176 fichiers). Elle contient les données des trois études et celles des plans (§3.4).
   On la décompresse à la racine du dépôt. C'est le seul moyen d'obtenir *les mêmes
   chiffres* : Yahoo révise ses prix ajustés, et un nouveau téléchargement peut déplacer

@@ -13,8 +13,10 @@ historique complet.
 >   ci-dessous, rien n'est à installer.
 > - Pour **relancer** les calculs, voir [Relancer les calculs](#relancer-les-calculs).
 
-Le code et ses commentaires sont en anglais ; le dossier et les documents de synthèse sont
-en français.
+Le code et ses commentaires sont en anglais, comme les documents de résultats de l'étude
+principale ; le dossier et les études de septembre 2026 sont en français. Le code a été écrit
+avec l'aide d'un assistant de programmation (Claude Code) ; la question, le protocole, les
+choix de recherche et l'interprétation sont les nôtres.
 
 *English summary at the bottom of this page.*
 
@@ -48,9 +50,10 @@ Pour comprendre le projet de bout en bout, dans l'ordre :
 | §3 Sparse Jump Model et Jump Model | [`regime_lab/models/jump.py`](regime_lab/models/jump.py), [`calibrate.py`](regime_lab/models/calibrate.py) | [`docs/artifacts/sjm_sparsity.txt`](docs/artifacts/sjm_sparsity.txt) |
 | §3 HMM filtré | [`regime_lab/models/hmm.py`](regime_lab/models/hmm.py) | — |
 | §3 Gradient boosting et HAR-RV | [`regime_lab/models/supervised.py`](regime_lab/models/supervised.py) | — |
-| §3 Walk-forward (49 réestimations) | [`regime_lab/models/base.py`](regime_lab/models/base.py), [`scripts/run_phase2.py`](scripts/run_phase2.py) | — |
+| §3 Walk-forward (49 réestimations) | [`regime_lab/models/base.py`](regime_lab/models/base.py), [`scripts/run_phase2.py`](scripts/run_phase2.py), [`export_states.py`](scripts/export_states.py) | [`docs/artifacts/etats_hors_echantillon.csv`](docs/artifacts/etats_hors_echantillon.csv) |
 | §3 Portefeuille 60/40 de référence | [`regime_lab/strategies/`](regime_lab/strategies/) | — |
 | §4 Résultat 1, classification | [`regime_lab/evaluation/reliability.py`](regime_lab/evaluation/reliability.py), [`scripts/run_evaluation.py`](scripts/run_evaluation.py) | [`docs/RESULTS_FINAL.md`](docs/RESULTS_FINAL.md) |
+| §4 Témoin de volatilité face au NBER | [`scripts/measure_vol_rule_nber.py`](scripts/measure_vol_rule_nber.py) | [`docs/artifacts/temoin_nber.txt`](docs/artifacts/temoin_nber.txt) |
 | §5 Résultat 2, risque et direction | [`regime_lab/evaluation/predictive.py`](regime_lab/evaluation/predictive.py), [`scripts/run_layer3.py`](scripts/run_layer3.py) | [`docs/RESULTS_FINAL.md`](docs/RESULTS_FINAL.md) |
 | §5 Contrôles de falsification (T1, T3, T5) | [`scripts/run_t1_control.py`](scripts/run_t1_control.py), `run_t3_control.py`, `run_t5_refit.py`, `run_t5_control.py` | [`docs/RESULTS_FALSIFICATION.md`](docs/RESULTS_FALSIFICATION.md) |
 | §5 Test P, §6 stratégies de crise | [`regime_lab/extensions/crisis.py`](regime_lab/extensions/crisis.py), [`scripts/run_crisis_coupling.py`](scripts/run_crisis_coupling.py) | [`docs/RESULTS_CRISE.md`](docs/RESULTS_CRISE.md) |
@@ -74,7 +77,7 @@ git clone https://github.com/Guillaume-Beaudouin-Git/regime-lab.git
 cd regime-lab
 git checkout dossier-2026-09-25              # la version qui accompagne le dossier
 uv sync --all-packages --extra dev           # un seul environnement pour tout le dépôt
-.venv/bin/python -m pytest -q                # 849 tests, environ 15 minutes, sans données
+.venv/bin/python -m pytest -q                # 851 tests, tous réussis le 25/09 ; sans données, ceux qui en ont besoin sont sautés
 ```
 
 Utilisez toujours `.venv/bin/python`, jamais le Python du système.
@@ -106,18 +109,21 @@ CLAUDE.md        les consignes données à l'assistant de programmation utilisé
 > au-delà de ce qu'une simple mesure de volatilité capte déjà ?
 
 1. **Le classifieur fonctionne.** 93,2 % d'exactitude équilibrée contre les récessions
-   officielles (NBER), sur 6 377 jours jamais vus à l'entraînement. Cinq méthodes
-   différentes s'accordent. ⚠ La période de test ne contient que **deux récessions**
-   (2008-09 et 2020) ; réestimée sur 1926-2026, une version réduite n'en reconnaît que
-   6 sur 14 (`docs/RESULTS_LONGHIST.md`).
+   officielles (NBER), sur 6 377 jours jamais vus à l'entraînement, contre 84,0 % pour la
+   meilleure règle de volatilité d'une ligne (`docs/artifacts/temoin_nber.txt`). ⚠ La
+   période de test ne contient que **deux récessions** (2008-09 et 2020) ; réestimée sur
+   1926-2026 (hors échantillon : 1937-2026), une version réduite n'en reconnaît que 6 sur 14
+   (`docs/RESULTS_LONGHIST.md`).
 2. **Il prédit la volatilité, pas la direction.** Il ajoute +3,93 points de R² sur la
    volatilité future au-delà d'une règle de volatilité passée, et rien sur les
-   rendements futurs (+0,03 point, t 0,27). ⚠ Au-delà du VIX, il n'ajoute que +0,20
-   point, non significatif (`docs/RESULTS_CRISE.md`, test P).
-3. **Personne n'a réussi à en tirer de l'argent.** Aucun usage du filtre n'est démontré
-   utile, et une règle d'une ligne (« la volatilité récente est-elle sous sa médiane ? »)
-   fait aussi bien. La raison est mécanique : le régime change **13 fois en 24 ans**, entre
-   en stress tard et y reste pendant les reprises.
+   rendements futurs (+0,03 point, t 0,27). ⚠ Dans un test séparé sur le S&P 500 (test P,
+   `docs/RESULTS_CRISE.md`), l'état ajoute +4,48 points au-delà d'un rang de volatilité,
+   mais +0,20 seulement, non significatif, une fois le VIX ajouté.
+3. **Aucun usage de trading n'en tire un gain démontré.** Sur 62 usages et 13 stratégies,
+   aucun n'est jugé utile, et une règle d'une ligne (« la volatilité récente est-elle sous sa
+   médiane ? ») fait aussi bien. Le régime ne change que **13 fois en 24 ans**, entre en
+   stress tard et reste en stress pendant une grande partie des reprises, en partie à
+   cause des réestimations semestrielles.
 
 Ce résultat négatif est le résultat. Il a été obtenu par des mesures conçues **à
 l'avance** pour pouvoir dire non.
@@ -141,8 +147,9 @@ l'avance** pour pouvoir dire non.
 A study of machine-learned market regimes under a point-in-time data contract. The
 classifier works (93.2% balanced accuracy against NBER recessions, out of sample) and
 carries information about **variance, not mean**: +3.93 points of incremental R² on
-forward volatility beyond a past-volatility rule (only +0.20 beyond the VIX), nothing on
-forward returns. The test period holds two recessions only. No use of it as a trading
-filter beats a one-line volatility rule, because the state changes 13 times in 24 years.
+forward volatility beyond a past-volatility rule (in a separate test on the S&P 500, +4.48
+points beyond a volatility rank but only +0.20 once the VIX is added), nothing on forward
+returns. The test period holds two recessions only. No use of it as a trading filter beats
+a one-line volatility rule; the state changes only 13 times in 24 years.
 Four derived hypotheses are falsified in `chantiers/`. The English description of the
 main study is in `docs/OVERVIEW_EN.md`.

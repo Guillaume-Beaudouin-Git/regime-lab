@@ -123,6 +123,13 @@ training-volatility target. Cutting exposure *because the market has turned* is
 not the same as cutting it *because it has become volatile*, and the difference
 shows up in the tail rather than in the mean.
 
+> **Note, 2026-09-25.** The paragraph above ("At the same volatility…") and points 2 to 4
+> below still quote the withdrawn cross-validation row (8.6%, 13.0%, 0.50, −32.0%, 76.6%).
+> They are kept as written, and should be read with the correction above. What stands
+> without that row: the benchmark reproduces to the decimal; the published model (0.68)
+> sits about 0.06-0.07 above a volatility target at matched volatility (0.61), inside the
+> detection threshold; and the conclusion rests on the eight-penalty sweep.
+
 ## What this establishes
 
 1. **The benchmark reproduces exactly.** The harness is validated against an

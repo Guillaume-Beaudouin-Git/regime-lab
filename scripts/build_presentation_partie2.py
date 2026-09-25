@@ -488,7 +488,7 @@ def build_html() -> str:
           <li><b>L'effet dépend entièrement de la stratégie.</b> Le momentum perd en période de stress&nbsp;:
           le couper aide. La tendance crypto y gagne le plus&nbsp;: la couper la pénalise.</li>
           <li><b>Aucun usage ne bat de façon démontrable une simple règle de volatilité.</b> Même le
-          meilleur cas reste sous le seuil de détection, et il fond quand on le vérifie sur 90 ans.</li>
+          meilleur cas reste sous le seuil de détection, et le gain de l'arrêt du momentum fond quand on le vérifie sur 90 ans.</li>
           <li><b>La raison est comprise</b>&nbsp;: le modèle alerte tard et reste en mode crise pendant la
           reprise. Ce qui paie vraiment, c'est la diversification.</li>
         </ol>""", "docs/RESULTS_REFUGE.md, RESULTS_COUPLAGE_STRATEGIES.md, RESULTS_LONGHIST.md"))
@@ -589,10 +589,10 @@ def build_html() -> str:
             <p>Réestimer le même type de modèle sur un siècle, avec les variables qui existent depuis 1926,
             pour avoir 14 récessions au lieu de 2 et un test 2,5 fois plus précis.</p>
             <h3>Ce qu'on a trouvé</h3>
-            <p>Le gain vient presque entièrement de 2002-2026&nbsp;: le modèle réduit y gagne +0,145
-            (A′ complet&nbsp;: +0,17). Sur 90 ans, il vaut +0,045, trois fois et demie sous le seuil,
+            <p>Le gain vient presque entièrement de 2002-2026&nbsp;: +0,145 pour le modèle réduit sur cette
+            sous-période (sur la fenêtre exacte d'A′&nbsp;: +0,138, contre +0,166 pour A′ complet). Sur 90 ans, il vaut +0,045, trois fois et demie sous le seuil,
             et il vient d'une baisse du risque, pas d'un gain de rendement.</p>
-            <p class="callout">Une règle publiée fait mieux&nbsp;: « marché baissier + forte volatilité »
+            <p class="callout">Une règle publiée fait mieux (témoin, écart non testé)&nbsp;: « marché baissier + forte volatilité »
             (Daniel et Moskowitz) donne +0,11 et ramène la perte max de −37&nbsp;% à −27&nbsp;%.</p>
           </div></div>""", "docs/RESULTS_LONGHIST.md (modèle réduit à 30 variables, sans VIX ni macro)"))
 
@@ -654,11 +654,11 @@ def build_html() -> str:
           <div class="side">
             <p><b>1. Il alerte tard.</b> Le 11 mars 2020, le VIX, l'indice de la peur, était déjà passé de 14 à 54.</p>
             <p><b>2. Il reste en crise pendant la reprise.</b> Il sort une première fois du stress à +49&nbsp;%
-            depuis le creux, y revient, et n'en sort définitivement qu'à +82&nbsp;%&nbsp;: 97&nbsp;% de ses
+            depuis le creux, y est replacé par la réestimation d'octobre, et n'en sort définitivement qu'à +82&nbsp;%&nbsp;: 97&nbsp;% de ses
             jours de stress Covid tombent le jour du creux ou après (55&nbsp;% sur les trois épisodes).</p>
             <p><b>3. Le marché le savait déjà.</b> Une fois le VIX ajouté, le modèle n'ajoute presque rien
             à la prévision du risque (+0,20 point, contre +4,48 sans le VIX).</p>
-            <p class="callout"><b>Conséquence&nbsp;:</b> une couverture gagne dans la chute puis reperd dans le
+            <p class="callout"><b>Conséquence&nbsp;:</b> une couverture gagne dans la chute puis rend ses gains dans le
             rebond. Seule une stratégie qui <b>perd dans les rebonds</b>, comme le momentum, en profite.</p>
           </div></div>""", "docs/presentation/PISTES_AMELIORATION.md §0, docs/RESULTS_CRISE.md (test P), data/cache/states.parquet"))
 

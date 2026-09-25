@@ -121,8 +121,8 @@ ans. Les modèles plus nerveux se trompent plus souvent. »
 Nous avons aussi refait à l'identique le papier de Shu et al. (2024), pour vérifier.
 **Le risque se reproduit, le rendement non** : le S&P 500 conservé se reproduit au
 chiffre près (Sharpe 0,48 des deux côtés) et le modèle réduit le risque comme dans le
-papier, mais sans gain de rendement. Même le chiffre publié (Sharpe 0,68) ne dépasse une
-simple cible de volatilité (0,61) que de 0,06, sous notre seuil de détection
+papier, mais sans gain de rendement. Même le Sharpe publié (0,68) reste proche de celui
+d'une simple cible de volatilité (0,61), un écart sous notre seuil de détection
 (`docs/REPLICATION_SHU2024.md`).
 
 **À dire, c'est la transition vers la partie 2** : « Notre modèle est un bon thermomètre

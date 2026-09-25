@@ -257,10 +257,10 @@ def build_html() -> str:
     kpis = [("93,2 %", "d'exactitude face aux récessions officielles", "exactitude équilibrée "
              "contre le NBER, sans voir le futur ; 2 récessions dans la période (2008-09, 2020)"),
             ("+3,93 pts", "d'information sur le risque futur", "au-delà d'une règle de volatilité "
-             "passée ; un test à part le ramène à +0,20 une fois le VIX ajouté"),
+             "passée. Test séparé sur le S&P 500 : +4,48 sans le VIX, +0,20 avec"),
             ("+0,03 pt", "d'information sur la direction", "R² incrémental sur les rendements "
              "futurs : statistiquement nul (t = 0,27)"),
-            ("0 / 63", "usages du filtre utiles", "arrêt, réduction, bascule, valeurs refuges et "
+            ("0 / 62", "usages du filtre utiles", "arrêt, réduction, bascule, valeurs refuges et "
              "options, sur 13 stratégies : aucune amélioration démontrée")]
     tiles = "".join(f'<div class="kpi"><div class="kv">{v}</div><div class="kl">{lab}</div>'
                     f'<div class="kd">{d}</div></div>' for v, lab, d in kpis)
@@ -272,7 +272,7 @@ def build_html() -> str:
           <li><b>Il informe sur la volatilité future, pas sur la direction</b>, et le VIX en savait
           déjà presque autant. C'est un thermomètre du risque, pas un signal de trading.</li>
           <li><b>Utilisé comme filtre, il n'améliore aucune stratégie de façon démontrable</b>&nbsp;:
-          63 usages testés, avec un critère écrit avant chaque lecture.</li>
+          62 usages testés, avec un critère écrit avant chaque lecture.</li>
         </ol>""", "docs/RESULTS_FINAL.md, RESULTS_COUPLAGE_STRATEGIES, RESULTS_CRISE, RESULTS_REFUGE"))
 
     n_configs = f"{pd.read_parquet(ROOT / 'data' / 'trials.parquet')['config_hash'].nunique():,}"
@@ -393,7 +393,7 @@ def build_html() -> str:
               <li><span>Ordre des états</span><b>par la volatilité d'entraînement</b></li>
             </ul>
             <h3>Références</h3>
-            <p class="ref">Nystrup, Kolm &amp; Lindström (2020-2021)&nbsp;; Aydınhan, Kolm, Mulvey
+            <p class="ref">Nystrup, Lindström &amp; Madsen (2020)&nbsp;; Nystrup, Kolm &amp; Lindström (2021)&nbsp;; Aydınhan, Kolm, Mulvey
             &amp; Shu (2024). Implémentation de référence des auteurs (jumpmodels).</p>
           </div>
         </div>""", "regime_lab/models/jump.py, regime_lab/models/calibrate.py"))
@@ -533,12 +533,12 @@ def build_html() -> str:
           direction.</h3><p>Il informe sur la volatilité future, pas sur les rendements, et le
           VIX en savait déjà presque autant.</p></div></div>
           <div class="cl"><div class="cn">3</div><div><h3>Comme filtre de trading, elle ne
-          paie pas.</h3><p>Aucune amélioration démontrée sur 63 usages et 13 stratégies&nbsp;;
+          paie pas.</h3><p>Aucune amélioration démontrée sur 62 usages et 13 stratégies&nbsp;;
           une simple règle de volatilité fait aussi bien. Le meilleur cas, momentum + or en
           stress, reste sous le seuil de détection.</p></div></div>
-          <div class="cl"><div class="cn">→</div><div><h3>Les pistes ouvertes.</h3><p>Plus de
-          crises pour trancher (un historique depuis 1926), et le régime comme budget de risque
-          d'un portefeuille plutôt que comme interrupteur.</p></div></div>
+          <div class="cl"><div class="cn">→</div><div><h3>Testé ensuite.</h3><p>Un historique depuis
+          1926 (le modèle réduit n'y reconnaît que 6 récessions sur 14) et le régime comme budget
+          de risque d'un portefeuille (aucun gain démontré)&nbsp;: voir le dossier.</p></div></div>
         </div>
         <div class="banner">Le régime décrit le <b>risque</b>, pas la <b>direction</b>&nbsp;:
         c'est un outil de dimensionnement, pas un signal d'entrée ou de sortie.</div>""",
