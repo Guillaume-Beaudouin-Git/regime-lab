@@ -37,14 +37,21 @@ partis de là. »
 
 ### Étape 2 — En creusant, on a trouvé quatre faiblesses au HMM
 
-Elles sont écrites dans notre cadrage (`docs/CHARTER.html` §02) :
+Elles sont écrites dans notre cadrage (`docs/CHARTER.html` §02), comme des hypothèses à
+vérifier :
 1. **Il triche facilement.** La version standard utilise des données futures pour
    étiqueter le passé, ce qui est impossible en temps réel. En version honnête
    (« filtrée »), il est beaucoup moins tranché.
 2. **Il redécouvre souvent la volatilité, rien de plus.** « Marché agité / marché calme »,
    ce qu'une règle d'une ligne sait déjà faire.
-3. **Il réagit en retard**, précisément au moment où ça compte.
+3. **Il réagirait en retard**, précisément au moment où ça compte.
 4. **Il est instable** : réestimé deux fois, il peut donner deux découpages différents.
+
+**Ce que nos données ont montré sur le point 3** : le HMM filtré n'a pas été en retard.
+Au Covid, il passe en stress le 27 février 2020, deux semaines avant le Sparse Jump Model.
+Son vrai défaut ici, ce sont les **fausses alertes** : il est en stress 35 % du temps,
+change d'avis 49 fois en 24 ans, et seuls 19 % de ses jours de stress tombent dans une
+récession officielle.
 
 ### Étape 3 — Un papier de recherche plus récent propose mieux : le Jump Model
 
@@ -53,18 +60,18 @@ Kolm, Mulvey et Shu (2024) l'étendent, et la littérature lui prête des régim
 plus exploitables que le HMM. Son idée clé : **chaque changement d'état a un coût**,
 donc le modèle ne change d'avis que si la preuve est forte.
 
-Nous avons pris sa version *sparse* : elle **choisit elle-même** la dizaine de variables
-utiles parmi nos 50. Nous lui avons aussi imposé des variables qui ne sont pas de la
-volatilité (crédit, taux, dispersion entre secteurs…). Sinon, il n'aurait fait que
-redécouvrir la volatilité, comme le HMM.
+Nous avons pris sa version *sparse* : elle **choisit elle-même au plus 10 variables**
+parmi nos 50, et en ignore le reste. Nous avons aussi mis parmi les 50 des variables qui
+ne sont pas de la volatilité (crédit, taux, dispersion entre secteurs…), pour qu'il ne
+puisse pas se contenter de redécouvrir la volatilité.
 
 **À dire** : « On a trouvé un modèle plus récent, le Jump Model, qui fait payer chaque
 changement d'avis. Il est plus stable, et il choisit lui-même ses indicateurs. »
 
 ### Étape 4 — Pour être honnêtes, on l'a mis en concurrence
 
-Un modèle ne vaut que comparé. Nous avons aligné cinq concurrents, avec les mêmes données,
-les mêmes règles et les mêmes dates :
+Un modèle ne vaut que comparé. Nous avons aligné cinq concurrents, avec les mêmes 50
+variables (le HAR-RV utilise ses propres termes), les mêmes règles et les mêmes dates :
 - le **HMM**, notre point de départ ;
 - le **Jump Model** simple et le **Sparse Jump Model** ;
 - deux modèles **sans état caché**, qui prédisent directement la volatilité : un modèle
@@ -74,20 +81,23 @@ les mêmes règles et les mêmes dates :
 
 ### Étape 5 — La comparaison : le Sparse Jump Model gagne comme détecteur
 
-| | Récessions reconnues | Accord (kappa) | Changements d'état par an | Informe sur la volatilité future ? |
+| | Exactitude face aux récessions | Accord (kappa) | Changements d'état par an | Informe sur la volatilité future ? |
 |---|---|---|---|---|
 | **Sparse Jump Model** | **93,2 %** | **0,53** | **0,5** | **oui, +3,93 pts** |
 | Jump Model | 93,3 % | 0,49 | 0,5 | oui, +3,47 pts |
-| HMM | 84,7 % | 0,24 | 2,0 | oui, +2,26 pts |
-| Gradient boosting | 75,0 % | 0,12 | 14,1 | oui, +2,13 pts |
-| HAR-RV | 78,2 % | 0,17 | 18,4 | presque pas, +0,19 pt |
+| HMM | 84,7 % | 0,24 | 1,9 | oui, +2,26 pts |
+| Gradient boosting | 75,0 % | 0,12 | 13,6 | oui, +2,13 pts |
+| HAR-RV | 78,2 % | 0,17 | 17,8 | presque pas, +0,19 pt |
 
-Sources : `docs/RESULTS_FINAL.md`, couches 1 et 2. La dernière colonne donne le R²
-incrémental au-delà du témoin, sur la volatilité à 21 jours.
+Sources : `docs/RESULTS_FINAL.md`, couches 1 et 2 ; les changements d'état sont comptés
+dans `data/cache/states.parquet` sur les 6 377 séances hors échantillon. L'exactitude est
+l'exactitude équilibrée (§4). La dernière colonne donne le R² incrémental au-delà du
+témoin, sur la volatilité à 21 jours.
 
-**À dire** : « Le Sparse Jump Model reconnaît 93 % des récessions, en temps réel, et il
-ne change d'avis qu'une fois tous les deux ans. Les modèles plus nerveux se trompent plus
-souvent. »
+**À dire** : « Le Sparse Jump Model atteint 93 % d'exactitude face aux récessions
+officielles, sans jamais voir le futur : il met en stress 96 % des jours de récession et
+laisse en calme 90 % des jours normaux. Et il ne change d'avis qu'une fois tous les deux
+ans. Les modèles plus nerveux se trompent plus souvent. »
 
 **À dire aussi, sans quoi le chiffre trompe** :
 - **Le 93 % repose sur deux récessions seulement.** La période de test (2002-2026) ne
@@ -108,8 +118,10 @@ souvent. »
   t = 0,27.
 
 Nous avons aussi refait à l'identique le papier de Shu et al. (2024), pour vérifier.
-**Le risque se reproduit, le rendement non** : notre version réduit le risque autant que
-la leur, mais ne gagne pas plus que « être investi 77 % du temps »
+**Le risque se reproduit, le rendement non** : le S&P 500 conservé se reproduit au
+chiffre près (Sharpe 0,48 des deux côtés) et le modèle réduit le risque comme dans le
+papier, mais sans gain de rendement. Même le chiffre publié (Sharpe 0,68) ne dépasse une
+simple cible de volatilité (0,61) que de 0,06, sous notre seuil de détection
 (`docs/REPLICATION_SHU2024.md`).
 
 **À dire, c'est la transition vers la partie 2** : « Notre modèle est un bon thermomètre
@@ -149,11 +161,11 @@ n'allume pas le chauffage à chaque courant d'air.
 
 ### Le Sparse Jump Model (notre modèle principal)
 
-**En une phrase** : le Jump Model, qui en plus **choisit lui-même la dizaine
-d'indicateurs utiles** parmi les 50, et ignore les autres.
+**En une phrase** : le Jump Model, qui en plus **choisit lui-même au plus 10
+indicateurs** parmi les 50, et ignore les autres.
 
-**Image** : un analyste qui, face à un tableau de bord de 50 voyants, n'en surveille que
-les 10 qui comptent vraiment.
+**Image** : un analyste qui, face à un tableau de bord de 50 voyants, n'en surveille
+qu'une dizaine au plus, ceux qui comptent vraiment.
 
 **En vrai** :
 - **13 changements d'état en 24 ans** ;
@@ -174,8 +186,8 @@ dépasse tel seuil et que le crédit se tend, alors… ». Au-dessus de la médi
 **Image** : un comptable qui a vu des milliers de cas passés et applique des règles
 empiriques.
 
-**En vrai** : très réactif, mais nerveux. Il a changé d'avis **5 fois en février 2020**,
-et environ **14 fois par an** en moyenne.
+**En vrai** : très réactif, mais nerveux. Il a changé d'avis **4 fois en février 2020**,
+et près de **14 fois par an** en moyenne.
 
 ### Le HAR-RV
 
@@ -185,7 +197,7 @@ mélange de celle d'hier, de la semaine passée et du mois passé.
 **Image** : prévoir la température de demain avec la moyenne d'hier, de la semaine et du
 mois.
 
-**En vrai** : **25 changements d'avis en 2008** à lui seul, 18 par an en moyenne. C'est
+**En vrai** : **26 changements d'avis en 2008** à lui seul, 18 par an en moyenne. C'est
 la référence de la littérature pour prévoir la volatilité, pas pour dater des régimes.
 
 ### Le témoin d'une ligne
@@ -202,7 +214,7 @@ qu'une volatilité déguisée.
 |---|---|---|---|
 | HMM | oui | selon des probabilités de passage | moyen, 2 fois par an |
 | Jump Model | oui | seulement si ça vaut l'amende λ | calme, 0,5 fois par an |
-| Sparse Jump | oui | idem, avec ses 10 indicateurs | calme, 0,5 fois par an |
+| Sparse Jump | oui | idem, avec au plus 10 indicateurs | calme, 0,5 fois par an |
 | Gradient boosting | non, prédit la volatilité | dès que la prévision passe la médiane | nerveux, 14 fois par an |
 | HAR-RV | non, prédit la volatilité | idem | très nerveux, 18 fois par an |
 
@@ -221,8 +233,10 @@ est nerveux, plus il voit tôt, mais plus il se trompe (fausses alertes).
   partir de sa date de publication, dans sa première version.
 - **Hors échantillon** : on juge le modèle sur des années qu'il n'a pas vues pendant son
   apprentissage.
-- **Exactitude équilibrée** : la part de bonnes réponses, en donnant le même poids aux
-  mois de récession, rares, et aux mois normaux. 50 % correspond au hasard.
+- **Exactitude équilibrée** : la moyenne de deux taux, la part des jours de récession
+  classés en stress et la part des jours normaux classés en calme. Les deux comptent
+  autant, même si les récessions sont rares. 50 % correspond au hasard. Pour le Sparse
+  Jump Model : (96,3 % + 90,0 %) / 2 = 93,2 %.
 - **Kappa** : l'accord avec la réalité une fois retiré ce qu'on aurait trouvé par hasard.
   0 = hasard, 1 = parfait.
 - **R² incrémental** : ce qu'un indicateur ajoute à la prévision, *en plus* de ce qu'on
@@ -256,3 +270,11 @@ est nerveux, plus il voit tôt, mais plus il se trompe (fausses alertes).
   et nos critères ont été écrits avant les résultats.
 - **« Pourquoi pas plus de deux états ? »** Deux états suffisent à la question calme
   contre crise, et chaque état en plus multiplie les paramètres à estimer.
+
+---
+
+*Corrigé le 25/09/2026 : le « 93 % » est une exactitude équilibrée, pas une part de
+récessions reconnues ; le Sparse Jump Model garde au plus 10 variables, pas exactement
+10 ; le « retard » du HMM était une hypothèse du cadrage, que nos données démentent ; la
+phrase « investi 77 % du temps » venait d'une ligne retirée de la réplication de Shu le
+22/09 ; trois comptes de changements d'état sont recalculés sur `states.parquet`.*

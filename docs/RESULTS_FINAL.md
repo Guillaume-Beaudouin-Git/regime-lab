@@ -121,7 +121,8 @@ Corrections after the audit, all lowering a published figure:
 | | published | corrected |
 | --- | --- | --- |
 | NBER balanced accuracy, A′ | 95.1% / kappa 0.56 | 93.2% / kappa 0.53 |
-| recession recall, A | 434 / 434 | 419 / 435 |
+| recession recall, A | 434 / 434 | 431 / 435 |
+| recession recall, A′ | — | 419 / 435 |
 | detection threshold range | 0.33 – 0.55 | 0.271 – 0.399 |
 | sample shortfall | factor 3 to 7 | factor 2 to 4 |
 | years to settle | 68 – 188 | 46 – 101 |
@@ -129,6 +130,12 @@ Corrections after the audit, all lowering a published figure:
 The NBER label had been routed through the lagged macro path, giving the
 classifier up to 45 days of hindsight at every regime boundary. It is now scored
 against the calendar month it describes.
+
+*Correction, 2026-09-25.* Until this date the table read "recession recall, A |
+434 / 434 | 419 / 435". The 434 / 434 was A's, but 419 / 435 is the recall of
+**A′** sparse jump, the classifier behind the 93.2%. A's corrected recall is
+431 / 435. Recomputed from `data/cache/states.parquet` against the calendar-month
+NBER label.
 
 Open, and declared rather than quietly omitted:
 

@@ -112,7 +112,10 @@ every regime boundary.
 | | on this page | corrected |
 | --- | --- | --- |
 | NBER balanced accuracy, A′ | 95.1% / kappa 0.56 | **93.2% / kappa 0.53** |
-| recession recall, A | 434 / 434 | **419 / 435** |
+| recession recall, A | 434 / 434 | **431 / 435** |
+| recession recall, A′ | — | **419 / 435** |
+
+*(Corrected 2026-09-25: this table first gave 419 / 435, which is A′'s recall, as A's.)*
 
 Perfect recall was an artefact of that hindsight. The ranking of the five
 families, the inversion finding, the persistence table and the sizing-not-timing
