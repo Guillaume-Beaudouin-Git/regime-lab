@@ -458,12 +458,12 @@ toute lecture.
   (κ 0,70 à 0,74 contre 0,40, `EXPLORATION_SJM_SPEED.md`).
 - **Mieux timer la vente de variance** : le VIX sait déjà ce que sait le modèle.
 - **Le pairs trading à régimes** (Elliott et Bradrania 2018 ; Endres et Stübinger, dans
-  `Papers_a_tester/`) : il franchit les quatre axes, mais son objet de base est un
+  `pilotage/notes_de_lecture/papiers_a_tester/`) : il franchit les quatre axes, mais son objet de base est un
   retournement de court terme. Or ce retournement est tué sur les actions US
   (`chantiers/reversal-lab` : Sharpe de la prime −0,18 depuis 2020), et le seul univers d'actions du
   dépôt a un biais de survie déclaré.
 - **Des régimes macro par K-means sur FRED-MD** (Oliveira et al. 2026, dans
-  `Papers_a_tester/`) : trop proche du niveau A de Two Sigma (contexte K-means puis
+  `pilotage/notes_de_lecture/papiers_a_tester/`) : trop proche du niveau A de Two Sigma (contexte K-means puis
   sélection, FAIL) et du plan Bridgewater. À ne rouvrir que si Bridgewater tourne.
 
 ---

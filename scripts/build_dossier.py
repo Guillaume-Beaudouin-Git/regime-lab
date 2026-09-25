@@ -478,16 +478,18 @@ def build_html() -> str:
   protocole fixé avant les résultats, puis le meilleur appliqué comme filtre à trois stratégies de trading.</div>
   <div class="authors">Guillaume Beaudouin · Gabriel Golivet</div>
   <div class="date">25 septembre 2026</div>
-  <div class="repo">Code, protocole, sorties brutes et historique complet&nbsp;:<br>
-  <a href="{REPO_URL}">{REPO_URL.replace("https://", "")}</a><br>
-  Version de référence de ce dossier&nbsp;: étiquette <b>{TAG}</b>. Tous les chiffres renvoient à un
-  fichier du dépôt, cité sous chaque tableau et chaque figure.</div>
+  <div class="repo"><b>Le code n'est pas joint à ce dossier&nbsp;: il est sur GitHub</b>, dans un dépôt public
+  consultable sans inscription&nbsp;:<br>
+  <a href="{REPO_URL}" style="font-size:11pt">{REPO_URL.replace("https://", "")}</a><br>
+  Sa page d'accueil explique par où commencer et où se trouve le code de chaque partie de ce dossier (voir
+  aussi §10). Version qui accompagne ce dossier&nbsp;: étiquette <b>{TAG}</b>. Tous les chiffres renvoient à
+  un fichier du dépôt, cité sous chaque tableau et chaque figure.</div>
 </div>
 <div class="toc">
   <b>Résumé</b><br><b>1</b> La question et la démarche<br><b>2</b> Les données<br><b>3</b> Les modèles et le protocole<br>
   <b>4</b> Résultat 1 : il reconnaît les crises<br><b>5</b> Résultat 2 : le risque, pas la direction<br>
   <b>6</b> Application : trois stratégies<br><b>7</b> Pourquoi le filtre ne paie pas<br><b>8</b> Limites<br>
-  <b>9</b> Conclusion et ouverture<br><b>10</b> Reproduire les résultats<br><b>Bibliographie</b><br>
+  <b>9</b> Conclusion et ouverture<br><b>10</b> Accéder au code et reproduire les résultats<br><b>Bibliographie</b><br>
   <b>Annexes</b> A. Les 50 variables · B. Écarts au protocole · C. Méthode statistique · D. Le test sur 90 ans · E. Les autres études
 </div></section>""")
 
@@ -533,7 +535,11 @@ les rebonds, comme le momentum, en profite.</p>
   <li>«&nbsp;Sans voir le futur&nbsp;» ne veut pas dire «&nbsp;avant le marché&nbsp;».</li>
   <li>Un écart inférieur au seuil de détection est «&nbsp;sous-puissant&nbsp;» — ni un oui, ni un non — et jamais
   «&nbsp;validé&nbsp;».</li>
-</ul></div>""")
+</ul></div>
+<div class="box"><h3>Où est le code&nbsp;?</h3>
+<p>Le code n'est pas joint à ce dossier. Il est public sur GitHub&nbsp;: <a href="{REPO_URL}"><b>{REPO_URL.replace("https://", "")}</b></a>.
+Un navigateur suffit pour le lire. La page d'accueil du dépôt indique par où commencer et où se trouve le code de
+chaque partie de ce dossier&nbsp;; la section 10 reprend ces indications.</p></div>""")
 
     # ------------------------------------------------------------------ 1 question
     s.append(f"""
@@ -910,34 +916,57 @@ démontrable (<code>docs/RESULTS_BUDGET_RISQUE.md</code>).</p>""")
   qui suivent les ventes d'une enseigne comme Chipotle avant ses résultats officiels.</li>
 </ul>""")
 
-    # ------------------------------------------------------------------ 10 reproduce
-    repro = [
-        ["Les 50 indicateurs", "scripts/fetch_data.py, scripts/build_features.py", "data/cache/features.parquet"],
-        ["Les états des cinq modèles (49 réestimations, 15 à 20 min)", "scripts/run_phase2.py", "data/cache/states.parquet"],
-        ["Couches 1 et 2", "scripts/run_evaluation.py", "docs/RESULTS_FINAL.md"],
-        ["Couche 3", "scripts/run_layer3.py", "docs/RESULTS_FINAL.md"],
-        ["Contrôles de falsification T1, T3, T5", "scripts/run_t1_control.py, run_t3_control.py, run_t5_refit.py, run_t5_control.py", "docs/RESULTS_FALSIFICATION.md"],
-        ["Stratégies de crise et test P", "scripts/run_crisis_coupling.py", "docs/artifacts/crise/reading.txt"],
-        ["Valeurs refuges", "scripts/run_safe_haven_switch.py", "docs/artifacts/refuge/reading.txt"],
-        ["Rebond obligataire", "scripts/run_b1_regime_coupling.py", "docs/RESULTS_B1_COUPLAGE.md"],
-        ["Test sur 90 ans", "scripts/longhist_fetch.py, longhist_fit.py, longhist_validate.py, longhist_umd.py", "docs/artifacts/longhist/"],
-        ["Parcimonie du Sparse Jump Model", "scripts/measure_sjm_sparsity.py", "docs/artifacts/sjm_sparsity.txt"],
-        ["Ce dossier et les deux supports", "scripts/build_dossier.py, build_presentation.py, build_presentation_partie2.py", "docs/presentation/"],
+    # ------------------------------------------------------------------ 10 code
+    code_map = [
+        ["§2 Données et contrat point-in-time", "regime_lab/data/ (universe.py, pit.py) ; scripts/fetch_data.py", "AVANCEMENT.md §3"],
+        ["§2 Les 50 indicateurs", "regime_lab/features/ ; scripts/build_features.py", "annexe A"],
+        ["§3 Sparse Jump Model, Jump Model, choix de λ", "regime_lab/models/jump.py, calibrate.py ; scripts/measure_sjm_sparsity.py", "docs/artifacts/sjm_sparsity.txt"],
+        ["§3 HMM filtré", "regime_lab/models/hmm.py", "—"],
+        ["§3 Gradient boosting et HAR-RV", "regime_lab/models/supervised.py", "—"],
+        ["§3 Walk-forward, 49 réestimations (15 à 20 min)", "regime_lab/models/base.py ; scripts/run_phase2.py", "data/cache/states.parquet"],
+        ["§3 Portefeuille 60/40 de référence", "regime_lab/strategies/", "—"],
+        ["§4 Classification", "regime_lab/evaluation/reliability.py ; scripts/run_evaluation.py", "docs/RESULTS_FINAL.md"],
+        ["§5 Risque, direction, portefeuille", "regime_lab/evaluation/predictive.py ; scripts/run_evaluation.py, run_layer3.py", "docs/RESULTS_FINAL.md"],
+        ["§5 Contrôles de falsification", "scripts/run_t1_control.py, run_t3_control.py, run_t5_refit.py, run_t5_control.py", "docs/RESULTS_FALSIFICATION.md"],
+        ["§5 Test P ; §6 stratégies de crise", "regime_lab/extensions/crisis.py ; scripts/run_crisis_coupling.py", "docs/RESULTS_CRISE.md"],
+        ["§6 Rebond obligataire de fin de mois", "scripts/run_b1_regime_coupling.py", "docs/RESULTS_B1_COUPLAGE.md"],
+        ["§6 Valeurs refuges (or, obligations, options)", "scripts/run_safe_haven_switch.py", "docs/RESULTS_REFUGE.md"],
+        ["§7 Le test sur 90 ans", "regime_lab/extensions/longhist.py ; scripts/longhist_*.py", "docs/RESULTS_LONGHIST.md"],
+        ["Annexe B, écarts au protocole", "—", "docs/PROTOCOL_FREEZE.md"],
+        ["Annexe C, bootstrap, placebo, puissance, journal des essais", "regime_lab/analysis/", "data/trials.parquet"],
+        ["Figures et tableaux de ce dossier", "scripts/build_dossier.py", "docs/presentation/"],
     ]
+    reading = [
+        ("regime_lab/data/universe.py", "la liste de toutes les séries, avec leur source"),
+        ("regime_lab/features/", "le calcul des 50 indicateurs et leur standardisation sur le seul passé"),
+        ("regime_lab/models/jump.py", "le Sparse Jump Model ; le choix de λ est dans <code>calibrate.py</code>"),
+        ("scripts/run_phase2.py", "les cinq modèles réestimés 49 fois sur le passé seul"),
+        ("regime_lab/evaluation/", "la notation des états : classification et information"),
+        ("scripts/run_crisis_coupling.py", "une application complète, critère de décision écrit en tête du fichier"),
+    ]
+    reading_html = "".join(f"<li><code>{f}</code>&nbsp;: {d}.</li>" for f, d in reading)
     s.append(f"""
-<h1 class="sec"><span class="n">10</span>Reproduire les résultats</h1>
-<p>Tout le programme tient dans un seul dépôt public, avec son historique&nbsp;: <a href="{REPO_URL}">{REPO_URL.replace("https://", "")}</a>,
-version de référence <b>{TAG}</b>. Il faut Python 3.12 et uv.</p>
+<h1 class="sec"><span class="n">10</span>Accéder au code et reproduire les résultats</h1>
+<div class="box"><h3>Le code est sur GitHub, pas dans ce dossier</h3>
+<p>Tout le code du projet, ses résultats et son historique sont dans un dépôt public, consultable sans inscription&nbsp;:
+<a href="{REPO_URL}"><b>{REPO_URL.replace("https://", "")}</b></a>. Un navigateur suffit pour le lire&nbsp;: la page
+d'accueil du dépôt (le fichier README, affiché automatiquement) dit par où commencer et reprend le tableau
+ci-dessous, avec des liens directs vers chaque fichier. La version exacte qui accompagne ce dossier est
+l'étiquette <a href="{REPO_URL}/tree/{TAG}"><b>{TAG}</b></a>. Le code et ses commentaires sont en anglais.</p></div>
+<h2>Par où commencer&nbsp;: six fichiers, dans l'ordre</h2>
+<ol>{reading_html}</ol>
+{c.table("Où est le code de chaque partie de ce dossier.", tbl(["Partie du dossier", "Code (chemins dans le dépôt)", "Résultat écrit"], [[r[0], f"<code>{r[1]}</code>", r[2] if r[2] in ("annexe A", "—") else f"<code>{r[2]}</code>"] for r in code_map], cls="small", widths=[24, 42, 34]), "dépôt regime-lab, fichier README.md.",
+    note="Non reproductibles depuis le dépôt public : la tendance crypto et les sept stratégies privées du livre de neuf, qui vivent dans un dépôt privé et ne sont publiées qu'en agrégats.")}
+<h2>Relancer les calculs</h2>
+<p>Il faut Python 3.12 et uv.</p>
 <p><code>git clone {REPO_URL}.git</code><br>
 <code>cd regime-lab &amp;&amp; git checkout {TAG}</code><br>
 <code>uv sync --all-packages --extra dev</code><br>
-<code>.venv/bin/python -m pytest -q</code> (849 tests, tous verts au 25 septembre 2026)</p>
-<p>Les données ne sont pas versionnées (une cinquantaine de mégaoctets, régénérables)&nbsp;; une clé API FRED gratuite suffit à les
-télécharger. L'inventaire exact, fichier par fichier, est dans <code>AVANCEMENT.md</code> §3. Les lectures des
-études ont été faites une seule fois&nbsp;: leurs sorties intégrales sont commitées dans <code>docs/artifacts/</code>, et
-le journal des essais est <code>data/trials.parquet</code>.</p>
-{c.table("Où trouver chaque résultat.", tbl(["Résultat", "Script", "Sortie"], [[r[0], f"<code>{r[1]}</code>", f"<code>{r[2]}</code>"] for r in repro], cls="small", widths=[22, 40, 38]), "dépôt regime-lab.",
-    note="Non reproductibles depuis le dépôt public : la tendance crypto et les sept stratégies privées du livre de neuf, qui vivent dans le dépôt privé voisin et ne sont publiées qu'en agrégats.")}""")
+<code>.venv/bin/python -m pytest -q</code> (849 tests, tous verts au 25 septembre 2026, sans données)</p>
+<p>Les données ne sont pas versionnées (une cinquantaine de mégaoctets, régénérables)&nbsp;; une clé API FRED gratuite suffit
+à les télécharger avec <code>scripts/fetch_data.py</code>. L'inventaire exact, fichier par fichier, est dans
+<code>AVANCEMENT.md</code> §3. Les lectures des études n'ont été faites qu'une fois&nbsp;: leurs sorties intégrales sont
+commitées dans <code>docs/artifacts/</code>.</p>""")
 
     # ------------------------------------------------------------------ bibliography
     s.append("""
