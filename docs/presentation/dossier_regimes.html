@@ -89,16 +89,18 @@ tr { break-inside: avoid; }
   protocole fixé avant les résultats, puis le meilleur appliqué comme filtre à trois stratégies de trading.</div>
   <div class="authors">Guillaume Beaudouin · Gabriel Golivet</div>
   <div class="date">25 septembre 2026</div>
-  <div class="repo">Code, protocole, sorties brutes et historique complet&nbsp;:<br>
-  <a href="https://github.com/Guillaume-Beaudouin-Git/regime-lab">github.com/Guillaume-Beaudouin-Git/regime-lab</a><br>
-  Version de référence de ce dossier&nbsp;: étiquette <b>dossier-2026-09-25</b>. Tous les chiffres renvoient à un
-  fichier du dépôt, cité sous chaque tableau et chaque figure.</div>
+  <div class="repo"><b>Le code n'est pas joint à ce dossier&nbsp;: il est sur GitHub</b>, dans un dépôt public
+  consultable sans inscription&nbsp;:<br>
+  <a href="https://github.com/Guillaume-Beaudouin-Git/regime-lab" style="font-size:11pt">github.com/Guillaume-Beaudouin-Git/regime-lab</a><br>
+  Sa page d'accueil explique par où commencer et où se trouve le code de chaque partie de ce dossier (voir
+  aussi §10). Version qui accompagne ce dossier&nbsp;: étiquette <b>dossier-2026-09-25</b>. Tous les chiffres renvoient à
+  un fichier du dépôt, cité sous chaque tableau et chaque figure.</div>
 </div>
 <div class="toc">
   <b>Résumé</b><br><b>1</b> La question et la démarche<br><b>2</b> Les données<br><b>3</b> Les modèles et le protocole<br>
   <b>4</b> Résultat 1 : il reconnaît les crises<br><b>5</b> Résultat 2 : le risque, pas la direction<br>
   <b>6</b> Application : trois stratégies<br><b>7</b> Pourquoi le filtre ne paie pas<br><b>8</b> Limites<br>
-  <b>9</b> Conclusion et ouverture<br><b>10</b> Reproduire les résultats<br><b>Bibliographie</b><br>
+  <b>9</b> Conclusion et ouverture<br><b>10</b> Accéder au code et reproduire les résultats<br><b>Bibliographie</b><br>
   <b>Annexes</b> A. Les 50 variables · B. Écarts au protocole · C. Méthode statistique · D. Le test sur 90 ans · E. Les autres études
 </div></section>
 <h1 class="sec">Résumé</h1>
@@ -142,6 +144,10 @@ les rebonds, comme le momentum, en profite.</p>
   <li>Un écart inférieur au seuil de détection est «&nbsp;sous-puissant&nbsp;» — ni un oui, ni un non — et jamais
   «&nbsp;validé&nbsp;».</li>
 </ul></div>
+<div class="box"><h3>Où est le code&nbsp;?</h3>
+<p>Le code n'est pas joint à ce dossier. Il est public sur GitHub&nbsp;: <a href="https://github.com/Guillaume-Beaudouin-Git/regime-lab"><b>github.com/Guillaume-Beaudouin-Git/regime-lab</b></a>.
+Un navigateur suffit pour le lire. La page d'accueil du dépôt indique par où commencer et où se trouve le code de
+chaque partie de ce dossier&nbsp;; la section 10 reprend ces indications.</p></div>
 <h1 class="sec newpage"><span class="n">1</span>La question et la démarche</h1>
 <p>La question de recherche a été écrite avant toute mesure&nbsp;: <i>«&nbsp;Un modèle de régimes appris par machine
 apporte-t-il une information exploitable au-delà de ce qu'une simple mesure de volatilité capte déjà&nbsp;?&nbsp;»</i>
@@ -403,18 +409,26 @@ démontrable (<code>docs/RESULTS_BUDGET_RISQUE.md</code>).</p>
   <li><b>Des données alternatives</b>, plus rares et moins accessibles&nbsp;: par exemple les données de transactions
   qui suivent les ventes d'une enseigne comme Chipotle avant ses résultats officiels.</li>
 </ul>
-<h1 class="sec"><span class="n">10</span>Reproduire les résultats</h1>
-<p>Tout le programme tient dans un seul dépôt public, avec son historique&nbsp;: <a href="https://github.com/Guillaume-Beaudouin-Git/regime-lab">github.com/Guillaume-Beaudouin-Git/regime-lab</a>,
-version de référence <b>dossier-2026-09-25</b>. Il faut Python 3.12 et uv.</p>
+<h1 class="sec"><span class="n">10</span>Accéder au code et reproduire les résultats</h1>
+<div class="box"><h3>Le code est sur GitHub, pas dans ce dossier</h3>
+<p>Tout le code du projet, ses résultats et son historique sont dans un dépôt public, consultable sans inscription&nbsp;:
+<a href="https://github.com/Guillaume-Beaudouin-Git/regime-lab"><b>github.com/Guillaume-Beaudouin-Git/regime-lab</b></a>. Un navigateur suffit pour le lire&nbsp;: la page
+d'accueil du dépôt (le fichier README, affiché automatiquement) dit par où commencer et reprend le tableau
+ci-dessous, avec des liens directs vers chaque fichier. La version exacte qui accompagne ce dossier est
+l'étiquette <a href="https://github.com/Guillaume-Beaudouin-Git/regime-lab/tree/dossier-2026-09-25"><b>dossier-2026-09-25</b></a>. Le code et ses commentaires sont en anglais.</p></div>
+<h2>Par où commencer&nbsp;: six fichiers, dans l'ordre</h2>
+<ol><li><code>regime_lab/data/universe.py</code>&nbsp;: la liste de toutes les séries, avec leur source.</li><li><code>regime_lab/features/</code>&nbsp;: le calcul des 50 indicateurs et leur standardisation sur le seul passé.</li><li><code>regime_lab/models/jump.py</code>&nbsp;: le Sparse Jump Model ; le choix de λ est dans <code>calibrate.py</code>.</li><li><code>scripts/run_phase2.py</code>&nbsp;: les cinq modèles réestimés 49 fois sur le passé seul.</li><li><code>regime_lab/evaluation/</code>&nbsp;: la notation des états : classification et information.</li><li><code>scripts/run_crisis_coupling.py</code>&nbsp;: une application complète, critère de décision écrit en tête du fichier.</li></ol>
+<div class="tablewrap"><p class="tcap"><b>Tableau 10.</b> Où est le code de chaque partie de ce dossier.</p><table class="small"><colgroup><col style="width:24%"><col style="width:42%"><col style="width:34%"></colgroup><thead><tr><th class="">Partie du dossier</th><th class="">Code (chemins dans le dépôt)</th><th class="">Résultat écrit</th></tr></thead><tbody><tr><td class="">§2 Données et contrat point-in-time</td><td class=""><code>regime_lab/data/ (universe.py, pit.py) ; scripts/fetch_data.py</code></td><td class=""><code>AVANCEMENT.md §3</code></td></tr><tr><td class="">§2 Les 50 indicateurs</td><td class=""><code>regime_lab/features/ ; scripts/build_features.py</code></td><td class="">annexe A</td></tr><tr><td class="">§3 Sparse Jump Model, Jump Model, choix de λ</td><td class=""><code>regime_lab/models/jump.py, calibrate.py ; scripts/measure_sjm_sparsity.py</code></td><td class=""><code>docs/artifacts/sjm_sparsity.txt</code></td></tr><tr><td class="">§3 HMM filtré</td><td class=""><code>regime_lab/models/hmm.py</code></td><td class="">—</td></tr><tr><td class="">§3 Gradient boosting et HAR-RV</td><td class=""><code>regime_lab/models/supervised.py</code></td><td class="">—</td></tr><tr><td class="">§3 Walk-forward, 49 réestimations (15 à 20 min)</td><td class=""><code>regime_lab/models/base.py ; scripts/run_phase2.py</code></td><td class=""><code>data/cache/states.parquet</code></td></tr><tr><td class="">§3 Portefeuille 60/40 de référence</td><td class=""><code>regime_lab/strategies/</code></td><td class="">—</td></tr><tr><td class="">§4 Classification</td><td class=""><code>regime_lab/evaluation/reliability.py ; scripts/run_evaluation.py</code></td><td class=""><code>docs/RESULTS_FINAL.md</code></td></tr><tr><td class="">§5 Risque, direction, portefeuille</td><td class=""><code>regime_lab/evaluation/predictive.py ; scripts/run_evaluation.py, run_layer3.py</code></td><td class=""><code>docs/RESULTS_FINAL.md</code></td></tr><tr><td class="">§5 Contrôles de falsification</td><td class=""><code>scripts/run_t1_control.py, run_t3_control.py, run_t5_refit.py, run_t5_control.py</code></td><td class=""><code>docs/RESULTS_FALSIFICATION.md</code></td></tr><tr><td class="">§5 Test P ; §6 stratégies de crise</td><td class=""><code>regime_lab/extensions/crisis.py ; scripts/run_crisis_coupling.py</code></td><td class=""><code>docs/RESULTS_CRISE.md</code></td></tr><tr><td class="">§6 Rebond obligataire de fin de mois</td><td class=""><code>scripts/run_b1_regime_coupling.py</code></td><td class=""><code>docs/RESULTS_B1_COUPLAGE.md</code></td></tr><tr><td class="">§6 Valeurs refuges (or, obligations, options)</td><td class=""><code>scripts/run_safe_haven_switch.py</code></td><td class=""><code>docs/RESULTS_REFUGE.md</code></td></tr><tr><td class="">§7 Le test sur 90 ans</td><td class=""><code>regime_lab/extensions/longhist.py ; scripts/longhist_*.py</code></td><td class=""><code>docs/RESULTS_LONGHIST.md</code></td></tr><tr><td class="">Annexe B, écarts au protocole</td><td class=""><code>—</code></td><td class=""><code>docs/PROTOCOL_FREEZE.md</code></td></tr><tr><td class="">Annexe C, bootstrap, placebo, puissance, journal des essais</td><td class=""><code>regime_lab/analysis/</code></td><td class=""><code>data/trials.parquet</code></td></tr><tr><td class="">Figures et tableaux de ce dossier</td><td class=""><code>scripts/build_dossier.py</code></td><td class=""><code>docs/presentation/</code></td></tr></tbody></table><p class="tnote">Non reproductibles depuis le dépôt public : la tendance crypto et les sept stratégies privées du livre de neuf, qui vivent dans un dépôt privé et ne sont publiées qu'en agrégats.</p><p class="tsrc">Source : dépôt regime-lab, fichier README.md.</p></div>
+<h2>Relancer les calculs</h2>
+<p>Il faut Python 3.12 et uv.</p>
 <p><code>git clone https://github.com/Guillaume-Beaudouin-Git/regime-lab.git</code><br>
 <code>cd regime-lab &amp;&amp; git checkout dossier-2026-09-25</code><br>
 <code>uv sync --all-packages --extra dev</code><br>
-<code>.venv/bin/python -m pytest -q</code> (849 tests, tous verts au 25 septembre 2026)</p>
-<p>Les données ne sont pas versionnées (une cinquantaine de mégaoctets, régénérables)&nbsp;; une clé API FRED gratuite suffit à les
-télécharger. L'inventaire exact, fichier par fichier, est dans <code>AVANCEMENT.md</code> §3. Les lectures des
-études ont été faites une seule fois&nbsp;: leurs sorties intégrales sont commitées dans <code>docs/artifacts/</code>, et
-le journal des essais est <code>data/trials.parquet</code>.</p>
-<div class="tablewrap"><p class="tcap"><b>Tableau 10.</b> Où trouver chaque résultat.</p><table class="small"><colgroup><col style="width:22%"><col style="width:40%"><col style="width:38%"></colgroup><thead><tr><th class="">Résultat</th><th class="">Script</th><th class="">Sortie</th></tr></thead><tbody><tr><td class="">Les 50 indicateurs</td><td class=""><code>scripts/fetch_data.py, scripts/build_features.py</code></td><td class=""><code>data/cache/features.parquet</code></td></tr><tr><td class="">Les états des cinq modèles (49 réestimations, 15 à 20 min)</td><td class=""><code>scripts/run_phase2.py</code></td><td class=""><code>data/cache/states.parquet</code></td></tr><tr><td class="">Couches 1 et 2</td><td class=""><code>scripts/run_evaluation.py</code></td><td class=""><code>docs/RESULTS_FINAL.md</code></td></tr><tr><td class="">Couche 3</td><td class=""><code>scripts/run_layer3.py</code></td><td class=""><code>docs/RESULTS_FINAL.md</code></td></tr><tr><td class="">Contrôles de falsification T1, T3, T5</td><td class=""><code>scripts/run_t1_control.py, run_t3_control.py, run_t5_refit.py, run_t5_control.py</code></td><td class=""><code>docs/RESULTS_FALSIFICATION.md</code></td></tr><tr><td class="">Stratégies de crise et test P</td><td class=""><code>scripts/run_crisis_coupling.py</code></td><td class=""><code>docs/artifacts/crise/reading.txt</code></td></tr><tr><td class="">Valeurs refuges</td><td class=""><code>scripts/run_safe_haven_switch.py</code></td><td class=""><code>docs/artifacts/refuge/reading.txt</code></td></tr><tr><td class="">Rebond obligataire</td><td class=""><code>scripts/run_b1_regime_coupling.py</code></td><td class=""><code>docs/RESULTS_B1_COUPLAGE.md</code></td></tr><tr><td class="">Test sur 90 ans</td><td class=""><code>scripts/longhist_fetch.py, longhist_fit.py, longhist_validate.py, longhist_umd.py</code></td><td class=""><code>docs/artifacts/longhist/</code></td></tr><tr><td class="">Parcimonie du Sparse Jump Model</td><td class=""><code>scripts/measure_sjm_sparsity.py</code></td><td class=""><code>docs/artifacts/sjm_sparsity.txt</code></td></tr><tr><td class="">Ce dossier et les deux supports</td><td class=""><code>scripts/build_dossier.py, build_presentation.py, build_presentation_partie2.py</code></td><td class=""><code>docs/presentation/</code></td></tr></tbody></table><p class="tnote">Non reproductibles depuis le dépôt public : la tendance crypto et les sept stratégies privées du livre de neuf, qui vivent dans le dépôt privé voisin et ne sont publiées qu'en agrégats.</p><p class="tsrc">Source : dépôt regime-lab.</p></div>
+<code>.venv/bin/python -m pytest -q</code> (849 tests, tous verts au 25 septembre 2026, sans données)</p>
+<p>Les données ne sont pas versionnées (une cinquantaine de mégaoctets, régénérables)&nbsp;; une clé API FRED gratuite suffit
+à les télécharger avec <code>scripts/fetch_data.py</code>. L'inventaire exact, fichier par fichier, est dans
+<code>AVANCEMENT.md</code> §3. Les lectures des études n'ont été faites qu'une fois&nbsp;: leurs sorties intégrales sont
+commitées dans <code>docs/artifacts/</code>.</p>
 <div class="refs">
 <h1 class="sec">Bibliographie</h1>
 <h2>Articles de référence du cours</h2>

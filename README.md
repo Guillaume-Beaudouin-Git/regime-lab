@@ -1,27 +1,104 @@
-# regime-lab — détection de régimes de marché, et ce qu'elle vaut vraiment
+# Détecter les crises de marché : est-ce que ça rapporte ?
 
-Projet de Big Data appliqué à la finance. On y apprend à une machine à reconnaître les
-**régimes de marché** (calme, stress, crise…), puis on se demande honnêtement si cette
-reconnaissance **rapporte quelque chose** une fois pris en compte les coûts, les données
-réellement disponibles à chaque date, et le nombre de tests effectués.
+**Projet Big Data — Master 2** · Guillaume Beaudouin et Gabriel Golivet · 25 septembre 2026
 
-C'est un projet de cours de M2, restitué par une présentation d'une dizaine de minutes.
-Son horizon, au-delà du cours : des stratégies de trading algorithmique dépendantes du
-régime (voir `AVANCEMENT.md` §0).
+Ce dépôt (`regime-lab`) contient **tout le code du projet**, ses résultats et son
+historique complet.
+
+> **Vous venez du dossier PDF ?** Vous êtes au bon endroit.
+> - Le dossier lui-même : [`docs/presentation/dossier_regimes.pdf`](docs/presentation/dossier_regimes.pdf).
+> - La version exacte du code qui l'accompagne : l'étiquette
+>   [`dossier-2026-09-25`](https://github.com/Guillaume-Beaudouin-Git/regime-lab/tree/dossier-2026-09-25).
+> - Pour **lire** le code, un navigateur suffit : cliquez sur les fichiers cités
+>   ci-dessous, rien n'est à installer.
+> - Pour **relancer** les calculs, voir [Relancer les calculs](#relancer-les-calculs).
+
+Le code et ses commentaires sont en anglais ; le dossier et les documents de synthèse sont
+en français.
 
 *English summary at the bottom of this page.*
 
-## Par où commencer
+## Lire le code en six fichiers
 
-| si vous voulez… | lisez |
-|---|---|
-| **le dossier du projet** (M2, restitué le 25/09/2026) | **`docs/presentation/dossier_regimes.pdf`** |
-| les supports de présentation | `docs/presentation/presentation_regimes.pdf` (partie 1), `docs/presentation/presentation_partie2.pdf` (partie 2) |
-| savoir où en est le projet et ce qu'il reste à faire | **`AVANCEMENT.md`** |
-| les résultats de l'étude principale | `docs/RESULTS_FINAL.md` |
-| le protocole fixé avant toute mesure | `docs/CHARTER.html` (gelé), `docs/PROTOCOL_FREEZE.md` (écarts) |
-| la liste détaillée des tâches | `pilotage/feuille_de_route/TACHES.md` |
-| ce qui est établi, ce qui est mort | `pilotage/feuille_de_route/CONCLUSIONS.md` |
+Pour comprendre le projet de bout en bout, dans l'ordre :
+
+1. [`regime_lab/data/universe.py`](regime_lab/data/universe.py) — la liste de toutes les
+   séries utilisées, avec leur source (Yahoo Finance, FRED, ALFRED, Ken French).
+2. [`regime_lab/features/`](regime_lab/features/) — le calcul des 50 indicateurs
+   (`market.py`, `asymmetry.py`, `crosssection.py`, `macro.py`) et leur standardisation sur
+   le seul passé (`standardise.py`).
+3. [`regime_lab/models/jump.py`](regime_lab/models/jump.py) — le Sparse Jump Model, modèle
+   principal ; le choix de sa pénalité λ est dans
+   [`regime_lab/models/calibrate.py`](regime_lab/models/calibrate.py).
+4. [`scripts/run_phase2.py`](scripts/run_phase2.py) — les cinq modèles réestimés 49 fois
+   sur le passé seul (walk-forward), qui produisent les états de chaque jour.
+5. [`regime_lab/evaluation/`](regime_lab/evaluation/) — la notation des états :
+   classification face aux récessions (`reliability.py`) et information sur la volatilité
+   et les rendements futurs (`predictive.py`).
+6. [`scripts/run_crisis_coupling.py`](scripts/run_crisis_coupling.py) — un exemple complet
+   d'application à des stratégies, avec le critère de décision écrit en tête du fichier
+   avant la lecture.
+
+## Où est le code de chaque partie du dossier
+
+| partie du dossier | code | résultat écrit |
+|---|---|---|
+| §2 Les données et le contrat point-in-time | [`regime_lab/data/`](regime_lab/data/) (`universe.py`, `pit.py`), [`scripts/fetch_data.py`](scripts/fetch_data.py) | `AVANCEMENT.md` §3 |
+| §2 Les 50 indicateurs | [`regime_lab/features/`](regime_lab/features/), [`scripts/build_features.py`](scripts/build_features.py) | annexe A du dossier |
+| §3 Sparse Jump Model et Jump Model | [`regime_lab/models/jump.py`](regime_lab/models/jump.py), [`calibrate.py`](regime_lab/models/calibrate.py) | [`docs/artifacts/sjm_sparsity.txt`](docs/artifacts/sjm_sparsity.txt) |
+| §3 HMM filtré | [`regime_lab/models/hmm.py`](regime_lab/models/hmm.py) | — |
+| §3 Gradient boosting et HAR-RV | [`regime_lab/models/supervised.py`](regime_lab/models/supervised.py) | — |
+| §3 Walk-forward (49 réestimations) | [`regime_lab/models/base.py`](regime_lab/models/base.py), [`scripts/run_phase2.py`](scripts/run_phase2.py) | — |
+| §3 Portefeuille 60/40 de référence | [`regime_lab/strategies/`](regime_lab/strategies/) | — |
+| §4 Résultat 1, classification | [`regime_lab/evaluation/reliability.py`](regime_lab/evaluation/reliability.py), [`scripts/run_evaluation.py`](scripts/run_evaluation.py) | [`docs/RESULTS_FINAL.md`](docs/RESULTS_FINAL.md) |
+| §5 Résultat 2, risque et direction | [`regime_lab/evaluation/predictive.py`](regime_lab/evaluation/predictive.py), [`scripts/run_layer3.py`](scripts/run_layer3.py) | [`docs/RESULTS_FINAL.md`](docs/RESULTS_FINAL.md) |
+| §5 Contrôles de falsification (T1, T3, T5) | [`scripts/run_t1_control.py`](scripts/run_t1_control.py), `run_t3_control.py`, `run_t5_refit.py`, `run_t5_control.py` | [`docs/RESULTS_FALSIFICATION.md`](docs/RESULTS_FALSIFICATION.md) |
+| §5 Test P, §6 stratégies de crise | [`regime_lab/extensions/crisis.py`](regime_lab/extensions/crisis.py), [`scripts/run_crisis_coupling.py`](scripts/run_crisis_coupling.py) | [`docs/RESULTS_CRISE.md`](docs/RESULTS_CRISE.md) |
+| §6 Rebond obligataire de fin de mois | [`scripts/run_b1_regime_coupling.py`](scripts/run_b1_regime_coupling.py) | [`docs/RESULTS_B1_COUPLAGE.md`](docs/RESULTS_B1_COUPLAGE.md) |
+| §6 Valeurs refuges (or, obligations, options) | [`scripts/run_safe_haven_switch.py`](scripts/run_safe_haven_switch.py) | [`docs/RESULTS_REFUGE.md`](docs/RESULTS_REFUGE.md) |
+| §7 Le test sur 90 ans | [`regime_lab/extensions/longhist.py`](regime_lab/extensions/longhist.py), `scripts/longhist_*.py` | [`docs/RESULTS_LONGHIST.md`](docs/RESULTS_LONGHIST.md) |
+| Annexe B, écarts au protocole | — | [`docs/PROTOCOL_FREEZE.md`](docs/PROTOCOL_FREEZE.md) |
+| Annexe C, bootstrap, placebo, puissance, journal des essais | [`regime_lab/analysis/`](regime_lab/analysis/) | `data/trials.parquet` (non versionné) |
+| Les figures et tableaux du dossier | [`scripts/build_dossier.py`](scripts/build_dossier.py) | [`docs/presentation/`](docs/presentation/) |
+
+La tendance crypto et sept des neuf stratégies du livre de la partie application viennent
+d'un dépôt privé : le dossier n'en publie que des chiffres agrégés, et elles ne sont pas
+ici. Tout le reste se relance depuis ce dépôt.
+
+## Relancer les calculs
+
+Il faut Python 3.12 et [uv](https://docs.astral.sh/uv/).
+
+```bash
+git clone https://github.com/Guillaume-Beaudouin-Git/regime-lab.git
+cd regime-lab
+git checkout dossier-2026-09-25              # la version qui accompagne le dossier
+uv sync --all-packages --extra dev           # un seul environnement pour tout le dépôt
+.venv/bin/python -m pytest -q                # 849 tests, environ 15 minutes, sans données
+```
+
+Utilisez toujours `.venv/bin/python`, jamais le Python du système.
+
+**Les données ne sont pas dans git** (environ 50 Mo, régénérables). Une clé API FRED
+gratuite suffit pour les télécharger : copiez `.env.example` vers `.env`, renseignez
+`FRED_API_KEY`, puis lancez `scripts/fetch_data.py` et `scripts/build_features.py`.
+L'inventaire exact, fichier par fichier, est dans [`AVANCEMENT.md`](AVANCEMENT.md) §3.
+Les lectures des études n'ont été faites qu'une fois : leurs sorties complètes sont
+commitées dans [`docs/artifacts/`](docs/artifacts/).
+
+## Organisation du dépôt
+
+```
+regime_lab/      le code : données, indicateurs, modèles, évaluation, statistiques
+scripts/         un script par résultat publié
+tests/           les tests
+docs/            le cadrage gelé, les résultats (RESULTS_*.md), les écarts au protocole,
+                 les sorties brutes (artifacts/) et le dossier (presentation/)
+chantiers/       deux études dérivées, falsifiées : macro-momentum (H1 à H3), reversal-lab
+pilotage/        feuille de route, plans de recherche, notes de lecture
+AVANCEMENT.md    l'état du projet, l'inventaire des données, ce qui reste
+CLAUDE.md        les consignes données à l'assistant de programmation utilisé pendant le projet
+```
 
 ## La question, et la réponse
 
@@ -37,58 +114,20 @@ régime (voir `AVANCEMENT.md` §0).
    volatilité future au-delà d'une règle de volatilité passée, et rien sur les
    rendements futurs (+0,03 point, t 0,27). ⚠ Au-delà du VIX, il n'ajoute que +0,20
    point, non significatif (`docs/RESULTS_CRISE.md`, test P).
-3. **Personne n'a réussi à en tirer de l'argent.** Sept dispositifs ont été testés et
-   aucun ne bat une règle d'une ligne : « la volatilité récente est-elle sous sa
-   médiane ? ». La raison est mécanique : le régime change **13 fois en 24 ans**, soit
-   trop peu de décisions pour qu'un signal de trading en émerge. Les études de
-   septembre 2026 (stratégies de crise, valeurs refuges, couplage à des stratégies
-   réelles) le confirment : aucun usage du filtre n'est démontré utile.
+3. **Personne n'a réussi à en tirer de l'argent.** Aucun usage du filtre n'est démontré
+   utile, et une règle d'une ligne (« la volatilité récente est-elle sous sa médiane ? »)
+   fait aussi bien. La raison est mécanique : le régime change **13 fois en 24 ans**, entre
+   en stress tard et y reste pendant les reprises.
 
 Ce résultat négatif est le résultat. Il a été obtenu par des mesures conçues **à
 l'avance** pour pouvoir dire non.
-
-## Ce que contient le dépôt
-
-```
-README.md, AVANCEMENT.md       entrée et état d'avancement
-regime_lab/                    le code de l'étude principale (données, variables, modèles, évaluation)
-scripts/                       les scripts qui produisent chaque résultat publié
-tests/                         les tests unitaires et d'intégration
-docs/                          cadrage, résultats, registre des écarts au protocole
-chantiers/macro-momentum/      trois hypothèses dérivées (H1, H2, H3), toutes falsifiées
-chantiers/reversal-lab/        la prime de retour à la moyenne, disparue depuis 2020
-pilotage/                      feuille de route et plans de recherche
-```
-
-Trois familles de modèles sont comparées : des modèles à sauts statistiques (A, A′), un
-modèle de Markov caché (B) et des prédicteurs supervisés (C, C′). Toutes les données macro
-respectent un **contrat point-in-time** : une valeur n'entre dans un modèle qu'à partir du
-jour où elle était réellement publiée.
-
-## Installation
-
-Il faut Python 3.12 et [uv](https://docs.astral.sh/uv/).
-
-```bash
-git clone https://github.com/Guillaume-Beaudouin-Git/regime-lab.git
-cd regime-lab
-uv sync --all-packages --extra dev          # un seul environnement pour tout le dépôt
-.venv/bin/python -m pytest -q               # plus de 800 tests, une dizaine de minutes
-```
-
-Utilisez toujours `.venv/bin/python`, jamais le Python du système.
-
-**Les données ne sont pas dans git** (environ 50 Mo, régénérables). L'inventaire exact, fichier
-par fichier (source, période, script qui le produit), est dans `AVANCEMENT.md` §3. Pour
-les télécharger soi-même, une clé API FRED gratuite suffit : copiez `.env.example` vers
-`.env` et renseignez `FRED_API_KEY`.
 
 ## Les règles de méthode
 
 - Le signal est calculé en T−1 et la position prise en T.
 - On juge sur des rendements **nets de coûts et en excès du taux sans risque**. Seule
-  exception, déclarée : les couplages aux stratégies de la partie 2 de la présentation
-  sont calculés sans coût, par hypothèse du cours.
+  exception, déclarée : les couplages aux stratégies de la partie application sont
+  calculés sans coût, par hypothèse du cours.
 - Erreurs-types robustes (HAC), correction dès qu'il y a plusieurs tests, bootstrap par
   blocs.
 - **Le critère de décision est écrit et commité avant de produire le chiffre.** Un effet
@@ -103,8 +142,7 @@ A study of machine-learned market regimes under a point-in-time data contract. T
 classifier works (93.2% balanced accuracy against NBER recessions, out of sample) and
 carries information about **variance, not mean**: +3.93 points of incremental R² on
 forward volatility beyond a past-volatility rule (only +0.20 beyond the VIX), nothing on
-forward returns. The test period holds two recessions only. None of seven devices built
-to monetise it beats a one-line volatility rule, because the state changes 13 times in
-24 years. Four
-derived hypotheses are falsified in `chantiers/`. The English description of the main
-study is in `docs/OVERVIEW_EN.md`.
+forward returns. The test period holds two recessions only. No use of it as a trading
+filter beats a one-line volatility rule, because the state changes 13 times in 24 years.
+Four derived hypotheses are falsified in `chantiers/`. The English description of the
+main study is in `docs/OVERVIEW_EN.md`.
