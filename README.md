@@ -5,7 +5,7 @@
 > **English readers.** *regime-lab* asks whether a machine-learned market-regime model carries
 > tradable information beyond a plain volatility measure, under a point-in-time data contract
 > (FRED/ALFRED vintages, features standardised on past data only) and with the decision
-> criteria written down before the results. Five model families (Sparse Jump Model, HMM,
+> criteria written down before the results. Five models (Sparse Jump Model, Jump Model, HMM,
 > gradient boosting, HAR-RV) are re-estimated 49 times walk-forward over 6,377 out-of-sample
 > days. The classifier recognises NBER recessions (93.2 % balanced accuracy, against 84.0 %
 > for the best one-line volatility rule) and predicts volatility, not returns; none of the
@@ -109,11 +109,10 @@ regime_lab/      le code : données, indicateurs, modèles, évaluation, statist
 scripts/         un script par résultat publié
 tests/           les tests
 docs/            le cadrage gelé, les résultats (RESULTS_*.md), les écarts au protocole,
-                 les sorties brutes (artifacts/) et le dossier (presentation/)
+                 les sorties brutes (artifacts/) et le dossier (presentation/) — guide : docs/README.md
 chantiers/       deux études dérivées, falsifiées : macro-momentum (H1 à H3), reversal-lab
 pilotage/        feuille de route, plans de recherche, notes de lecture
 AVANCEMENT.md    l'état du projet, l'inventaire des données, ce qui reste
-CLAUDE.md        les consignes données à l'assistant de programmation utilisé pendant le projet
 ```
 
 ## La question, et la réponse

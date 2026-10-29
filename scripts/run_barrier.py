@@ -54,11 +54,11 @@ def _simulator_root() -> Path:
     return Path(configured).expanduser() if configured else Path()
 
 
-ALGO_CLAUDE = _simulator_root()
+SIMULATOR_ROOT = _simulator_root()
 OUT = Path(os.environ.get("BARRIER_OUT", CACHE))
-_SIMULATOR = ALGO_CLAUDE / "Portfolio" / "risk" / "trailing_dd_simulator.py"
+_SIMULATOR = SIMULATOR_ROOT / "Portfolio" / "risk" / "trailing_dd_simulator.py"
 if _SIMULATOR.exists():
-    sys.path.insert(0, str(ALGO_CLAUDE))
+    sys.path.insert(0, str(SIMULATOR_ROOT))
 
 
 def _require_simulator() -> None:
