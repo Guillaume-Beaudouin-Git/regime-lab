@@ -16,5 +16,4 @@ jobs:
           python-version: "3.12"
       - run: uv sync --all-packages --extra dev
       - run: uv run ruff check regime_lab scripts tests
-        continue-on-error: true
       - run: uv run pytest -q -p no:cacheprovider

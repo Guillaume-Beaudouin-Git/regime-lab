@@ -24,7 +24,7 @@ of these results mean anything.
 | · vol placebo | 34 d | 16× | 0.0% | — | — |
 
 The project's own pre-registered drawdown rule scores 91.1% / kappa 0.44 against
-NBER. The models are better, by four points of balanced accuracy and nine of
+NBER. The models are better, by two points of balanced accuracy and nine of
 kappa — a real margin, and a smaller one than "the best stress detector of the
 five" suggested.
 
@@ -93,8 +93,8 @@ alike — adds nothing.
 
 The earlier version showed seven of these eleven rows, keeping the better rule
 per family on gross Sharpe — a selection on the reported metric, unannounced.
-The omitted rows are not all unfavourable: C′ sized has the best net Sharpe in
-the table (0.53) and the second-best certainty equivalent.
+The omitted rows are not all unfavourable: C′ sized has the second-best net Sharpe in
+the table (0.53, after A′ on/off at 0.55) and the second-best certainty equivalent.
 
 Every improvement over the base book sits inside the 0.271–0.399 detection
 threshold measured in T2. **At the portfolio layer nothing here is decidable.**
