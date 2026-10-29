@@ -16,7 +16,7 @@
 **Projet Big Data — Master 2** · Guillaume Beaudouin et Gabriel Golivet · 25 septembre 2026
 
 Projet de groupe mené à deux de bout en bout (question, protocole, code, résultats, dossier) ;
-l'historique git est porté par un seul compte.
+les commits ont été poussés depuis un seul compte.
 
 Ce dépôt (`regime-lab`) contient **tout le code du projet**, ses résultats et son
 historique complet.
@@ -33,8 +33,6 @@ Le code et ses commentaires sont en anglais, comme les documents de résultats d
 principale ; le dossier et les études de septembre 2026 sont en français. Le code a été écrit
 avec l'aide d'un assistant de programmation (Claude Code) ; la question, le protocole, les
 choix de recherche et l'interprétation sont les nôtres.
-
-*English summary at the bottom of this page.*
 
 ## Lire le code en six fichiers
 

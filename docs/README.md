@@ -12,7 +12,7 @@ Forty-odd files live here. Four of them carry the study; the rest is the record.
 **The rest**
 
 - `CHARTER.html`, `PROTOCOL_FREEZE.md` — the pre-registered framing, frozen by SHA-256 before any result.
-- `PRESPEC_*.md` / `RESULTS_*.md` pairs — one pre-specification and one results file per secondary study (`LONGHIST` 1926–2026, `CRISE`, `BARRIER`, `TREND_VEHICLE`, `TWOSIGMA`, `AHL`, `BRIDGEWATER`, …). The names after the underscore are internal labels for the research plan each study follows, not affiliations.
+- `PRESPEC_*.md` / `RESULTS_*.md` pairs — one pre-specification and one results file per secondary study (`LONGHIST` 1926–2026, `CRISE`, `TREND_VEHICLE`, `TWOSIGMA`, `AHL`, …; `RESULTS_BARRIER.md` has results only). The names after the underscore are internal labels for the research plan each study follows, not affiliations.
 - `artifacts/` — raw outputs every number in a results file points to.
 - `presentation/` — the course deliverable (French).
 - `DATA_NOTES.md`, `FEATURE_NOTES.md`, `CALIBRATION_NOTES.md` — working notes.
