@@ -505,3 +505,5 @@ volatilité qui fait au moins aussi bien.
   `docs/PROTOCOL_FREEZE.md`.
 - On commite tout, avec des messages qui donnent la raison. Un chiffre publié sans son
   code commité, c'est le piège n°1 de ce projet, et il s'est produit cinq fois.
+
+> **2026-10-29 (soir) — historique réécrit.** Les trailers « Co-Authored-By: Claude » ont été retirés de tous les commits et `origin/main` a été force-poussé. Si ton clone local diverge : `git stash -u && git fetch && git reset --hard origin/main && git stash pop`.
