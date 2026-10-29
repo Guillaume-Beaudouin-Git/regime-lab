@@ -1,5 +1,18 @@
 # Détecter les crises de marché : est-ce que ça rapporte ?
 
+[![tests](https://github.com/Guillaume-Beaudouin-Git/regime-lab/actions/workflows/tests.yml/badge.svg)](https://github.com/Guillaume-Beaudouin-Git/regime-lab/actions/workflows/tests.yml)
+
+> **English readers.** *regime-lab* asks whether a machine-learned market-regime model carries
+> tradable information beyond a plain volatility measure, under a point-in-time data contract
+> (FRED/ALFRED vintages, features standardised on past data only) and with the decision
+> criteria written down before the results. Five model families (Sparse Jump Model, HMM,
+> gradient boosting, HAR-RV) are re-estimated 49 times walk-forward over 6,377 out-of-sample
+> days. The classifier recognises NBER recessions (93.2 % balanced accuracy, against 84.0 %
+> for the best one-line volatility rule) and predicts volatility, not returns; none of the
+> trading uses tested beats a one-line volatility filter. The negative result is the result.
+> Full English description of the main study: [`docs/OVERVIEW_EN.md`](docs/OVERVIEW_EN.md);
+> results: [`docs/RESULTS_FINAL.md`](docs/RESULTS_FINAL.md). Code and comments are in English.
+
 **Projet Big Data — Master 2** · Guillaume Beaudouin et Gabriel Golivet · 25 septembre 2026
 
 Ce dépôt (`regime-lab`) contient **tout le code du projet**, ses résultats et son
