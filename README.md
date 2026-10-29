@@ -132,7 +132,7 @@ AVANCEMENT.md    l'état du projet, l'inventaire des données, ce qui reste
    rendements futurs (+0,03 point, t 0,27). ⚠ Dans un test séparé sur le S&P 500 (test P,
    `docs/RESULTS_CRISE.md`), l'état ajoute +4,48 points au-delà d'un rang de volatilité,
    mais +0,20 seulement, non significatif, une fois le VIX ajouté.
-3. **Aucun usage de trading n'en tire un gain démontré.** Sur 62 usages et 13 stratégies,
+3. **Aucun usage de trading n'en tire un gain démontré** (décompte dans `AVANCEMENT.md` §0 et §1). Sur 62 usages et 13 stratégies,
    aucun n'est jugé utile, et une règle d'une ligne (« la volatilité récente est-elle sous sa
    médiane ? ») fait aussi bien. Le régime ne change que **13 fois en 24 ans**, entre en
    stress tard et reste en stress pendant une grande partie des reprises, en partie à
