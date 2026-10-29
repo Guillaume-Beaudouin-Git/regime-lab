@@ -15,6 +15,9 @@
 
 **Projet Big Data — Master 2** · Guillaume Beaudouin et Gabriel Golivet · 25 septembre 2026
 
+Projet de groupe mené à deux de bout en bout (question, protocole, code, résultats, dossier) ;
+l'historique git est porté par un seul compte.
+
 Ce dépôt (`regime-lab`) contient **tout le code du projet**, ses résultats et son
 historique complet.
 
