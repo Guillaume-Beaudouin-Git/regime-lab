@@ -294,6 +294,8 @@ automatiquement par toute session ouverte ici. Ce fichier-ci en est le détail.
 10. ~~L'objectif final~~ **FIXÉ le 23/09** : une présentation de 10 minutes ;
     l'objectif de fond est de construire des stratégies dépendantes du régime, avec
     l'ambition d'un Sharpe net de 1 à 2 à coûts institutionnels (`AVANCEMENT.md` §0).
+    Note du 13/11 : cet objectif de fond est abandonné ; l'objectif est désormais
+    l'identification du régime, de la tendance et du sentiment (`AVANCEMENT.md` §0).
 11. **Plan Two Sigma, phase 1 FAITE le 23/09** (`22abbe0`, `3b64ab2`) par une autre
     session : l'outillage est construit et les chiffres du brouillon sont remesurés.
     **Le verrou est commité le 23/09** après l'approbation de Guillaume, un second

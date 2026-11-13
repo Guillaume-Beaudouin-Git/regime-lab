@@ -119,6 +119,14 @@ Elles viennent du `CLAUDE.md` du dépôt privé voisin et s'appliquent partout.
   groupés.
 - **Placebo apparié** obligatoire sur tout claim calendaire ou conditionnel.
 
+> 13/11 : trois de ces règles ont changé pour les études à venir (voir `CLAUDE.md`,
+> §Règles dures). La correction pour tests multiples est un Šidák sur la famille
+> testée dans l'étude, jamais une pénalité par un compteur global ; le nombre de
+> modifications et le DSR se rapportent à titre informatif, ce ne sont pas des portes ;
+> rendements nets en excess et ciblage de volatilité valent pour une étude qui teste un
+> usage en trading. L'objectif du projet est désormais l'identification du régime, de
+> la tendance et du sentiment, pas les stratégies.
+
 Coûts aller-retour : crypto 0,17 % · futures ~0,01 % · actions 0,05-0,10 % ·
 FX 0,15 %.
 

@@ -1,233 +1,145 @@
-# Projet Big Data — régimes de marché. Consignes pour les sessions Claude Code.
+# Projet Big Data — régimes de marché. Consignes pour les sessions Claude Code
 
-Tu démarres à froid. Ce fichier dit quoi faire, dans quel ordre, avec quelles commandes.
-L'état d'avancement lisible par un humain est dans **`AVANCEMENT.md`**. Lis-le d'abord.
+L'état du projet, l'inventaire des données et ce qui reste sont dans `AVANCEMENT.md` : lis-le d'abord. Ce
+fichier ne garde que ce que le dépôt ne dit pas de lui-même.
 
-**Depuis le 22/09, tout le programme tient dans ce seul dépôt, qui est public.** Les
-anciens dépôts `macro-momentum` et `reversal-lab` sont dans `chantiers/`, avec leur
-historique intact : les identifiants de commit cités comme preuves de pré-enregistrement
-existent toujours. Les anciens dossiers `1_Etude_principale/`, `2_Chantiers_derives/`,
-`4_Feuille_de_route/` et `5_Plans_de_recherche/` n'existent plus. Les deux documents
-verrouillés qui les citent encore sont couverts par la correspondance donnée dans
-`docs/PROTOCOL_FREEZE.md`.
+## Le dépôt
 
-**Une deuxième session Claude Code peut tourner en parallèle** et elle ne voit que le
-disque. Commite tout, mets tes raisons dans les messages de commit, et tiens ce fichier,
-`AVANCEMENT.md` et `pilotage/feuille_de_route/TACHES.md` à jour. Une modification non
-commitée est invisible pour l'autre session, ou pire, elle trébuche dessus.
+- Depuis le 22/09, tout le programme tient dans ce dépôt, qui est public. Les anciens dépôts `macro-momentum` et
+  `reversal-lab` sont dans `chantiers/` avec leur historique : les commits cités comme preuves de
+  pré-enregistrement existent toujours. Les anciens dossiers `1_Etude_principale/`, `2_Chantiers_derives/`,
+  `4_Feuille_de_route/` et `5_Plans_de_recherche/` n'existent plus ; les deux documents verrouillés qui les citent
+  sont couverts par la correspondance de `docs/PROTOCOL_FREEZE.md`.
+- Rien sur les stratégies de trading personnelles de Guillaume, aucun chemin absolu, aucun nom ni chemin de son
+  dépôt privé : on écrit « le dépôt privé voisin » (règle appliquée le 21/09 puis le 22/09).
+- Aucune ligne d'attribution dans les commits, ni `Co-Authored-By` ni `Claude-Session`. Guillaume a arrêté les
+  `Co-Authored-By` partout le 13/11 (« Oui il faut arrêter les co-authored partout. ») et laissé le reste à la
+  session principale (« Fait au mieux »), qui a tranché ainsi parce que l'historique de ce dépôt public a été
+  nettoyé de ses signatures le 29/10 : les trailers « Co-Authored-By: Claude » en ont été retirés et `origin/main`
+  a été force-poussé (voir la fin d'`AVANCEMENT.md` pour réaligner un clone).
 
-**Le dépôt est public.** Rien sur les stratégies de trading personnelles de Guillaume,
-aucun chemin absolu, aucun nom ni chemin de son dépôt privé (on écrit « le dépôt privé
-voisin »). C'est la règle appliquée le 21/09 puis le 22/09.
+## Deux sessions en parallèle
 
----
+- Une deuxième session peut tourner en même temps et ne voit que le disque. Commite tout, mets la raison dans le
+  message, et tiens à jour ce fichier, `AVANCEMENT.md` et `pilotage/feuille_de_route/TACHES.md`.
+- Le dossier de travail est partagé : n'ajoute que tes fichiers, avec des chemins explicites, jamais `git add -A`.
+- Plan Bridgewater (lancé le 24/09 par Guillaume) : la session du compte B (`projet-big-data-regimes-cd`) construit
+  l'outillage, le verrou, les instruments et les lectures. L'autre session ne touche pas à
+  `regime_lab/construction/`, `scripts/*bridgewater*`, `scripts/fetch_spf.py`, `tests/test_bridgewater_*`,
+  `docs/PRESPEC_BRIDGEWATER.md`, `docs/RESULTS_BRIDGEWATER*`, `docs/artifacts/bridgewater/`, `data/raw/spf/`, ni
+  aux lignes `bridgewater` de `data/trials.parquet`. Recouvrement connu, à déclarer dans le verrou : l'idée 3
+  « Couverture » (`docs/RESULTS_COUVERTURE.md`) et l'idée 4 « Budget de risque » (`docs/RESULTS_BUDGET_RISQUE.md`).
 
-## Nature du projet — précisée par Guillaume le 23/09
+## Nature du projet (Guillaume, 23/09 et 13/11)
 
-- **Ce n'est pas un mémoire.** C'est un projet de cours de M2, restitué par une
-  **présentation d'une dizaine de minutes** au format entreprise. Tout ce qui ne sert pas
-  cette présentation ou l'objectif de fond passe après.
-- **L'objectif de fond**, une fois la parenthèse macro refermée, est de construire des
-  **stratégies de trading algorithmique dépendantes du régime**. On cherche un résultat
-  intéressant et prometteur, dont l'ambition est un Sharpe **net, en excess, hors
-  échantillon, de 1 à 2**. Les règles dures ne changent pas pour autant, et un écart
-  sous le MDE reste « sous-puissant ».
-- **Hypothèse de coûts : institutionnels.** Le barème de tête du programme l'est déjà :
-  futures 1 bp, matières premières 1,5 bp, actions US 5 bp, ETF sans future 7,5 bp. Les
-  colonnes prudente et de stress restent rapportées à côté. Les barèmes déjà verrouillés
-  ne changent pas.
+- Ce n'est pas un mémoire : c'est un projet de cours de M2, restitué par une présentation d'une dizaine de minutes
+  au format entreprise. L'oral a eu lieu le 25/09 ; le dossier remis est `docs/presentation/dossier_regimes.pdf`
+  (`scripts/build_dossier.py`, étiquette `dossier-2026-09-25`). Un chiffre changé dans le dossier se change aussi
+  dans les deux PDF de présentation, les deux decks et `docs/presentation/PARTIE1_CHEMINEMENT.md`.
+- L'objectif (Guillaume, 13/11) : « l'objectif n'est pas les stratégies, mais bien l'identification du régime ou
+  de la tendance, du sentiment. » Il remplace l'objectif de trading du 23/09 (stratégies dépendantes du régime),
+  abandonné le 13/11 : un document plus ancien qui le porte encore ne le remet pas en vigueur.
+- Un résultat d'identification se juge sur les mesures que le dépôt emploie déjà : exactitude équilibrée, kappa,
+  rappel, spécificité et changements d'état par an contre les récessions NBER, face à une règle de volatilité d'une
+  ligne (`docs/artifacts/temoin_nber.txt`) ; R² incrémental sur la volatilité future (`docs/RESULTS_CRISE.md`, test P) ou
+  sur les rendements futurs (`AVANCEMENT.md` §0), avec son t. L'hygiène reste la même : critère pré-enregistré, walk-forward, placebo, MDE.
+- Pour une étude qui teste un usage en trading (dimensionnement, interrupteur) : coûts de tête institutionnels,
+  futures 1 bp, matières premières 1,5 bp, actions US 5 bp, ETF sans future 7,5 bp ; les colonnes prudente et de
+  stress restent rapportées à côté. Les barèmes déjà verrouillés ne changent pas.
 
----
+## Ce qui reste
 
-## PROCHAINE ACTION
+Les priorités sont dans `AVANCEMENT.md` §4 et §5, et c'est Guillaume qui les fixe : ne choisis pas à sa place.
+- Le plan Two Sigma est fermé depuis le 23/09 (`docs/RESULTS_TWOSIGMA.md`) : il n'y a plus rien à lire, et
+  `scripts/run_twosigma_tree.py` refuse toute seconde lecture.
+- Fermer l'arbre AHL. Le pré-enregistrement verrouillé est `docs/PRESPEC_AHL.md` (commit `92e4e9e`) ; ne le modifie
+  pas. A est réfuté sur le signe, B1 indécidable (MDE à 49,6 % de l'erreur moyenne contre une limite de 25 %, 52,2 %
+  en rendements log), C0 passé à la lettre seulement (+0,067 de Sharpe brut, t 0,22, 2016-2026). C1 est un test de
+  portefeuille que le §9 déclare sous-puissant d'avance (seuil 0,331). Prends `scripts/run_ahl_level_b.py` pour
+  modèle : instrument, MDE sous le nul, critère écrit et commité avant le chiffre, puis la lecture, qui est un essai
+  à journaliser avec `regime_lab.analysis.trials.log`. Garde le garde qui refuse un verdict sur une lecture non
+  finie. Si C tombe, écris la fermeture (§14, niveau D) : une mort propre sur tout l'arbre est un résultat valide.
+- Deux points à ne pas trancher seul. A1 a été lu sur la jambe (63,5), alors que le §4 verrouillé désigne (126,10)
+  comme jambe principale : la lecture principale reste due, c'est un essai et une décision sur l'arbre, demande à
+  Guillaume. `pilotage/mesures_brutes/` (non versionné) contient les scripts de mesure des cinq plans et des
+  contre-expertises A4, avec des chemins absolus et privés : les passer en configuration ou en `Path(__file__)`
+  avant de les commiter.
 
-**Les priorités sont dans `AVANCEMENT.md` §4 et §5, et c'est Guillaume qui les fixe.**
-Ne choisis pas à sa place. Trois chantiers sont prêts.
+## Citer les résultats sans les déformer
 
-**1. La présentation de 10 minutes — FAITE le 25/09.** L'oral a eu lieu ; le dossier
-remis au professeur est `docs/presentation/dossier_regimes.pdf` (`scripts/build_dossier.py`,
-étiquette git `dossier-2026-09-25`). Tout chiffre qu'on y change doit l'être aussi dans les
-deux PDF de présentation, les deux decks et `docs/presentation/PARTIE1_CHEMINEMENT.md`.
+Les résultats eux-mêmes sont dans `AVANCEMENT.md` §0-1 et les `docs/RESULTS_*.md`. Ce qui suit dit comment les
+citer.
+- Le 93,2 % d'exactitude équilibrée contre le NBER (`docs/artifacts/temoin_nber.txt`) repose sur deux récessions
+  seulement (2008-09, 2020), et la même méthode réduite à 30 variables sur 1926-2026 n'en reconnaît que 6 sur 14,
+  pas mieux qu'une règle de volatilité (`docs/RESULTS_LONGHIST.md`). Ne cite pas le 93 % sans ces deux faits.
+- Le +3,93 points de R² sur la volatilité future est « au-delà d'une règle de volatilité passée », jamais « au-delà
+  du VIX » : au-delà du VIX il n'ajoute que +0,20 point, t −1,34 (`docs/RESULTS_CRISE.md`, test P).
+- AHL niveau B est indécidable, ce qui n'est pas un échec.
+- Le livre de 9 stratégies à 1,52 de Sharpe brut (2005-2026) n'est pas un résultat de régime, et c'est un plafond :
+  sans coût, stratégies choisies en connaissant ces années.
+- Le SJM entre en stress tard et y reste pendant les reprises, en partie à cause des réestimations : trois des six
+  entrées en stress d'A′ tombent un jour de réestimation (le filtrage repart de `train.tail(252)` dans
+  `regime_lab/models/base.py`).
+- La portée exacte des mesures, et ce qu'elles ne disent pas, est dans `pilotage/plans_de_recherche/ARBITRAGE.md`
+  §6. Pour une étude qui teste un usage en trading, une piste neuve qui réunit les quatre propriétés du « septième
+  dispositif » (latente ordonnée par la
+  volatilité, moins de ~2 transitions par an, usage de dimensionnement ou d'interrupteur, objet de dimension
+  effective inférieure à 4) tombera sur le même placebo d'une ligne : elle doit différer sur au moins un axe et le
+  chiffrer.
 
-**2. Le plan Two Sigma — FAIT et FERMÉ le 23/09** (`docs/RESULTS_TWOSIGMA.md`). Les trois
-niveaux sont lus, l'étape de Holm et les 14 sensibilités aussi, et 20 essais sont
-journalisés : il n'y a **plus rien à lire**. A FAIL (le sélecteur fait −0,110 de Sharpe
-contre le mélange équipondéré), B sous-puissant (+0,064 contre une barre de 0,338), C non
-montré (économie nulle). Les deux événements du 23/09, un amendement de C-1 avant lecture
-et un incident de registre à la lecture de A, sont dans `docs/PROTOCOL_FREEZE.md`. Pour
-refaire tourner le pipeline : `scripts/run_twosigma_tree.py`. Il refuse toute seconde
-lecture. Ce qui suit est l'historique de la tâche :
-La phase 1 est faite (`22abbe0`, `3b64ab2`).
-Le verrou `docs/PRESPEC_TWOSIGMA.md` est **commité**. Guillaume l'a approuvé, et un
-second validateur puis un auditeur l'ont confirmé. Ne le modifie pas : toute déviation va
-dans `docs/PROTOCOL_FREEZE.md`. Prochaine étape (§13.1) : écrire, tester sur données
-synthétiques et commiter **les instruments de A, B et C**, avec leurs seuils dans un JSON
-et le SHA-256 des fichiers d'entrée, **avant toute lecture**. Ensuite viennent les
-lectures A, puis B, puis C, quel que soit le résultat de chacune ; chacune est un essai.
+## Règles dures
 
-⚠ **Répartition du 23/09, 10h, décidée par Guillaume : la session du compte B
-(`projet-big-data-regimes-cd`) construit les instruments et fait les lectures Two
-Sigma.** L'autre session ne touche pas à ces fichiers : `regime_lab/selection/`
-(nouveaux modules), `scripts/run_twosigma_*`, `tests/test_twosigma_*`,
-`docs/RESULTS_TWOSIGMA*`, `docs/artifacts/twosigma/`, ni aux lignes `twosigma` de
-`data/trials.parquet`. Le dossier de travail est partagé : n'ajoute que tes fichiers,
-avec des chemins explicites, jamais `git add -A`.
-
-⚠ **Plan Bridgewater — lancé le 24/09 par Guillaume dans la session du compte B
-(`projet-big-data-regimes-cd`).** Cette session construit l'outillage, le verrou, les
-instruments et les lectures. L'autre session ne touche pas à : `regime_lab/construction/`,
-`scripts/*bridgewater*`, `scripts/fetch_spf.py`, `tests/test_bridgewater_*`,
-`docs/PRESPEC_BRIDGEWATER.md`, `docs/RESULTS_BRIDGEWATER*`, `docs/artifacts/bridgewater/`,
-`data/raw/spf/`, ni aux lignes `bridgewater` de `data/trials.parquet`. Recouvrement
-connu, à déclarer dans le verrou : l'idée 3 « Couverture » (`docs/RESULTS_COUVERTURE.md`)
-et l'idée 4 « Budget de risque » (`docs/RESULTS_BUDGET_RISQUE.md`).
-
-**3. Fermer l'arbre AHL** (priorité plus basse) :
-
-**AHL niveau C, puis fermeture de l'arbre.** Le pré-enregistrement verrouillé
-est `docs/PRESPEC_AHL.md` (commit `92e4e9e`). Ne le modifie pas.
-- A est réfuté sur le signe (`docs/RESULTS_AHL_LEVEL_A.md`). B1 est indécidable
-  (`docs/RESULTS_AHL_LEVEL_B.md`) : le MDE vaut 49,6 % de l'erreur moyenne contre une
-  limite de 25 %, et 52,2 % en rendements log.
-- C0 est passé à la lettre seulement : +0,067 de Sharpe brut, t 0,22, 2016-2026.
-- ⚠ **C1 est un test de portefeuille, que le §9 déclare sous-puissant d'avance**
-  (seuil 0,331). Reprends `scripts/run_ahl_level_b.py` comme modèle : instrument,
-  MDE sous le nul, **critère écrit et commité avant le chiffre**, puis la lecture, qui
-  est un essai à journaliser avec `regime_lab.analysis.trials.log`. Garde le garde qui
-  refuse tout verdict sur une lecture non finie.
-- Si C tombe, écris la fermeture (§14, niveau D). **Une mort propre sur tout l'arbre est
-  un résultat valide et publiable.**
-
-**Deux points ouverts, à ne pas trancher seul :**
-1. A1 a été lu sur la jambe (63,5). Le §4 verrouillé désigne **(126,10)** comme jambe
-   principale. La lecture principale reste donc due, mais c'est un essai et une décision
-   sur l'arbre : demande à Guillaume.
-2. `pilotage/mesures_brutes/` (non versionné) contient 120 fichiers sauvés de
-   `/private/tmp` : les scripts de mesure des cinq plans et des contre-expertises A4. Ils
-   portent des chemins absolus et privés. Il faut les nettoyer (chemins → configuration
-   ou `Path(__file__)`) avant de les commiter.
-
----
-
-## Ce que le programme a établi
-
-**Le classifieur marche comme classifieur** : 93,2 % d'exactitude équilibrée contre les
-récessions NBER, kappa 0,53, sur 6 377 jours hors échantillon, contre 84,0 % (κ 0,34) pour
-la meilleure règle de volatilité d'une ligne sur les mêmes jours (`docs/artifacts/temoin_nber.txt`,
-mesuré le 25/09). ⚠ **Sur deux récessions seulement** (2008-09, 2020). La même méthode réduite à 30 variables et réestimée sur
-1926-2026 n'en reconnaît que **6 sur 14** (57,5 %, κ 0,16), pas mieux qu'une règle de
-volatilité (`docs/RESULTS_LONGHIST.md`) : ne jamais citer le 93 % sans ces deux faits.
-
-**Il porte la variance, pas la moyenne** : +3,93 points de R² incrémental sur la
-volatilité future (t −3,40), contre +0,030 sur les rendements (t 0,27). ⚠ **Au-delà du
-VIX, il n'ajoute que +0,20 point** (t −1,34, non significatif ; `docs/RESULTS_CRISE.md`,
-test P). Le +3,93 est « au-delà d'une règle de volatilité passée », jamais « au-delà du
-VIX ».
-
-**Sept dispositifs ont échoué à le monétiser** : T1, T3, l'atténuateur de Carver, la
-barrière propfirm, la réplication Shu 2024, H-b et AHL niveau A. AHL niveau B est
-indécidable, ce qui n'est pas la même chose.
-
-**Les 23 et 24/09, huit études de plus, toutes pré-enregistrées, et aucun usage utile du
-régime** : stratégies de crise (`RESULTS_CRISE`), valeurs refuges (`RESULTS_REFUGE`,
-deux parties), corrélation actions-obligations (`RESULTS_COUVERTURE`), budget de risque
-multi-stratégies (`RESULTS_BUDGET_RISQUE`), prévision de risque sur 46 marchés
-(`RESULTS_RISQUE`), un SJM par facteur (`RESULTS_FACTORSJM`), le SJM réduit sur
-1926-2026 (`RESULTS_LONGHIST`). Deux choses en ressortent, **qui ne sont pas des
-résultats de régime** : un livre de 9 stratégies non conditionné fait 1,52 de Sharpe brut
-sur 2005-2026 (plafond : sans coût, stratégies choisies en connaissant ces années) ; le
-signe de la corrélation actions-obligations prédit le risque d'un portefeuille à risque
-égal au-delà du VIX (placebo pile au seuil de 95 %). Le mécanisme de l'échec du SJM : il
-entre en stress tard et **y reste pendant les reprises** (55 % des séances de stress le
-jour du creux ou après, 97 % au Covid). ⚠ **En partie un effet des réestimations** : trois des
-six entrées en stress d'A′ tombent un jour de réestimation (1/10/2009, 1/10/2020, 1/4/2021),
-soit 153 des 1 013 jours de stress et 124 des 229 du Covid (`regime_lab/models/base.py`, le
-filtrage repart de `train.tail(252)` à chaque réestimation ; constaté le 25/09). La réserve scellée AQR (1971-1989) a été **ouverte** le 23/09
-pour `longhist` (`docs/PROTOCOL_FREEZE.md`).
-
-**La sélection entre signaux a été testée le 23/09 (plan Two Sigma) et ne transfère
-pas.** Il s'agit d'une partition de contexte orthogonale à la volatilité, à 12,5
-transitions par an, utilisée pour choisir entre 10 signaux sectoriels US. Niveau A FAIL,
-B sous-puissant, C non montré ; un témoin de volatilité fait au moins aussi bien partout
-(`docs/RESULTS_TWOSIGMA.md`).
-
-⚠ **La portée exacte compte.** Ces mesures portent sur :
-
-> Un classifieur **ordonné par la volatilité d'entraînement**, changeant d'état **0,514
-> fois par an**, utilisé comme **multiplicateur de taille ou interrupteur au niveau du
-> portefeuille**, sur un **livre de tendance unique de dimension effective 3,86**,
-> n'apporte rien au-delà d'une volatilité réalisée sous sa médiane expansive.
-
-Elles ne disent rien d'un état à plus d'une transition par an, d'une latente autre que la
-volatilité, ni de la sélection entre signaux, de la construction de portefeuille ou de
-l'exécution. Détail dans `pilotage/plans_de_recherche/ARBITRAGE.md` §6.
-
-**Quatre hypothèses falsifiées** : H1, H2 (sa matière première a été supprimée par traité
-en mars 1999), H3 et la prime de retournement.
-
-## La règle opposable, avant toute idée neuve
-
-Est un **septième dispositif**, et tombera sur le même placebo d'une ligne, tout objet
-qui réunit les quatre propriétés suivantes : latente ordonnée par la volatilité ;
-horloge sous ~2 transitions par an ; usage de dimensionnement ou d'interrupteur ; objet
-conditionné de dimension effective inférieure à 4. Une piste neuve doit différer sur au
-moins un de ces axes **et le chiffrer**.
-
-## Règles dures, non négociables
-
-- Signal en T−1, trade en T. Aucune exception.
-- **Rendements nets en excess**, seule métrique de décision. HAC lag 6. Correction pour
-  tests multiples dès que n_tests > 1.
-- Walk-forward ≥ 5 plis, réellement évalués. Ciblage de volatilité quotidien.
-- N ≥ 30 instruments pour toute affirmation transversale. 3 modifications maximum par
-  hypothèse.
-- **Bootstrap stationnaire par blocs**, via `regime_lab/analysis/bootstrap.py`.
-- Placebo apparié obligatoire sur toute affirmation conditionnelle.
-- **Un écart sous le MDE est UNDERPOWERED, JAMAIS un PASS.**
-- Un critère s'écrit et se commite **avant** de toucher la donnée.
-- Les documents verrouillés ne se modifient pas : les écarts vont dans
+Pour toute étude :
+- Signal en T−1, trade en T, sans exception ; HAC lag 6.
+- Tests multiples : Šidák sur la famille testée dans l'étude, jamais de pénalité par un compteur global
+  (décision du 30/10).
+- Walk-forward d'au moins 5 plis, réellement évalués.
+- Au moins 30 instruments pour une affirmation transversale.
+- Le nombre de modifications d'une hypothèse et le DSR se rapportent à titre informatif ; ce ne sont pas des portes
+  (Guillaume, 13/11 : « On garde les 3 modifs et le DSR à titre informatif, c'est juste qu'ils ne suffisent pas en
+  tant que portes. »).
+- Ces deux règles (Šidák sur la famille de l'étude ; trois modifications et DSR à titre informatif) valent pour les
+  études à venir : les documents verrouillés gardent leurs règles d'origine, et un écart se déclare dans
   `docs/PROTOCOL_FREEZE.md`.
+- Bootstrap stationnaire par blocs, via `regime_lab/analysis/bootstrap.py`.
+- Placebo apparié sur toute affirmation conditionnelle.
+- Un écart sous le MDE est UNDERPOWERED, pas un PASS.
+- Un critère s'écrit et se commite avant de toucher la donnée.
+- Un document verrouillé ne se modifie pas : les écarts vont dans `docs/PROTOCOL_FREEZE.md`.
 
-## Les sept pièges qui se sont réellement produits ici
+Pour une étude qui teste un usage en trading (dimensionnement, interrupteur), en plus :
+- Rendements nets en excess, seule métrique de décision.
+- Ciblage de volatilité quotidien.
 
-1. **Un chiffre publié sans code commité, cinq fois.** La dernière : les scripts des
-   mesures qui ont fondé les cinq plans vivaient dans `/private/tmp`. Relance le code
-   avant d'écrire un nombre, et **n'écris jamais une mesure qui compte dans un dossier
-   temporaire**.
-2. **La troncature déguisée en signal, deux fois.**
-3. **Un NaN qui se lit comme un verdict.** Tout script de décision refuse d'émettre un
-   verdict sur une lecture non finie.
-4. **Comparer des niveaux de prix à des rendements.** `trend_universe*.parquet` stocke des
-   **prix**.
-5. **Le gain qui passe par le dénominateur** : montre toujours qu'un gain n'est pas un
-   gain d'exposition.
-6. **Affirmer une cause sans l'avoir vérifiée.** Le 22/09, l'écart 7,26 / 9,10 alarmes par
-   an a d'abord été attribué à une standardisation non causale. La vraie cause était le
-   type de rendement (log contre simple). Corrigé dans `4dd0eb6`.
-7. **Décrire un réglage au lieu de le mesurer.** Le 25/09, « le Sparse Jump Model garde au
-   plus 10 variables » a remplacé « ≈ 10 effectives » dans tous les supports, alors que
-   `max_feats = 10` borne le nombre *effectif* de variables et que 17 à 24 gardent un
-   poids non nul. Mesuré par `scripts/measure_sjm_sparsity.py`, puis corrigé partout.
+## Les sept pièges qui se sont produits ici
+
+1. Un chiffre publié sans code commité, cinq fois ; la dernière, les scripts des mesures qui ont fondé les cinq
+   plans vivaient dans un dossier temporaire. Relance le code avant d'écrire un nombre, et n'écris pas une mesure qui
+   compte dans un dossier temporaire.
+2. La troncature déguisée en signal, deux fois.
+3. Un NaN qui se lit comme un verdict : tout script de décision refuse de rendre un verdict sur une lecture non finie.
+4. Comparer des niveaux de prix à des rendements : `trend_universe*.parquet` stocke des prix.
+5. Le gain qui passe par le dénominateur : montre qu'un gain n'est pas un gain d'exposition.
+6. Affirmer une cause sans l'avoir vérifiée. Le 22/09, l'écart de 7,26 contre 9,10 alarmes par an a d'abord été
+   attribué à une standardisation non causale ; la vraie cause était le type de rendement (log contre simple),
+   corrigé dans `4dd0eb6`.
+7. Décrire un réglage au lieu de le mesurer. Le 25/09, « le Sparse Jump Model garde au plus 10 variables » a remplacé
+   « ≈ 10 effectives » partout, alors que `max_feats = 10` borne le nombre effectif et que 17 à 24 variables gardent
+   un poids non nul (`scripts/measure_sjm_sparsity.py`).
 
 ## Environnement
 
 ```bash
 uv sync --all-packages --extra dev     # un seul .venv à la racine, les trois paquets en éditable
 .venv/bin/python -m pytest -q          # 851 tests au 25/09, 15 à 25 min
-.venv/bin/ruff check .                 # doit rester propre
+.venv/bin/ruff check .                 # doit rester propre ; la CI (tests.yml) lance ruff sur regime_lab, scripts, tests
 ```
 
-Toujours `.venv/bin/python`, jamais le Python système. Si le dossier est déplacé, on
-recrée le venv (`rm -rf .venv && uv sync --all-packages --extra dev`) au lieu de réparer
-les chemins.
-
-- `data/` est gitignoré : inventaire complet dans `AVANCEMENT.md` §3. Ne relance jamais
-  `scripts/run_phase2.py` à la légère : il prend 15 à 20 min et réécrit
-  `states.parquet`.
-- `.env` (gitignoré) contient `FRED_API_KEY` et `SIMULATOR_PATH`. Seul
-  `scripts/run_barrier.py` a besoin de ce dernier, un simulateur qui vit dans le dépôt
-  privé voisin.
-- ⚠ `~/.gitignore_global` contient `config.py` : un nouveau fichier de ce nom doit être
-  ajouté avec `git add -f`.
-- La littérature (PDF, sous droits) est hors du dépôt :
-  le dossier `3_Litterature/`, à côté du dépôt.
+- Toujours `.venv/bin/python`, pas le Python système. Si le dossier est déplacé, recrée le venv
+  (`rm -rf .venv && uv sync --all-packages --extra dev`) plutôt que de réparer les chemins.
+- `data/` est gitignoré (inventaire dans `AVANCEMENT.md` §3). `scripts/run_phase2.py` prend 15 à 20 minutes et
+  réécrit `states.parquet` : ne le relance pas à la légère.
+- `.env` (gitignoré) contient `FRED_API_KEY` et `SIMULATOR_PATH` ; seul `scripts/run_barrier.py` a besoin du second,
+  un simulateur qui vit dans le dépôt privé voisin.
+- `~/.gitignore_global` contient `config.py` : un nouveau fichier de ce nom s'ajoute avec `git add -f`.
+- La littérature (PDF sous droits) est hors du dépôt, dans le dossier `3_Litterature/` voisin.

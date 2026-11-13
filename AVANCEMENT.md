@@ -38,13 +38,14 @@ pour tests multiples ?
 conclut par une **présentation d'une dizaine de minutes** des résultats, au format d'une
 présentation en entreprise.
 
-**L'objectif de fond, au-delà du cours.** Construire des **stratégies de trading
-algorithmique dépendantes du régime**, une fois cette parenthèse macro refermée. On
-cherche un résultat intéressant et prometteur. L'ambition est un Sharpe **net, en excès
-du cash et hors échantillon, de l'ordre de 1 à 2**, à **coûts institutionnels**. Le seuil
-de recherche du programme ne bouge pas : RESEARCH_PASS, soit un Sharpe supérieur à 0,7,
-une perte maximale moins profonde que −25 % et plus de 50 % des plis de walk-forward
-positifs.
+**L'objectif de fond, au-delà du cours (Guillaume, 13/11).** « l'objectif n'est pas les
+stratégies, mais bien l'identification du régime ou de la tendance, du sentiment. »
+Il remplace l'objectif du 23/09, abandonné le 13/11 : construire des stratégies de
+trading dépendantes du régime, avec l'ambition d'un Sharpe net de 1 à 2 à coûts
+institutionnels. Une étude qui teste encore un usage en trading (dimensionnement,
+interrupteur) garde le seuil de recherche du programme : RESEARCH_PASS, soit un Sharpe
+supérieur à 0,7, une perte maximale moins profonde que −25 % et plus de 50 % des plis de
+walk-forward positifs.
 
 **Où on en est par rapport à cet objectif.** Le meilleur livre mesuré ici fait +0,36 de
 Sharpe net en excès. C'est une tendance sur 46 instruments, déjà facturée à des coûts de
@@ -65,6 +66,10 @@ taux et de change, 1,5 bp pour les matières premières, 5 bp pour les actions U
 pour un ETF sans future équivalent. Les colonnes prudente (×2) et de stress (×4 à ×5)
 restent rapportées à côté, mais ne décident pas. Les barèmes déjà verrouillés dans les
 pré-enregistrements ne changent pas.
+
+> 13/11 : ces deux paragraphes se mesurent à l'objectif de trading du 23/09, abandonné le
+> 13/11 ; les coûts institutionnels valent pour une étude qui teste un usage en trading.
+> Les constats restent vrais comme résultats ; ils ne fixent plus la direction du projet.
 
 ---
 
@@ -116,6 +121,8 @@ d'essais compte 84 configurations distinctes (`data/trials.parquet`).
 
 - **Nature du projet précisée** : un projet de cours de M2 qui se termine par une
   présentation de 10 minutes, pas un mémoire. L'objectif de fond est écrit en §0.
+  (Note du 13/11 : l'objectif de fond fixé le 23/09 est abandonné ; celui en vigueur
+  est en §0.)
 - **La phase 1 du plan Two Sigma est faite** par une autre session (`22abbe0`,
   `3b64ab2`, 262 tests). L'outillage est en place : 10 signaux sur les 49 secteurs US,
   le classifieur de contexte K-means, un placebo apparié exact et le protocole de test.
@@ -461,7 +468,7 @@ critère de fin.
 
 | # | tâche | effort | données | c'est fini quand |
 |---|---|---|---|---|
-| ~~0~~ | ~~Fixer l'objectif final~~ **FAIT le 23/09** : une présentation de 10 minutes ; objectif de fond, des stratégies dépendantes du régime (§0) | — | — | — |
+| ~~0~~ | ~~Fixer l'objectif final~~ **FAIT le 23/09** : une présentation de 10 minutes ; objectif de fond, des stratégies dépendantes du régime (§0). Note du 13/11 : objectif abandonné, voir §0 | — | — | — |
 | ~~1~~ | **FAIT le 25/09 : oral, deck de 14 diapositives et dossier `docs/presentation/dossier_regimes.pdf`.** Ancien énoncé : **Construire la présentation de 10 minutes**, au format entreprise, en 8 à 10 diapositives. Le fil : la question → la méthode (données point-in-time, critère écrit avant le chiffre) → ce qui marche (classifieur à 93,2 %, qui prédit la variance et pas la direction) → ce que ça implique (un outil de dimensionnement, pas de timing ; 13 changements d'état en 25 ans) → ce qu'on a testé sans succès (7 dispositifs, 4 hypothèses) → la suite, vers des stratégies dépendantes du régime. Trois figures : **(a)** R² sur la volatilité contre R² sur les rendements, un point par famille ; **(b)** la frise des 13 transitions ; **(c)** les dispositifs face à la règle d'une ligne | 1-2 j | `data/cache/*` et `docs/RESULTS_*.md`, déjà calculés | les diapositives et un texte oral de 10 minutes, répétés une fois |
 | ~~2~~ | ~~**Plan Two Sigma**~~ **FAIT et FERMÉ le 23/09** : A FAIL, B sous-puissant, C non montré (`docs/RESULTS_TWOSIGMA.md`). Ce qui suit est l'ancien énoncé : ~~descendre l'arbre A → B → C** (le verrou est commité).~~ C'est la piste la plus proche de l'objectif de fond : le régime choisit entre dix signaux. Le verrou impose d'abord d'écrire et de commiter **les trois instruments** (A, B, C), leurs seuils et les empreintes des données (§13.1). Ensuite viennent les lectures dans l'ordre A, B, C, **quel que soit le résultat de chacune** ; chaque lecture compte comme un essai. Le verdict alimente la dernière diapositive | ~2 j pour les instruments, puis quelques heures par lecture | `industry_49`, `factors_5`, `features` (§3.1) | verdicts écrits dans `docs/RESULTS_TWOSIGMA*.md` |
 | **3** | **Fermer l'arbre AHL** : le MDE de C1, que le pré-enregistrement déclare sous-puissant d'avance, la note de fermeture, et la décision sur la lecture A1 principale sur (126,10), qui reste due | ½-1 j | `trend_universe_m1.parquet` | `docs/RESULTS_AHL_LEVEL_C.md` et la fermeture |
@@ -494,8 +501,12 @@ volatilité qui fait au moins aussi bien.
 
 ## 6. Règles du projet, à connaître avant de toucher au code
 
-- Signal en T−1, trade en T. Rendements **nets, en excess** du taux cash. Erreurs HAC
-  lag 6. Correction pour tests multiples dès qu'il y a plus d'un test.
+- Signal en T−1, trade en T. Erreurs HAC lag 6. Pour une étude qui teste un usage en
+  trading, rendements **nets, en excess** du taux cash.
+- Tests multiples : Šidák sur la famille testée dans l'étude, jamais de pénalité par un
+  compteur global. Le nombre de modifications d'une hypothèse et le DSR se rapportent à
+  titre informatif, ce ne sont pas des portes (Guillaume, 13/11). Ces règles valent pour
+  les études à venir ; les documents verrouillés gardent les leurs.
 - **On écrit le critère avant de produire le chiffre**, et on le commite. Un écart sous
   le MDE est « sous-puissant », **jamais** un succès.
 - Tout script de décision **refuse de rendre un verdict** si une lecture n'est pas finie
